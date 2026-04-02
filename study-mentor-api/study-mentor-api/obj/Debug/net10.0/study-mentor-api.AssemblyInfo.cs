@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("study-mentor-api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6062549d823d5201fead7675e352269044c0b995")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d541efd92e41234068b578291dfe291273f19795")]
 [assembly: System.Reflection.AssemblyProductAttribute("study-mentor-api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("study-mentor-api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
