@@ -10,7 +10,7 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
-        builder.Services.AddApplicationServices(); // 👈 додати це
+        builder.Services.AddApplicationServices(builder.Configuration); // 👈 додали builder.Configuration
 
         var app = builder.Build();
 
