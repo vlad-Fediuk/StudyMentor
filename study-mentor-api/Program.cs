@@ -1,3 +1,5 @@
+using StudyMentorApi.Extensions;
+using StudyMentorApi.Services;
 namespace study_mentor_api;
 
 public class Program
@@ -11,7 +13,10 @@ public class Program
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
-
+        // Add MongoDB settings
+        builder.Services.Configure<MongoDbSettings>(
+            builder.Configuration.GetSection("MongoDbSettings"));
+        builder.Services.AddSingleton<MongoDbService>();
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
