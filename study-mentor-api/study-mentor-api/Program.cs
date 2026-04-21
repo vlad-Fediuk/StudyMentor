@@ -11,10 +11,6 @@ public class Program
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
-<<<<<<< HEAD
-=======
-        builder.Services.AddApplicationServices(builder.Configuration); // 👈 додали builder.Configuration
->>>>>>> e997e60 (S-3 Add service registration via ServiceExtensions)
 
         var app = builder.Build();
 
