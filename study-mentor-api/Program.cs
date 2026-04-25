@@ -1,6 +1,5 @@
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Services;
-using StudyMentorApi.Services.Ai;
 namespace study_mentor_api;
 
 public class Program
@@ -10,8 +9,6 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-
-        builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
         // Add MongoDB settings
@@ -19,9 +16,7 @@ public class Program
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
 
-        builder.Services.Configure<NvidiaAiSettings>(
-            builder.Configuration.GetSection(NvidiaAiSettings.SectionName));
-        builder.Services.AddHttpClient<IAiChatService, NvidiaAiChatService>();
+        builder.Services.AddAiServices(builder.Configuration);
 
         var app = builder.Build();
 
@@ -34,9 +29,6 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
-
-
-        app.MapControllers();
 
         app.Run();
     }

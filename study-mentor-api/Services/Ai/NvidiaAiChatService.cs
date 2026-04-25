@@ -47,7 +47,7 @@ public sealed class NvidiaAiChatService : IAiChatService
         var payload = new NvidiaChatCompletionRequest(
             model,
             request.Messages.Select(message => new NvidiaChatMessage(message.Role, message.Content)).ToArray(),
-            _settings.MaxTokens,
+            _settings.MaxOutputTokens,
             _settings.Temperature,
             _settings.TopP,
             false,

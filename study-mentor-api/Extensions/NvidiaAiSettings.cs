@@ -17,7 +17,7 @@ public sealed class NvidiaAiSettings
         "nvidia/nemotron-3-super-120b-a12b"
     ];
 
-    public int MaxTokens { get; set; } = 16384;
+    public int MaxOutputTokens { get; set; } = 32768;
 
     public double Temperature { get; set; } = 1.0;
 
