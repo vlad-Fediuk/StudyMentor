@@ -17,7 +17,8 @@ namespace StudyMentorApi.Services
         public IMongoDatabase? Database => _database;
         public IMongoCollection<T> GetCollection<T>(string collectionName)
         {
-            return _database.GetCollection<T>(collectionName);
+            return _database?.GetCollection<T>(collectionName)
+                ?? throw new InvalidOperationException("Mongo database was not initialized.");
         }
     }
 }
