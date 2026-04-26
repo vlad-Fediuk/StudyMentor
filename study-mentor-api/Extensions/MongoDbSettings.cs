@@ -1,4 +1,4 @@
-namespace StudyMentorApi.Extensions
+namespace study_mentor_api.Extensions
 {
     public class MongoDbSettings
     {

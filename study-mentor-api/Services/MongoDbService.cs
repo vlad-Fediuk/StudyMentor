@@ -1,8 +1,8 @@
 using MongoDB.Driver;
 using Microsoft.Extensions.Options;
-using StudyMentorApi.Extensions;
+using study_mentor_api.Extensions;
 
-namespace StudyMentorApi.Services
+namespace study_mentor_api.Services
 {
     public class MongoDbService
     {
