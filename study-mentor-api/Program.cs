@@ -18,6 +18,7 @@ public class Program
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
+        
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -35,7 +36,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
-
+        app.MapSubjectEndpoints();
         app.Run();
     }
 }
