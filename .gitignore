@@ -5,6 +5,7 @@
 
 .idea/
 .slnx
+.dotnet/
 
 # User-specific files
 *.rsuser
