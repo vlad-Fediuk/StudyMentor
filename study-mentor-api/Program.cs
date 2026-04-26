@@ -13,6 +13,7 @@ public class Program
         builder.Services.AddControllers();
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
+        builder.Services.AddSwaggerGen();
         // Add MongoDB settings
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection("MongoDbSettings"));
@@ -23,6 +24,13 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Study Mentor API V1");
+                c.RoutePrefix = string.Empty; 
+            });
         }
 
         app.UseHttpsRedirection();
