@@ -1,5 +1,6 @@
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Services;
+using StudyMentorApi.Services.Ai;
 namespace study_mentor_api;
 
 public class Program
@@ -16,7 +17,9 @@ public class Program
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
 
-        builder.Services.AddAiServices(builder.Configuration);
+        builder.Services.Configure<NvidiaAiSettings>(
+            builder.Configuration.GetSection(NvidiaAiSettings.SectionName));
+        builder.Services.AddHttpClient<IAiChatService, NvidiaAiChatService>();
 
         var app = builder.Build();
 
