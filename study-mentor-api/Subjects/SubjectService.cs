@@ -1,7 +1,8 @@
 using MongoDB.Driver;
-using study_mentor_api.Data.Models;
-using study_mentor_api.Services;
-namespace study_mentor_api.Subjects;
+using StudyMentorApi.Data.Models;
+using StudyMentorApi.Services;
+
+namespace StudyMentorApi.Subjects;
 
 public class SubjectService : BaseCrudService<Subject, string>
 {

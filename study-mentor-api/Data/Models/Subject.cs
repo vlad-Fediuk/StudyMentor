@@ -1,5 +1,6 @@
 using MongoDB.Bson.Serialization.Attributes;
-namespace study_mentor_api.Data.Models;
+
+namespace StudyMentorApi.Data.Models;
 
 public class Subject : BaseEntity<string>
 {
