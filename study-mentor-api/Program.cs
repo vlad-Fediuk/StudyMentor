@@ -1,5 +1,5 @@
-using StudyMentorApi.Extensions;
-using StudyMentorApi.Services;
+using study_mentor_api.Extensions;
+using study_mentor_api.Services;
 namespace study_mentor_api;
 
 public class Program
@@ -11,6 +11,8 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddApplicationServices();
+
         // Add MongoDB settings
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection("MongoDbSettings"));
