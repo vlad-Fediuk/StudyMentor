@@ -1,6 +1,6 @@
-using study_mentor_api.Data.Models;
+using StudyMentorApi.Data.Models;
 
-namespace study_mentor_api.Services;
+namespace StudyMentorApi.Services;
 
 public abstract class BaseCrudService<TEntity, TKey>
     where TEntity : class, IEntity<TKey>

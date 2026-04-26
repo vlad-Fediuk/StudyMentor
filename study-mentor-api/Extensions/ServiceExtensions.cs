@@ -1,4 +1,4 @@
-namespace study_mentor_api.Extensions;
+namespace StudyMentorApi.Extensions;
 
 public static class ServiceExtensions
 {

@@ -1,6 +1,7 @@
-using study_mentor_api.Extensions;
-using study_mentor_api.Services;
-namespace study_mentor_api;
+using StudyMentorApi.Extensions;
+using StudyMentorApi.Services;
+
+namespace StudyMentorApi;
 
 public class Program
 {
