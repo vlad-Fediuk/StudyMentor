@@ -1,6 +1,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
-namespace study_mentor_api.Data.Models;
+
+namespace StudyMentorApi.Data.Models;
 
 public abstract class BaseEntity<TKey> : IEntity<TKey>  where TKey : notnull
 {
