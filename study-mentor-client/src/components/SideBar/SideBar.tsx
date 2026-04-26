@@ -4,8 +4,44 @@ import ChatTypeSelectorGroup from "./ChatTypeSelector/ChatTypeSelectorGroup";
 import SidebarVisibilityToggle from "./SidebarVisibilityToggle/SidebarVisibilityToggle";
 import SideSearchBlock from "./SideSearchBlock/SideSearchBlock";
 
+const subjectItems = [
+  "Mathematics",
+  "Computer Science",
+  "World History",
+  "Linear Algebra",
+  "Organic Chemistry",
+];
+
+const lectureItems = [
+  "Lecture 1",
+  "Lecture 2",
+  "Lecture 3",
+  "Lecture 4",
+];
+
 const SideBar = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const [activeChatTypeId, setActiveChatTypeId] = useState("subject");
+
+  const handleChatTypeChange = (id: string) => {
+    setActiveChatTypeId(id);
+
+    if (!isOpen) {
+      setIsOpen(true);
+    }
+  };
+
+  const handleSearchItemClick = () => {
+    if (activeChatTypeId === "subject") {
+      setActiveChatTypeId("lecture");
+      return;
+    }
+
+    setIsOpen(false);
+  };
+
+  const visibleItems =
+    activeChatTypeId === "subject" ? subjectItems : lectureItems;
 
   return (
     <section
@@ -32,25 +68,15 @@ const SideBar = () => {
           { id: "subject", type: "subject" },
           { id: "lecture", type: "lecture" },
         ]}
-        defaultActiveId="subject"
+        activeId={activeChatTypeId}
         isCollapsed={!isOpen}
-        onChange={() => {
-          if (!isOpen) {
-            setIsOpen(true);
-          }
-        }}
+        onChange={handleChatTypeChange}
       />
       {isOpen ? (
         <SideSearchBlock
-          items={[
-            "Mathematics",
-            "Computer Science",
-            "World History",
-            "Linear Algebra",
-            "Organic Chemistry",
-          ]}
+          items={visibleItems}
           placeholder="Search chats"
-          onItemClick={() => setIsOpen(false)}
+          onItemClick={handleSearchItemClick}
         />
       ) : null}
       <SidebarVisibilityToggle

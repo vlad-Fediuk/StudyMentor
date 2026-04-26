@@ -1,4 +1,3 @@
-import { useState } from "react";
 import LectureButton from "./buttons/LectureButton";
 import SubjectButton from "./buttons/SubjectButton";
 
@@ -9,7 +8,7 @@ type ChatTypeSelectorItem = {
 
 interface ChatTypeSelectorGroupProps {
   items: ChatTypeSelectorItem[];
-  defaultActiveId?: string;
+  activeId: string;
   onChange?: (id: string) => void;
   isCollapsed?: boolean;
 }
@@ -19,16 +18,11 @@ const horizontalMargin = 20;
 
 const ChatTypeSelectorGroup = ({
   items,
-  defaultActiveId,
+  activeId,
   onChange,
   isCollapsed = false,
 }: ChatTypeSelectorGroupProps) => {
-  const [activeId, setActiveId] = useState(
-    defaultActiveId ?? items[0]?.id ?? "",
-  );
-
   const handleClick = (id: string) => {
-    setActiveId(id);
     onChange?.(id);
   };
 
