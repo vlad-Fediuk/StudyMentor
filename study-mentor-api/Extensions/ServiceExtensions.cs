@@ -6,6 +6,7 @@ public static class ServiceExtensions
         this IServiceCollection services)
     {
         // We use Scoped for services and repositories
+        services.AddScoped<Majors.MajorService>();
         services.AddScoped<Subjects.SubjectService>();
 
         return services;

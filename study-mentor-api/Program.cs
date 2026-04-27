@@ -1,4 +1,5 @@
 using StudyMentorApi.Extensions;
+using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
 namespace StudyMentorApi;
@@ -36,6 +37,7 @@ public class Program
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
+        app.MapMajorEndpoints();
         app.MapSubjectEndpoints();
         app.Run();
     }
