@@ -1,4 +1,5 @@
 using StudyMentorApi.Extensions;
+using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
@@ -51,6 +52,7 @@ public class Program
         app.MapControllers();
         app.MapMajorEndpoints();
         app.MapSubjectEndpoints();
+        app.MapLectureEndpoints();
         app.Run();
     }
 }

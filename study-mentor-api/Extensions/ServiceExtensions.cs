@@ -8,6 +8,7 @@ public static class ServiceExtensions
         // We use Scoped for services and repositories
         services.AddScoped<Majors.MajorService>();
         services.AddScoped<Subjects.SubjectService>();
+        services.AddScoped<Lectures.LectureService>();
 
         return services;
     }
