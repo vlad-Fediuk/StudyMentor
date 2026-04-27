@@ -1,5 +1,5 @@
-using StudyMentorApi.Data.Models;
+using StudyMentorApi.Majors;
 
 namespace StudyMentorApi.Subjects;
 
-public record SubjectResponse(string Id, string Name, Major Major);
+public record SubjectResponse(string Id, string Name, MajorResponse Major);

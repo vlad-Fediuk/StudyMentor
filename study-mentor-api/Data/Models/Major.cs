@@ -1,7 +1,9 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace StudyMentorApi.Data.Models;
 
-public enum Major
+public class Major : BaseEntity<string>
 {
-    Radiotech,
-    Software_Engineering
+    [BsonElement("major_name")]
+    public required string Name { get; set; }
 }

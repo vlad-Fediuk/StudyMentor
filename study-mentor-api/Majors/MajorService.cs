@@ -1,4 +1,5 @@
 using MongoDB.Driver;
+using StudyMentorApi.Data.Models;
 using StudyMentorApi.Services;
 
 namespace StudyMentorApi.Majors;

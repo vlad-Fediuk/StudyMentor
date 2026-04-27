@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using StudyMentorApi.Data.Models;
+using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 
 namespace StudyMentorApi.Subjects;
@@ -8,10 +9,12 @@ public class SubjectService : BaseCrudService<Subject, string>
 {
     private const string CollectionName = "subjects";
     private readonly IMongoCollection<Subject> _collection;
+    private readonly MajorService _majorService;
 
-    public SubjectService(MongoDbService dbService)
+    public SubjectService(MongoDbService dbService, MajorService majorService)
     {
         _collection = dbService.GetCollection<Subject>(CollectionName);
+        _majorService = majorService;
     }
 
     protected override IQueryable<Subject> Query()
@@ -49,6 +52,19 @@ public class SubjectService : BaseCrudService<Subject, string>
     protected override void UpdateEntityValues(Subject existingEntity, Subject updatedEntity)
     {
         existingEntity.Name = updatedEntity.Name;
-        existingEntity.Major = updatedEntity.Major;
+        existingEntity.MajorId = updatedEntity.MajorId;
+    }
+
+    protected override async Task ValidateCreateAsync(Subject entity, CancellationToken cancellationToken)
+    {
+        await _majorService.GetByIdAsync(entity.MajorId, cancellationToken);
+    }
+
+    protected override async Task ValidateUpdateAsync(
+        Subject existingEntity,
+        Subject updatedEntity,
+        CancellationToken cancellationToken)
+    {
+        await _majorService.GetByIdAsync(updatedEntity.MajorId, cancellationToken);
     }
 }
