@@ -1,12 +1,17 @@
 import { useState } from "react";
 
 interface SearchResultsTableProps {
-  items: string[];
-  onItemClick?: (item: string) => void;
+  items: SearchResultItem[];
+  onItemClick?: (item: SearchResultItem) => void;
+}
+
+export interface SearchResultItem {
+  id: string;
+  label: string;
 }
 
 interface SearchResultButtonProps {
-  item: string;
+  item: SearchResultItem;
   isDisabled?: boolean;
   onClick?: () => void;
 }
@@ -68,7 +73,7 @@ const SearchResultButton = ({
           color: "#4D463C",
         }}
       >
-        {item}
+        {item.label}
       </span>
     </button>
   );
@@ -78,7 +83,8 @@ const SearchResultsTable = ({
   items,
   onItemClick,
 }: SearchResultsTableProps) => {
-  const visibleItems = items.length > 0 ? items : ["Nothing here"];
+  const visibleItems =
+    items.length > 0 ? items : [{ id: "empty", label: "Nothing here" }];
 
   return (
     <div
@@ -98,7 +104,7 @@ const SearchResultsTable = ({
     >
       {visibleItems.map((item, index) => (
         <SearchResultButton
-          key={`${item}-${index}`}
+          key={`${item.id}-${index}`}
           item={item}
           isDisabled={items.length === 0}
           onClick={() => onItemClick?.(item)}

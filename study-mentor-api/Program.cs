@@ -26,7 +26,15 @@ public class Program
             options.AddDefaultPolicy(policy =>
             {
                 policy
-                    .WithOrigins("http://localhost:5173", "http://localhost:4173")
+                    .SetIsOriginAllowed(origin =>
+                    {
+                        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                        {
+                            return false;
+                        }
+
+                        return uri.Host is "localhost" or "127.0.0.1";
+                    })
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });

@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import SearchField from "./SearchField";
-import SearchResultsTable from "./SearchResultsTable";
+import SearchResultsTable, { type SearchResultItem } from "./SearchResultsTable";
 
 interface SearchBlockProps {
-  items: string[];
+  items: SearchResultItem[];
   placeholder?: string;
-  onItemClick?: (item: string) => void;
+  onItemClick?: (item: SearchResultItem) => void;
 }
 
 const searchFieldHeight = 40;
@@ -35,7 +35,7 @@ const SideSearchBlock = ({
     const queryParts = normalizedQuery.split(" ");
 
     return items.filter((item) => {
-      const normalizedItem = normalize(item);
+      const normalizedItem = normalize(item.label);
       return queryParts.every((part) => normalizedItem.includes(part));
     });
   }, [items, query]);
