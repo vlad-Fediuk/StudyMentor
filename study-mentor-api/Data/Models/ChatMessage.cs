@@ -14,9 +14,6 @@ public class ChatMessage : BaseEntity<string>
     [BsonElement("timestamp")]
     public DateTime Timestamp { get; set; }
 
-    [BsonElement("exercise_id")]
-    public string? ExerciseId { get; set; }
-
     [BsonElement("role")]
     [BsonRepresentation(BsonType.String)]
     public MessageRole Role { get; set; }

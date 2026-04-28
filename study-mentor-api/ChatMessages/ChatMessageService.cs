@@ -4,15 +4,11 @@ using StudyMentorApi.Services;
 
 namespace StudyMentorApi.ChatMessages;
 
-public class ChatMessageService : BaseCrudService<ChatMessage, string>
+public class ChatMessageService(MongoDbService dbService) : BaseCrudService<ChatMessage, string>
 {
     private const string CollectionName = "chat_messages";
-    private readonly IMongoCollection<ChatMessage> _collection;
-
-    public ChatMessageService(MongoDbService dbService)
-    {
-        _collection = dbService.GetCollection<ChatMessage>(CollectionName);
-    }
+    private readonly IMongoCollection<ChatMessage> _collection = 
+        dbService.GetCollection<ChatMessage>(CollectionName);
 
     public async Task<IEnumerable<ChatMessage>> GetBySessionAsync(
         string sessionId,
