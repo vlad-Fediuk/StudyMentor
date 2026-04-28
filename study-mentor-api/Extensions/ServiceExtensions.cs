@@ -9,6 +9,7 @@ public static class ServiceExtensions
         services.AddScoped<Majors.MajorService>();
         services.AddScoped<Subjects.SubjectService>();
         services.AddScoped<Lectures.LectureService>();
+        services.AddScoped<ChatMessages.ChatMessageService>();
 
         return services;
     }
