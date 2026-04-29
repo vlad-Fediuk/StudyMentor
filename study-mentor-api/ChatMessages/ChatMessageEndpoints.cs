@@ -54,7 +54,6 @@ public static class ChatMessageEndpoints
             ChatSessionId = request.ChatSessionId,
             Content = request.Content,
             Timestamp = request.Timestamp ?? DateTime.UtcNow,
-            ExerciseId = request.ExerciseId,
             Role = request.Role,
             SequenceNumber = request.SequenceNumber
         };
@@ -73,7 +72,6 @@ public static class ChatMessageEndpoints
             ChatSessionId = request.ChatSessionId,
             Content = request.Content,
             Timestamp = request.Timestamp ?? DateTime.UtcNow,
-            ExerciseId = request.ExerciseId,
             Role = request.Role,
             SequenceNumber = request.SequenceNumber
         };
@@ -91,5 +89,5 @@ public static class ChatMessageEndpoints
     }
 
     private static ChatMessageResponse ToResponse(ChatMessage m) =>
-        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.ExerciseId, m.Role, m.SequenceNumber);
+        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber);
 }

@@ -51,7 +51,6 @@ public class ChatMessageService(MongoDbService dbService) : BaseCrudService<Chat
         existingEntity.ChatSessionId = updatedEntity.ChatSessionId;
         existingEntity.Content = updatedEntity.Content;
         existingEntity.Timestamp = updatedEntity.Timestamp;
-        existingEntity.ExerciseId = updatedEntity.ExerciseId;
         existingEntity.Role = updatedEntity.Role;
         existingEntity.SequenceNumber = updatedEntity.SequenceNumber;
     }
