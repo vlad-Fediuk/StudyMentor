@@ -1,3 +1,4 @@
+using MongoDB.Bson;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Majors;
 
@@ -27,10 +28,14 @@ public static class SubjectEndpoints
         var majors = (await majorService.GetAllAsync(ct))
             .ToDictionary(m => m.Id, m => new MajorResponse(m.Id, m.Name));
 
-        return Results.Ok(items.Select(s => new SubjectResponse(
-            s.Id,
-            s.Name,
-            majors[s.MajorId])));
+        var response = items.Select(s =>
+        {
+            if (!majors.TryGetValue(s.MajorId, out var major))
+                return null;
+            return new SubjectResponse(s.Id, s.Name, major);
+        }).Where(s => s is not null);
+
+        return Results.Ok(response);
     }
 
     private static async Task<IResult> GetById(
@@ -39,9 +44,19 @@ public static class SubjectEndpoints
         MajorService majorService,
         CancellationToken ct)
     {
-        var item = await service.GetByIdAsync(id, ct);
-        var major = await majorService.GetByIdAsync(item.MajorId, ct);
-        return Results.Ok(new SubjectResponse(item.Id, item.Name, new MajorResponse(major.Id, major.Name)));
+        if (!ObjectId.TryParse(id, out _))
+            return Results.BadRequest($"'{id}' is not a valid id format.");
+
+        try
+        {
+            var item = await service.GetByIdAsync(id, ct);
+            var major = await majorService.GetByIdAsync(item.MajorId, ct);
+            return Results.Ok(new SubjectResponse(item.Id, item.Name, new MajorResponse(major.Id, major.Name)));
+        }
+        catch (KeyNotFoundException)
+        {
+            return Results.NotFound($"Subject with id '{id}' not found.");
+        }
     }
 
     private static async Task<IResult> Create(
@@ -50,9 +65,25 @@ public static class SubjectEndpoints
         MajorService majorService,
         CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return Results.BadRequest("Name is required.");
+
+        if (!ObjectId.TryParse(request.MajorId, out _))
+            return Results.BadRequest($"'{request.MajorId}' is not a valid id format.");
+
+        try
+        {
+            await majorService.GetByIdAsync(request.MajorId, ct);
+        }
+        catch (KeyNotFoundException)
+        {
+            return Results.BadRequest($"Major with id '{request.MajorId}' does not exist.");
+        }
+
         var entity = new Subject { Name = request.Name, MajorId = request.MajorId };
         var created = await service.CreateAsync(entity, ct);
         var major = await majorService.GetByIdAsync(created.MajorId, ct);
+
         return Results.Created(
             $"/subjects/{created.Id}",
             new SubjectResponse(created.Id, created.Name, new MajorResponse(major.Id, major.Name)));
@@ -65,10 +96,35 @@ public static class SubjectEndpoints
         MajorService majorService,
         CancellationToken ct)
     {
-        var entity = new Subject { Name = request.Name, MajorId = request.MajorId };
-        var updated = await service.UpdateAsync(id, entity, ct);
-        var major = await majorService.GetByIdAsync(updated.MajorId, ct);
-        return Results.Ok(new SubjectResponse(updated.Id, updated.Name, new MajorResponse(major.Id, major.Name)));
+        if (!ObjectId.TryParse(id, out _))
+            return Results.BadRequest($"'{id}' is not a valid id format.");
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return Results.BadRequest("Name is required.");
+
+        if (!ObjectId.TryParse(request.MajorId, out _))
+            return Results.BadRequest($"'{request.MajorId}' is not a valid id format.");
+
+        try
+        {
+            await majorService.GetByIdAsync(request.MajorId, ct);
+        }
+        catch (KeyNotFoundException)
+        {
+            return Results.BadRequest($"Major with id '{request.MajorId}' does not exist.");
+        }
+
+        try
+        {
+            var entity = new Subject { Name = request.Name, MajorId = request.MajorId };
+            var updated = await service.UpdateAsync(id, entity, ct);
+            var major = await majorService.GetByIdAsync(updated.MajorId, ct);
+            return Results.Ok(new SubjectResponse(updated.Id, updated.Name, new MajorResponse(major.Id, major.Name)));
+        }
+        catch (KeyNotFoundException)
+        {
+            return Results.NotFound($"Subject with id '{id}' not found.");
+        }
     }
 
     private static async Task<IResult> Delete(
@@ -76,7 +132,17 @@ public static class SubjectEndpoints
         SubjectService service,
         CancellationToken ct)
     {
-        await service.DeleteAsync(id, ct);
-        return Results.NoContent();
+        if (!ObjectId.TryParse(id, out _))
+            return Results.BadRequest($"'{id}' is not a valid id format.");
+
+        try
+        {
+            await service.DeleteAsync(id, ct);
+            return Results.NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return Results.NotFound($"Subject with id '{id}' not found.");
+        }
     }
 }
