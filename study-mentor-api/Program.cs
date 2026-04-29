@@ -3,6 +3,7 @@ using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
+using StudyMentorApi.ChatMessages;
 namespace StudyMentorApi;
 
 public class Program
@@ -53,6 +54,7 @@ public class Program
         app.MapMajorEndpoints();
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();
+        app.MapChatMessageEndpoints();
         app.Run();
     }
 }
