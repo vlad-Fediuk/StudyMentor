@@ -13,7 +13,8 @@ public sealed class NvidiaAiChatService : IAiChatService
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
     private readonly HttpClient _httpClient;
@@ -51,7 +52,8 @@ public sealed class NvidiaAiChatService : IAiChatService
             _settings.Temperature,
             _settings.TopP,
             false,
-            new NvidiaChatTemplateOptions(_settings.EnableThinking));
+            new NvidiaChatTemplateOptions(_settings.EnableThinking),
+            _settings.EnableThinking ? _settings.ReasoningBudget : null);
 
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, _settings.InvokeUrl)
         {
@@ -116,7 +118,9 @@ public sealed class NvidiaAiChatService : IAiChatService
         double TopP,
         bool Stream,
         [property: JsonPropertyName("chat_template_kwargs")]
-        NvidiaChatTemplateOptions ChatTemplateOptions);
+        NvidiaChatTemplateOptions ChatTemplateOptions,
+        [property: JsonPropertyName("reasoning_budget")]
+        int? ReasoningBudget);
 
     private sealed record NvidiaChatTemplateOptions(
         bool EnableThinking);

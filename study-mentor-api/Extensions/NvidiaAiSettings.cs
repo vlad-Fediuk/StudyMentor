@@ -9,15 +9,16 @@ public sealed class NvidiaAiSettings
 
     public string ApiKey { get; set; } = string.Empty;
 
-    public string DefaultModel { get; set; } = "google/gemma-4-31b-it";
+    public string DefaultModel { get; set; } = "nvidia/nemotron-3-super-120b-a12b";
 
     public string[] SupportedModels { get; set; } =
     [
-        "google/gemma-4-31b-it",
         "nvidia/nemotron-3-super-120b-a12b"
     ];
 
-    public int MaxOutputTokens { get; set; } = 32768;
+    public int MaxOutputTokens { get; set; } = 16384;
+
+    public int ReasoningBudget { get; set; } = 16384;
 
     public double Temperature { get; set; } = 1.0;
 

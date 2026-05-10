@@ -1,27 +1,26 @@
 using StudyMentorApi.Extensions;
+using StudyMentorApi.Diagnostics;
 using StudyMentorApi.Services;
-using StudyMentorApi.Services.Ai;
 namespace study_mentor_api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
-        // Add MongoDB settings
-        builder.Services.Configure<MongoDbSettings>(
-            builder.Configuration.GetSection("MongoDbSettings"));
-        builder.Services.AddSingleton<MongoDbService>();
-
-        builder.Services.Configure<NvidiaAiSettings>(
-            builder.Configuration.GetSection(NvidiaAiSettings.SectionName));
-        builder.Services.AddHttpClient<IAiChatService, NvidiaAiChatService>();
+        builder.Services.AddStudyMentorServices(builder.Configuration);
 
         var app = builder.Build();
+
+        if (args.Contains("--ai-smoke-test", StringComparer.OrdinalIgnoreCase))
+        {
+            Environment.ExitCode = await AiSmokeTestRunner.RunAsync(app.Services);
+            return;
+        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
