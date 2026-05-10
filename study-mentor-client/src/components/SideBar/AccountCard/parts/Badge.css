@@ -1,0 +1,19 @@
+.badge {
+  width: 50px;
+  height: 40px;
+  background-color: var(--color-accent-contrast);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.badge--inverted {
+  background-color: var(--color-accent);
+  color: var(--color-accent-contrast);
+}

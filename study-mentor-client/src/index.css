@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap");
+@import "./styles/variables.css";
+
+@font-face {
+  font-family: "SF Compact";
+  src:
+    local("SF Compact Regular"),
+    local("SFCompact-Regular"),
+    local("SF Compact Text Regular"),
+    local("SF Compact Display Regular"),
+    local("SF Pro Text Regular"),
+    local("SF Pro Display Regular");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-primary);
+  color: var(--color-text-primary);
+  background-color: var(--color-sidebar-surface);
+}

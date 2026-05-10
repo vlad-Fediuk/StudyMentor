@@ -1,0 +1,20 @@
+.sidebar {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+  transition:
+    width 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.sidebar--open {
+  width: var(--sidebar-width-expanded);
+  background-color: var(--color-sidebar-surface);
+}
+
+.sidebar--collapsed {
+  width: var(--sidebar-width-collapsed);
+  background-color: var(--color-accent);
+}
