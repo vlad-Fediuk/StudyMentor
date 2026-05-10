@@ -1,0 +1,29 @@
+.sidebar-visibility-toggle {
+  width: var(--icon-button-size);
+  height: var(--icon-button-size);
+  margin-top: auto;
+  margin-bottom: 15px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.sidebar-visibility-toggle--open {
+  margin-left: auto;
+  margin-right: 15px;
+}
+
+.sidebar-visibility-toggle--collapsed {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sidebar-visibility-toggle__icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+}

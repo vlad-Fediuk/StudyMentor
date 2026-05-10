@@ -1,0 +1,10 @@
+.search-block {
+  width: calc(var(--sidebar-width-expanded) - 20px);
+  margin: 15px 10px 0;
+  background-color: var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

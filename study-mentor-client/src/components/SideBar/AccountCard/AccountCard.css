@@ -1,0 +1,22 @@
+.account-card {
+  width: var(--sidebar-width-expanded);
+  height: var(--account-card-height);
+  background-color: var(--color-accent);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+}
+
+.account-card--collapsed {
+  width: 100%;
+  height: var(--account-card-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-card__badge {
+  margin-left: auto;
+}

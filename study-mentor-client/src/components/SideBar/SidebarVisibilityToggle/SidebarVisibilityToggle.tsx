@@ -1,5 +1,6 @@
 import arrowToLeft from "../../../assets/ArrowToLeft.svg";
 import arrowToRight from "../../../assets/ArrowToRight.svg";
+import "./SidebarVisibilityToggle.css";
 
 interface SidebarVisibilityToggleProps {
   isOpen: boolean;
@@ -15,28 +16,13 @@ const SidebarVisibilityToggle = ({
       type="button"
       onClick={onClick}
       aria-label={isOpen ? "Sidebar opened" : "Sidebar closed"}
-      style={{
-        width: 38,
-        height: 38,
-        marginTop: "auto",
-        marginBottom: 15,
-        marginLeft: isOpen ? "auto" : "auto",
-        marginRight: isOpen ? 15 : "auto",
-        padding: 0,
-        border: "none",
-        background: "transparent",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        alignSelf: isOpen ? "stretch" : "center",
-        cursor: "pointer",
-      }}
+      className={`sidebar-visibility-toggle ${isOpen ? "sidebar-visibility-toggle--open" : "sidebar-visibility-toggle--collapsed"}`}
     >
       <img
         src={isOpen ? arrowToLeft : arrowToRight}
         alt=""
         aria-hidden="true"
-        style={{ width: 30, height: 30, display: "block" }}
+        className="sidebar-visibility-toggle__icon"
       />
     </button>
   );

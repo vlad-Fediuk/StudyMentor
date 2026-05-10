@@ -1,0 +1,37 @@
+:root {
+  --color-accent: #b55252;
+  --color-accent-contrast: #eee7de;
+  --color-surface: #f9f4ed;
+  --color-sidebar-surface: #eee7de;
+  --color-text-primary: #4d463c;
+  --color-border: #4d463c;
+  --color-hover-ring: #d0d0d0;
+
+  --font-primary: "Montserrat", "Segoe UI", sans-serif;
+  --font-secondary:
+    "SF Compact",
+    "SF Pro Text",
+    "SF Pro Display",
+    "Segoe UI",
+    sans-serif;
+
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  --radius-sm: 5px;
+  --radius-md: 10px;
+  --radius-lg: 15px;
+  --radius-pill: 20px;
+  --radius-round: 999px;
+
+  --sidebar-width-expanded: 330px;
+  --sidebar-width-collapsed: 50px;
+  --account-card-height: 55px;
+  --icon-button-size: 38px;
+  --search-field-height: 40px;
+  --search-result-row-height: 40px;
+}

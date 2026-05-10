@@ -1,0 +1,16 @@
+.chat-type-selector {
+  width: 100%;
+  margin-top: 30px;
+  min-height: var(--icon-button-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-type-selector__item {
+  margin: 0 10px;
+}
+
+.chat-type-selector__item--collapsed {
+  margin: 0;
+}

@@ -4,6 +4,7 @@ import ChatTypeSelectorGroup from "./ChatTypeSelector/ChatTypeSelectorGroup";
 import SidebarVisibilityToggle from "./SidebarVisibilityToggle/SidebarVisibilityToggle";
 import SideSearchBlock from "./SideSearchBlock/SideSearchBlock";
 import type { SearchResultItem } from "./SideSearchBlock/SearchResultsTable";
+import "./SideBar.css";
 
 const apiBaseUrl = "http://localhost:5132";
 const accountGroupNumber = 531;
@@ -178,19 +179,7 @@ const SideBar = () => {
     activeChatTypeId === "subject" ? subjectItems : lectureItems;
 
   return (
-    <section
-      style={{
-        minHeight: "100vh",
-        width: isOpen ? 330 : 50,
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: isOpen ? "#EEE7DE" : "#B55252",
-        borderRight: "1px solid #4D463C",
-        boxSizing: "border-box",
-        overflow: "hidden",
-        transition: "width 0.2s ease",
-      }}
-    >
+    <section className={`sidebar ${isOpen ? "sidebar--open" : "sidebar--collapsed"}`}>
       <AccountCard
         firstName="Julia"
         lastName="Fox"

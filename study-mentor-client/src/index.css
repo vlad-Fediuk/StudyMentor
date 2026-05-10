@@ -1,22 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap");
+@import "./styles/variables.css";
 
 @font-face {
-  font-family: 'SF Compact';
+  font-family: "SF Compact";
   src:
-    local('SF Compact Regular'),
-    local('SFCompact-Regular'),
-    local('SF Compact Text Regular'),
-    local('SF Compact Display Regular'),
-    local('SF Pro Text Regular'),
-    local('SF Pro Display Regular');
+    local("SF Compact Regular"),
+    local("SFCompact-Regular"),
+    local("SF Compact Text Regular"),
+    local("SF Compact Display Regular"),
+    local("SF Pro Text Regular"),
+    local("SF Pro Display Regular");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-}
-
-:root {
-  --font-primary: 'Montserrat', 'Segoe UI', sans-serif;
-  --font-secondary: 'SF Compact', 'SF Pro Text', 'SF Pro Display', 'Segoe UI', sans-serif;
 }
 
 * {
@@ -32,14 +28,6 @@ body,
 
 body {
   font-family: var(--font-primary);
-}
-
-.font-montserrat-medium {
-  font-family: var(--font-primary);
-  font-weight: 500;
-}
-
-.font-sf-compact-regular {
-  font-family: var(--font-secondary);
-  font-weight: 400;
+  color: var(--color-text-primary);
+  background-color: var(--color-sidebar-surface);
 }
