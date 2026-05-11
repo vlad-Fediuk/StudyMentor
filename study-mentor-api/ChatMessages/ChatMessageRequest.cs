@@ -6,6 +6,5 @@ public record ChatMessageRequest(
     string ChatSessionId,
     string Content,
     DateTime? Timestamp,
-    string? ExerciseId,
     MessageRole Role,
     int SequenceNumber);
