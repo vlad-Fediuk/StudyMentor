@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Diagnostics;
+using StudyMentorApi.ChatMessages;
+using StudyMentorApi.Common;
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
-using StudyMentorApi.ChatMessages;
+
 namespace StudyMentorApi;
 
 public class Program
@@ -17,11 +20,10 @@ public class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddApplicationServices();
 
-        // Add MongoDB settings
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
-        
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -38,7 +40,6 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
-
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -46,7 +47,32 @@ public class Program
                 c.RoutePrefix = string.Empty;
             });
         }
-        
+
+        app.UseExceptionHandler(errorApp =>
+        {
+            errorApp.Run(async context =>
+            {
+                var exception = context.Features
+                    .Get<IExceptionHandlerFeature>()?.Error;
+
+                (int statusCode, string message) = exception switch
+                {
+                    NotFoundException ex => (404, ex.Message),
+                    ValidationException ex => (400, ex.Message),
+                    _ => (500, "An unexpected error occurred.")
+                };
+
+                context.Response.StatusCode = statusCode;
+                context.Response.ContentType = "application/json";
+
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    error = message,
+                    statusCode
+                });
+            });
+        });
+
         app.UseCors();
         app.UseHttpsRedirection();
         app.UseAuthorization();
