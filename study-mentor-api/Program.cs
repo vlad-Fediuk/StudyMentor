@@ -4,6 +4,7 @@ using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
 using StudyMentorApi.ChatMessages;
+using StudyMentorApi.ChatSessions;
 namespace StudyMentorApi;
 
 public class Program
@@ -21,6 +22,7 @@ public class Program
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
+        builder.Services.AddScoped<ChatSessionService>();
         
         builder.Services.AddCors(options =>
         {
@@ -55,6 +57,7 @@ public class Program
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();
         app.MapChatMessageEndpoints();
+        app.MapChatSessionEndpoints();
         app.Run();
     }
 }
