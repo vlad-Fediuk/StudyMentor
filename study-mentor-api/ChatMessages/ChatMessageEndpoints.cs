@@ -1,3 +1,4 @@
+using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
 
 namespace StudyMentorApi.ChatMessages;
@@ -22,8 +23,15 @@ public static class ChatMessageEndpoints
         ChatMessageService service,
         CancellationToken ct)
     {
-        var items = await service.GetAllAsync(ct);
-        return Results.Ok(items.Select(ToResponse));
+        try
+        {
+            var items = await service.GetAllAsync(ct);
+            return Results.Ok(items.Select(ToResponse));
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> GetById(
@@ -31,8 +39,19 @@ public static class ChatMessageEndpoints
         ChatMessageService service,
         CancellationToken ct)
     {
-        var item = await service.GetByIdAsync(id, ct);
-        return Results.Ok(ToResponse(item));
+        try
+        {
+            var item = await service.GetByIdAsync(id, ct);
+            return Results.Ok(ToResponse(item));
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> GetBySession(
@@ -40,8 +59,15 @@ public static class ChatMessageEndpoints
         ChatMessageService service,
         CancellationToken ct)
     {
-        var items = await service.GetBySessionAsync(sessionId, ct);
-        return Results.Ok(items.Select(ToResponse));
+        try
+        {
+            var items = await service.GetBySessionAsync(sessionId, ct);
+            return Results.Ok(items.Select(ToResponse));
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> Create(
@@ -49,16 +75,27 @@ public static class ChatMessageEndpoints
         ChatMessageService service,
         CancellationToken ct)
     {
-        var entity = new ChatMessage
+        try
         {
-            ChatSessionId = request.ChatSessionId,
-            Content = request.Content,
-            Timestamp = request.Timestamp ?? DateTime.UtcNow,
-            Role = request.Role,
-            SequenceNumber = request.SequenceNumber
-        };
-        var created = await service.CreateAsync(entity, ct);
-        return Results.Created($"/chat-messages/{created.Id}", ToResponse(created));
+            var entity = new ChatMessage
+            {
+                ChatSessionId = request.ChatSessionId,
+                Content = request.Content,
+                Timestamp = request.Timestamp ?? DateTime.UtcNow,
+                Role = request.Role,
+                SequenceNumber = request.SequenceNumber
+            };
+            var created = await service.CreateAsync(entity, ct);
+            return Results.Created($"/chat-messages/{created.Id}", ToResponse(created));
+        }
+        catch (ValidationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> Update(
@@ -67,16 +104,31 @@ public static class ChatMessageEndpoints
         ChatMessageService service,
         CancellationToken ct)
     {
-        var entity = new ChatMessage
+        try
         {
-            ChatSessionId = request.ChatSessionId,
-            Content = request.Content,
-            Timestamp = request.Timestamp ?? DateTime.UtcNow,
-            Role = request.Role,
-            SequenceNumber = request.SequenceNumber
-        };
-        var updated = await service.UpdateAsync(id, entity, ct);
-        return Results.Ok(ToResponse(updated));
+            var entity = new ChatMessage
+            {
+                ChatSessionId = request.ChatSessionId,
+                Content = request.Content,
+                Timestamp = request.Timestamp ?? DateTime.UtcNow,
+                Role = request.Role,
+                SequenceNumber = request.SequenceNumber
+            };
+            var updated = await service.UpdateAsync(id, entity, ct);
+            return Results.Ok(ToResponse(updated));
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (ValidationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> Delete(
@@ -84,8 +136,19 @@ public static class ChatMessageEndpoints
         ChatMessageService service,
         CancellationToken ct)
     {
-        await service.DeleteAsync(id, ct);
-        return Results.NoContent();
+        try
+        {
+            await service.DeleteAsync(id, ct);
+            return Results.NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static ChatMessageResponse ToResponse(ChatMessage m) =>
