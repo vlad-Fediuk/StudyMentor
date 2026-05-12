@@ -1,3 +1,4 @@
+using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Subjects;
@@ -25,13 +26,16 @@ public static class LectureEndpoints
         MajorService majorService,
         CancellationToken ct)
     {
-        var items = await service.GetAllAsync(ct);
-        var subjects = await BuildSubjectResponsesAsync(subjectService, majorService, ct);
-
-        return Results.Ok(items.Select(l => new LectureResponse(
-            l.Id,
-            l.Name,
-            subjects[l.SubjectId])));
+        try
+        {
+            var items = await service.GetAllAsync(ct);
+            var subjects = await BuildSubjectResponsesAsync(subjectService, majorService, ct);
+            return Results.Ok(items.Select(l => new LectureResponse(l.Id, l.Name, subjects[l.SubjectId])));
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> GetById(
@@ -41,9 +45,20 @@ public static class LectureEndpoints
         MajorService majorService,
         CancellationToken ct)
     {
-        var item = await service.GetByIdAsync(id, ct);
-        var subject = await MapSubjectResponseAsync(item.SubjectId, subjectService, majorService, ct);
-        return Results.Ok(new LectureResponse(item.Id, item.Name, subject));
+        try
+        {
+            var item = await service.GetByIdAsync(id, ct);
+            var subject = await MapSubjectResponseAsync(item.SubjectId, subjectService, majorService, ct);
+            return Results.Ok(new LectureResponse(item.Id, item.Name, subject));
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> Create(
@@ -53,13 +68,23 @@ public static class LectureEndpoints
         MajorService majorService,
         CancellationToken ct)
     {
-        var entity = new Lecture { Name = request.Name, SubjectId = request.SubjectId };
-        var created = await service.CreateAsync(entity, ct);
-        var subject = await MapSubjectResponseAsync(created.SubjectId, subjectService, majorService, ct);
-
-        return Results.Created(
-            $"/lectures/{created.Id}",
-            new LectureResponse(created.Id, created.Name, subject));
+        try
+        {
+            var entity = new Lecture { Name = request.Name, SubjectId = request.SubjectId };
+            var created = await service.CreateAsync(entity, ct);
+            var subject = await MapSubjectResponseAsync(created.SubjectId, subjectService, majorService, ct);
+            return Results.Created(
+                $"/lectures/{created.Id}",
+                new LectureResponse(created.Id, created.Name, subject));
+        }
+        catch (ValidationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> Update(
@@ -70,10 +95,25 @@ public static class LectureEndpoints
         MajorService majorService,
         CancellationToken ct)
     {
-        var entity = new Lecture { Name = request.Name, SubjectId = request.SubjectId };
-        var updated = await service.UpdateAsync(id, entity, ct);
-        var subject = await MapSubjectResponseAsync(updated.SubjectId, subjectService, majorService, ct);
-        return Results.Ok(new LectureResponse(updated.Id, updated.Name, subject));
+        try
+        {
+            var entity = new Lecture { Name = request.Name, SubjectId = request.SubjectId };
+            var updated = await service.UpdateAsync(id, entity, ct);
+            var subject = await MapSubjectResponseAsync(updated.SubjectId, subjectService, majorService, ct);
+            return Results.Ok(new LectureResponse(updated.Id, updated.Name, subject));
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (ValidationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<IResult> Delete(
@@ -81,8 +121,19 @@ public static class LectureEndpoints
         LectureService service,
         CancellationToken ct)
     {
-        await service.DeleteAsync(id, ct);
-        return Results.NoContent();
+        try
+        {
+            await service.DeleteAsync(id, ct);
+            return Results.NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
+        }
     }
 
     private static async Task<Dictionary<string, SubjectResponse>> BuildSubjectResponsesAsync(
