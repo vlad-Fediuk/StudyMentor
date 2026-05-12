@@ -1,9 +1,10 @@
+using StudyMentorApi.ChatMessages;
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
-using StudyMentorApi.ChatMessages;
+
 namespace StudyMentorApi;
 
 public class Program
@@ -17,11 +18,10 @@ public class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddApplicationServices();
 
-        // Add MongoDB settings
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
-        
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -38,7 +38,6 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
-
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -46,7 +45,8 @@ public class Program
                 c.RoutePrefix = string.Empty;
             });
         }
-        
+
+        app.UseGlobalExceptionHandler();
         app.UseCors();
         app.UseHttpsRedirection();
         app.UseAuthorization();
