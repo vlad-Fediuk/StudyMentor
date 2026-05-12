@@ -4,3 +4,4 @@ public record UserRequest(
     string Name,
     string Password,
     string GroupId);
+    

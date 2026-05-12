@@ -22,7 +22,6 @@ public class Program
         builder.Services.Configure<MongoDbSettings>(
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
-        builder.Services.AddScoped<UserService>();
         
         builder.Services.AddCors(options =>
         {
