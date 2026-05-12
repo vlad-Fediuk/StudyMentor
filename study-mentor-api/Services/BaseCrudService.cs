@@ -1,3 +1,4 @@
+using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
 
 namespace StudyMentorApi.Services;
@@ -18,7 +19,7 @@ public abstract class BaseCrudService<TEntity, TKey>
         CancellationToken cancellationToken = default)
     {
         var entity = await FindByIdAsync(id, cancellationToken);
-        return entity ?? throw new KeyNotFoundException(
+        return entity ?? throw new NotFoundException(
             $"Entity '{typeof(TEntity).Name}' with id '{id}' was not found.");
     }
 
@@ -36,13 +37,11 @@ public abstract class BaseCrudService<TEntity, TKey>
         CancellationToken cancellationToken = default)
     {
         var existingEntity = await FindByIdAsync(id, cancellationToken)
-            ?? throw new KeyNotFoundException(
+            ?? throw new NotFoundException(
                 $"Entity '{typeof(TEntity).Name}' with id '{id}' was not found.");
 
         await ValidateUpdateAsync(existingEntity, updatedEntity, cancellationToken);
-
         UpdateEntityValues(existingEntity, updatedEntity);
-
         return await SaveUpdatedEntityAsync(existingEntity, cancellationToken);
     }
 
@@ -51,7 +50,7 @@ public abstract class BaseCrudService<TEntity, TKey>
         CancellationToken cancellationToken = default)
     {
         var entity = await FindByIdAsync(id, cancellationToken)
-            ?? throw new KeyNotFoundException(
+            ?? throw new NotFoundException(
                 $"Entity '{typeof(TEntity).Name}' with id '{id}' was not found.");
 
         await DeleteEntityAsync(entity, cancellationToken);
