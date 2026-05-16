@@ -23,6 +23,8 @@ public class Program
             builder.Configuration.GetSection("MongoDbSettings"));
         builder.Services.AddSingleton<MongoDbService>();
 
+        builder.Services.AddJwtAuthentication(builder.Configuration);
+
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
@@ -50,6 +52,7 @@ public class Program
         app.UseGlobalExceptionHandler();
         app.UseCors();
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
         app.MapMajorEndpoints();
@@ -60,3 +63,4 @@ public class Program
         app.Run();
     }
 }
+

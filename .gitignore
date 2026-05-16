@@ -405,3 +405,4 @@ FodyWeavers.xsd
 #Credentials
 /*/firebase/
 **/net10.0/
+study-mentor-api/study-mentor-api.csproj.lscache
