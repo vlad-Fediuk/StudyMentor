@@ -22,6 +22,7 @@ public class UserService(MongoDbService dbService, IConfiguration configuration)
             .Find(u => u.Email == request.Email.ToLower())
             .FirstOrDefaultAsync(ct);
 
+        // Хешування: порівняння введеного пароля з хешем збереженим в базі даних
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Невірний email або пароль.");
 
@@ -33,6 +34,7 @@ public class UserService(MongoDbService dbService, IConfiguration configuration)
     {
         Name         = request.Name,
         Email        = request.Email.ToLower(),
+        // Хешування: пароль хешується бібліотекою BCrypt перед збереженням в базу даних
         PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
         GroupId      = request.GroupId
     };
