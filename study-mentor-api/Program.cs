@@ -3,7 +3,6 @@ using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
-using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
 using StudyMentorApi.Users;
 
@@ -11,19 +10,14 @@ namespace StudyMentorApi;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddApplicationServices();
-
-        builder.Services.Configure<MongoDbSettings>(
-            builder.Configuration.GetSection("MongoDbSettings"));
-        builder.Services.AddSingleton<MongoDbService>();
-        builder.Services.AddScoped<ChatSessionService>();
+        builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddCors(options =>
         {
