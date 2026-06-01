@@ -21,7 +21,6 @@ namespace StudyMentorApi.Services
             var client = new MongoClient(config.ConnectionString);
             _database = client.GetDatabase(config.DatabaseName);
         }
-
         public IMongoDatabase Database => _database;
         public IMongoCollection<T> GetCollection<T>(string collectionName)
         {
