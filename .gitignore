@@ -405,3 +405,4 @@ FodyWeavers.xsd
 
 #Credentials
 /*/firebase/
+**/net10.0/

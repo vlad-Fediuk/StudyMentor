@@ -1,7 +1,12 @@
+using StudyMentorApi.ChatMessages;
 using StudyMentorApi.Extensions;
-using StudyMentorApi.Diagnostics;
+using StudyMentorApi.Lectures;
+using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
-namespace study_mentor_api;
+using StudyMentorApi.Subjects;
+using StudyMentorApi.Users;
+
+namespace StudyMentorApi;
 
 public class Program
 {
@@ -9,29 +14,49 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+        builder.Services.AddControllers();
         builder.Services.AddOpenApi();
-        builder.Services.AddStudyMentorServices(builder.Configuration);
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddApplicationServices();
+
+        builder.Services.Configure<MongoDbSettings>(
+            builder.Configuration.GetSection("MongoDbSettings"));
+        builder.Services.AddSingleton<MongoDbService>();
+
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .WithOrigins("http://localhost:5173", "http://localhost:4173")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
 
         var app = builder.Build();
 
-        if (args.Contains("--ai-smoke-test", StringComparer.OrdinalIgnoreCase))
-        {
-            Environment.ExitCode = await AiSmokeTestRunner.RunAsync(app.Services);
-            return;
-        }
-
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Study Mentor API V1");
+                c.RoutePrefix = string.Empty;
+            });
         }
 
+        app.UseGlobalExceptionHandler();
+        app.UseCors();
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
+        app.MapControllers();
+        app.MapMajorEndpoints();
+        app.MapSubjectEndpoints();
+        app.MapLectureEndpoints();
+        app.MapChatMessageEndpoints();
+        app.MapUserEndpoints();
         app.Run();
     }
 }
