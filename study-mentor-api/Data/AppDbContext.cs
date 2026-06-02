@@ -13,6 +13,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
+    public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
+
     public DbSet<Exercise> Exercises => Set<Exercise>();
 
     public DbSet<User> Users => Set<User>();
@@ -27,6 +29,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ConfigureBaseEntity<Subject>(modelBuilder);
         ConfigureBaseEntity<Lecture>(modelBuilder);
         ConfigureBaseEntity<ChatMessage>(modelBuilder);
+        ConfigureBaseEntity<ChatSession>(modelBuilder);
         ConfigureBaseEntity<Exercise>(modelBuilder);
         ConfigureBaseEntity<User>(modelBuilder);
 
@@ -54,12 +57,28 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.ToTable("lectures");
             entity.Property(e => e.Name).IsRequired();
+            entity.HasMany(e => e.ChatSessions)
+                .WithOne(e => e.Lecture)
+                .HasForeignKey(e => e.LectureId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ChatSession>(entity =>
+        {
+            entity.ToTable("chat_sessions");
+            entity.HasMany(e => e.Messages)
+                .WithOne(e => e.ChatSession)
+                .HasForeignKey(e => e.ChatSessionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ChatMessage>(entity =>
         {
             entity.ToTable("chat_messages");
             entity.Property(e => e.Content).IsRequired();
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasDefaultValue("completed");
             entity.HasMany(e => e.Exercises)
                 .WithOne(e => e.ChatMessage)
                 .HasForeignKey(e => e.ChatMessageId)
@@ -77,6 +96,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.ToTable("users");
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Password).IsRequired();
+            entity.HasMany(e => e.ChatSessions)
+                .WithOne(e => e.User)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

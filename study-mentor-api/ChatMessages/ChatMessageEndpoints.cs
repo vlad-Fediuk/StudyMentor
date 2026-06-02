@@ -1,6 +1,8 @@
 using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
 
+namespace StudyMentorApi.ChatMessages;
+
 public static class ChatMessageEndpoints
 {
     public static void MapChatMessageEndpoints(this IEndpointRouteBuilder routes)
@@ -153,4 +155,7 @@ public static class ChatMessageEndpoints
 
     private static ChatMessageResponse ToResponse(ChatMessage m) =>
         new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber, m.Status);
+
+    private static DateTime NormalizeTimestamp(DateTime? timestamp) =>
+        timestamp?.ToUniversalTime() ?? DateTime.UtcNow;
 }

@@ -7,4 +7,6 @@ public class User : BaseEntity
     public required string Password { get; set; }
 
     public Guid GroupId { get; set; }
+
+    public ICollection<ChatSession> ChatSessions { get; set; } = [];
 }

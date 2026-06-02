@@ -1,4 +1,3 @@
-using StudyMentorApi.Services;
 using StudyMentorApi.Services.Ai;
 
 namespace StudyMentorApi.Extensions;
@@ -17,10 +16,6 @@ public static class ServiceExtensions
         services.AddScoped<ChatSessions.ChatSessionService>();
         services.AddScoped<AiChat.AiChatService>();
         services.AddScoped<Users.UserService>();
-
-        services.Configure<MongoDbSettings>(
-            configuration.GetSection("MongoDbSettings"));
-        services.AddSingleton<MongoDbService>();
 
         services.Configure<NvidiaAiSettings>(
             configuration.GetSection(NvidiaAiSettings.SectionName));

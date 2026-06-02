@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using StudyMentorApi.Data;
 using StudyMentorApi.AiChat;
+using StudyMentorApi.Data;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Extensions;

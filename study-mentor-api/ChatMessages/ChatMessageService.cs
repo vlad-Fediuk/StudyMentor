@@ -18,23 +18,22 @@ public class ChatMessageService(AppDbContext dbContext) : BaseCrudService<ChatMe
     }
 
     public async Task<IReadOnlyCollection<ChatMessage>> GetMessagesAsync(
-        string chatId,
+        Guid chatId,
         CancellationToken cancellationToken)
     {
-        return await _collection
-            .Find(m => m.ChatSessionId == chatId)
-            .SortBy(m => m.Timestamp)
+        return await dbContext.ChatMessages
+            .Where(m => m.ChatSessionId == chatId)
+            .OrderBy(m => m.Timestamp)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<int> GetNextSequenceNumberAsync(
-        string chatId,
+        Guid chatId,
         CancellationToken cancellationToken)
     {
-        var lastMessage = await _collection
-            .Find(m => m.ChatSessionId == chatId)
-            .SortByDescending(m => m.SequenceNumber)
-            .Limit(1)
+        var lastMessage = await dbContext.ChatMessages
+            .Where(m => m.ChatSessionId == chatId)
+            .OrderByDescending(m => m.SequenceNumber)
             .FirstOrDefaultAsync(cancellationToken);
 
         return lastMessage is null ? 0 : lastMessage.SequenceNumber + 1;
