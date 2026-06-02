@@ -15,23 +15,16 @@ public class AiChatService(
         string chatId,
         CancellationToken cancellationToken)
     {
-        var chatExists = await chatSessionService.ExistsAsync(chatId, cancellationToken);
+        var parsedChatId = ParseChatId(chatId);
+        var chatExists = await chatSessionService.ExistsAsync(parsedChatId, cancellationToken);
         if (!chatExists)
         {
             throw new NotFoundException($"Chat with id '{chatId}' was not found.");
         }
 
-        var messages = await chatMessageService.GetMessagesAsync(chatId, cancellationToken);
+        var messages = await chatMessageService.GetMessagesAsync(parsedChatId, cancellationToken);
 
-        return messages
-            .Select(message => new AiChatMessageDto(
-                message.Id,
-                message.ChatSessionId,
-                message.Role.ToString().ToLowerInvariant(),
-                message.Content,
-                message.Timestamp,
-                message.Status))
-            .ToList();
+        return messages.Select(ToDto).ToList();
     }
 
     public async Task<AiChatSendMessageResponse> SendMessageAsync(
@@ -48,19 +41,20 @@ public class AiChatService(
             throw new ValidationException("content is required.");
         }
 
-        var chatExists = await chatSessionService.ExistsAsync(request.ChatId, cancellationToken);
+        var parsedChatId = ParseChatId(request.ChatId);
+        var chatExists = await chatSessionService.ExistsAsync(parsedChatId, cancellationToken);
         if (!chatExists)
         {
             throw new NotFoundException($"Chat with id '{request.ChatId}' was not found.");
         }
 
         var nextSequenceNumber = await chatMessageService.GetNextSequenceNumberAsync(
-            request.ChatId,
+            parsedChatId,
             cancellationToken);
 
         var userMessage = await chatMessageService.CreateAsync(new ChatMessage
         {
-            ChatSessionId = request.ChatId,
+            ChatSessionId = parsedChatId,
             Content = request.Content.Trim(),
             Timestamp = DateTime.UtcNow,
             Role = MessageRole.User,
@@ -70,7 +64,7 @@ public class AiChatService(
 
         try
         {
-            var history = await chatMessageService.GetMessagesAsync(request.ChatId, cancellationToken);
+            var history = await chatMessageService.GetMessagesAsync(parsedChatId, cancellationToken);
             var aiResponse = await aiChatService.CompleteAsync(new AiChatRequest
             {
                 Messages = history
@@ -82,7 +76,7 @@ public class AiChatService(
 
             var assistantMessage = await chatMessageService.CreateAsync(new ChatMessage
             {
-                ChatSessionId = request.ChatId,
+                ChatSessionId = parsedChatId,
                 Content = aiResponse.Content,
                 Timestamp = DateTime.UtcNow,
                 Role = MessageRole.Assistant,
@@ -99,7 +93,7 @@ public class AiChatService(
         {
             await chatMessageService.CreateAsync(new ChatMessage
             {
-                ChatSessionId = request.ChatId,
+                ChatSessionId = parsedChatId,
                 Content = ex.Message,
                 Timestamp = DateTime.UtcNow,
                 Role = MessageRole.Assistant,
@@ -116,10 +110,20 @@ public class AiChatService(
 
     private static AiChatMessageDto ToDto(ChatMessage message) =>
         new(
-            message.Id,
-            message.ChatSessionId,
+            message.Id.ToString(),
+            message.ChatSessionId.ToString(),
             message.Role.ToString().ToLowerInvariant(),
             message.Content,
             message.Timestamp,
             message.Status);
+
+    private static Guid ParseChatId(string chatId)
+    {
+        if (!Guid.TryParse(chatId, out var parsedChatId))
+        {
+            throw new ValidationException("chatId must be a valid guid.");
+        }
+
+        return parsedChatId;
+    }
 }
