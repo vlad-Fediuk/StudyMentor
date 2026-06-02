@@ -15,4 +15,8 @@
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.7" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Services\Ai\Prompts\Templates\*.md" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>

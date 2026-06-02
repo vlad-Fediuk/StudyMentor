@@ -1,4 +1,5 @@
 using MongoDB.Driver;
+using MongoDB.Bson;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Services;
 
@@ -14,6 +15,18 @@ public class UserService(MongoDbService dbService) : BaseCrudService<User, strin
     {
         return await _collection
             .Find(u => u.GroupId == groupId)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<User?> FindSafeByIdAsync(string id, CancellationToken ct)
+    {
+        if (!ObjectId.TryParse(id, out _))
+        {
+            return null;
+        }
+
+        return await _collection
+            .Find(u => u.Id == id)
             .FirstOrDefaultAsync(ct);
     }
 
@@ -48,5 +61,8 @@ public class UserService(MongoDbService dbService) : BaseCrudService<User, strin
         existing.Name = updated.Name;
         existing.Password = updated.Password;
         existing.GroupId = updated.GroupId;
+        existing.LearningLevel = updated.LearningLevel;
+        existing.PreferredLanguage = updated.PreferredLanguage;
+        existing.CurrentProgress = updated.CurrentProgress;
     }
 }
