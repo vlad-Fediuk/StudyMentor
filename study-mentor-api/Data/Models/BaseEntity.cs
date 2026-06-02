@@ -1,11 +1,6 @@
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
-
 namespace StudyMentorApi.Data.Models;
 
-public abstract class BaseEntity<TKey> : IEntity<TKey>  where TKey : notnull
+public abstract class BaseEntity : IEntity
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public TKey Id { get; protected set; } = default!;
+    public Guid Id { get; protected set; }
 }
