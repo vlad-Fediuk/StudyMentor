@@ -1,3 +1,4 @@
+using StudyMentorApi.AiChat;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Extensions;
@@ -52,6 +53,7 @@ public class Program
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();
         app.MapChatMessageEndpoints();
+        app.MapAiChatEndpoints();
         app.MapUserEndpoints();
         app.MapChatSessionEndpoints();
         app.Run();

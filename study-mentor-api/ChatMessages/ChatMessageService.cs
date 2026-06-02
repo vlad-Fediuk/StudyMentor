@@ -7,7 +7,6 @@ namespace StudyMentorApi.ChatMessages;
 public class ChatMessageService(MongoDbService dbService) : BaseCrudService<ChatMessage, string>
 {
     private const string CollectionName = "chat_messages";
-
     private readonly IMongoCollection<ChatMessage> _collection = 
         dbService.GetCollection<ChatMessage>(CollectionName);
 
@@ -21,6 +20,29 @@ public class ChatMessageService(MongoDbService dbService) : BaseCrudService<Chat
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<ChatMessage>> GetMessagesAsync(
+        string chatId,
+        CancellationToken cancellationToken)
+    {
+        return await _collection
+            .Find(m => m.ChatSessionId == chatId)
+            .SortBy(m => m.Timestamp)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetNextSequenceNumberAsync(
+        string chatId,
+        CancellationToken cancellationToken)
+    {
+        var lastMessage = await _collection
+            .Find(m => m.ChatSessionId == chatId)
+            .SortByDescending(m => m.SequenceNumber)
+            .Limit(1)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return lastMessage is null ? 0 : lastMessage.SequenceNumber + 1;
+    }
+
     protected override IQueryable<ChatMessage> Query()
         => _collection.AsQueryable();
 
@@ -32,9 +54,6 @@ public class ChatMessageService(MongoDbService dbService) : BaseCrudService<Chat
     protected override async Task<ChatMessage> AddEntityAsync(ChatMessage entity, CancellationToken cancellationToken)
     {
         await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
-
-
-
         return entity;
     }
 
@@ -57,8 +76,6 @@ public class ChatMessageService(MongoDbService dbService) : BaseCrudService<Chat
         existingEntity.Timestamp = updatedEntity.Timestamp;
         existingEntity.Role = updatedEntity.Role;
         existingEntity.SequenceNumber = updatedEntity.SequenceNumber;
+        existingEntity.Status = updatedEntity.Status;
     }
-
-    
-
 }

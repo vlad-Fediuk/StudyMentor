@@ -20,6 +20,9 @@ public class ChatMessage : BaseEntity<string>
 
     [BsonElement("sequence_number")]
     public int SequenceNumber { get; set; }
+
+    [BsonElement("status")]
+    public string Status { get; set; } = "completed";
 }
 
 public enum MessageRole

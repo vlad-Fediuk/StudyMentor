@@ -83,7 +83,8 @@ public static class ChatMessageEndpoints
                 Content = request.Content,
                 Timestamp = request.Timestamp ?? DateTime.UtcNow,
                 Role = request.Role,
-                SequenceNumber = request.SequenceNumber
+                SequenceNumber = request.SequenceNumber,
+                Status = "completed"
             };
             var created = await service.CreateAsync(entity, ct);
             return Results.Created($"/chat-messages/{created.Id}", ToResponse(created));
@@ -112,7 +113,8 @@ public static class ChatMessageEndpoints
                 Content = request.Content,
                 Timestamp = request.Timestamp ?? DateTime.UtcNow,
                 Role = request.Role,
-                SequenceNumber = request.SequenceNumber
+                SequenceNumber = request.SequenceNumber,
+                Status = "completed"
             };
             var updated = await service.UpdateAsync(id, entity, ct);
             return Results.Ok(ToResponse(updated));
@@ -152,5 +154,5 @@ public static class ChatMessageEndpoints
     }
 
     private static ChatMessageResponse ToResponse(ChatMessage m) =>
-        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber);
+        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber, m.Status);
 }

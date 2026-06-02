@@ -1,4 +1,5 @@
 using MongoDB.Driver;
+using MongoDB.Bson;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Services;
 
@@ -15,6 +16,18 @@ public class ChatSessionService(MongoDbService dbService) : BaseCrudService<Chat
         return await _collection
             .Find(s => s.UserId == userId)
             .ToListAsync(ct);
+    }
+
+    public async Task<bool> ExistsAsync(string id, CancellationToken ct)
+    {
+        if (!ObjectId.TryParse(id, out _))
+        {
+            return false;
+        }
+
+        return await _collection
+            .Find(s => s.Id == id)
+            .AnyAsync(ct);
     }
 
     protected override IQueryable<ChatSession> Query()

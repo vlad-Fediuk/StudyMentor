@@ -14,6 +14,8 @@ public static class ServiceExtensions
         services.AddScoped<Subjects.SubjectService>();
         services.AddScoped<Lectures.LectureService>();
         services.AddScoped<ChatMessages.ChatMessageService>();
+        services.AddScoped<ChatSessions.ChatSessionService>();
+        services.AddScoped<AiChat.AiChatService>();
         services.AddScoped<Users.UserService>();
 
         services.Configure<MongoDbSettings>(
