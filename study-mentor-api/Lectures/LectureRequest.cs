@@ -1,3 +1,3 @@
 namespace StudyMentorApi.Lectures;
 
-public record LectureRequest(string Name, string SubjectId);
+public record LectureRequest(string Name, Guid SubjectId);

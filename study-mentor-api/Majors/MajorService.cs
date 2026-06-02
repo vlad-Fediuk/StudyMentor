@@ -1,49 +1,39 @@
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
+using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Services;
 
 namespace StudyMentorApi.Majors;
 
-public class MajorService : BaseCrudService<Major, string>
+public class MajorService(AppDbContext dbContext) : BaseCrudService<Major>
 {
-    private const string CollectionName = "majors";
-    private readonly IMongoCollection<Major> _collection;
-
-    public MajorService(MongoDbService dbService)
-    {
-        _collection = dbService.GetCollection<Major>(CollectionName);
-    }
-
     protected override IQueryable<Major> Query()
     {
-        return _collection.AsQueryable();
+        return dbContext.Majors.AsQueryable();
     }
 
-    protected override async Task<Major?> FindByIdAsync(string id, CancellationToken cancellationToken)
+    protected override async Task<Major?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _collection
-            .Find(m => m.Id == id)
-            .FirstOrDefaultAsync(cancellationToken);
+        return await dbContext.Majors.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
     }
 
     protected override async Task<Major> AddEntityAsync(Major entity, CancellationToken cancellationToken)
     {
-        await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
+        dbContext.Majors.Add(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
     protected override async Task<Major> SaveUpdatedEntityAsync(Major entity, CancellationToken cancellationToken)
     {
-        await _collection.ReplaceOneAsync(
-            m => m.Id == entity.Id,
-            entity,
-            cancellationToken: cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
     protected override async Task DeleteEntityAsync(Major entity, CancellationToken cancellationToken)
     {
-        await _collection.DeleteOneAsync(m => m.Id == entity.Id, cancellationToken);
+        dbContext.Majors.Remove(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     protected override void UpdateEntityValues(Major existingEntity, Major updatedEntity)

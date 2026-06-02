@@ -1,7 +1,7 @@
 namespace StudyMentorApi.Users;
 
 public record UserResponse(
-    string Id,
+    Guid Id,
     string Name,
-    string GroupId);
+    Guid GroupId);
     

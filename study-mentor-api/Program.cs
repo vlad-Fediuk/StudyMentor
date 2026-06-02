@@ -1,8 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using StudyMentorApi.Data;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
-using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
 using StudyMentorApi.Users;
 
@@ -17,11 +18,10 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddApplicationServices();
 
-        builder.Services.Configure<MongoDbSettings>(
-            builder.Configuration.GetSection("MongoDbSettings"));
-        builder.Services.AddSingleton<MongoDbService>();
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddApplicationServices();
 
         builder.Services.AddCors(options =>
         {

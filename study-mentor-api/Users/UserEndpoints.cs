@@ -26,7 +26,7 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> GetById(
-        string id,
+        Guid id,
         UserService service,
         CancellationToken ct)
     {
@@ -50,7 +50,7 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> Update(
-        string id,
+        Guid id,
         UserRequest request,
         UserService service,
         CancellationToken ct)
@@ -66,7 +66,7 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> Delete(
-        string id,
+        Guid id,
         UserService service,
         CancellationToken ct)
     {
