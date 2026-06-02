@@ -7,6 +7,7 @@ namespace StudyMentorApi.ChatMessages;
 public class ChatMessageService(MongoDbService dbService) : BaseCrudService<ChatMessage, string>
 {
     private const string CollectionName = "chat_messages";
+
     private readonly IMongoCollection<ChatMessage> _collection = 
         dbService.GetCollection<ChatMessage>(CollectionName);
 
@@ -31,6 +32,9 @@ public class ChatMessageService(MongoDbService dbService) : BaseCrudService<Chat
     protected override async Task<ChatMessage> AddEntityAsync(ChatMessage entity, CancellationToken cancellationToken)
     {
         await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
+
+
+
         return entity;
     }
 
@@ -54,4 +58,7 @@ public class ChatMessageService(MongoDbService dbService) : BaseCrudService<Chat
         existingEntity.Role = updatedEntity.Role;
         existingEntity.SequenceNumber = updatedEntity.SequenceNumber;
     }
+
+    
+
 }
