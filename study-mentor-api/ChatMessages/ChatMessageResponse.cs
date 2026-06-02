@@ -8,4 +8,5 @@ public record ChatMessageResponse(
     string Content,
     DateTime Timestamp,
     MessageRole Role,
-    int SequenceNumber);
+    int SequenceNumber,
+    string Status);

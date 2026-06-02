@@ -1,8 +1,6 @@
 using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
 
-namespace StudyMentorApi.ChatMessages;
-
 public static class ChatMessageEndpoints
 {
     public static void MapChatMessageEndpoints(this IEndpointRouteBuilder routes)
@@ -83,7 +81,8 @@ public static class ChatMessageEndpoints
                 Content = request.Content,
                 Timestamp = NormalizeTimestamp(request.Timestamp),
                 Role = request.Role,
-                SequenceNumber = request.SequenceNumber
+                SequenceNumber = request.SequenceNumber,
+                Status = "completed"
             };
             var created = await service.CreateAsync(entity, ct);
             return Results.Created($"/chat-messages/{created.Id}", ToResponse(created));
@@ -112,7 +111,8 @@ public static class ChatMessageEndpoints
                 Content = request.Content,
                 Timestamp = NormalizeTimestamp(request.Timestamp),
                 Role = request.Role,
-                SequenceNumber = request.SequenceNumber
+                SequenceNumber = request.SequenceNumber,
+                Status = "completed"
             };
             var updated = await service.UpdateAsync(id, entity, ct);
             return Results.Ok(ToResponse(updated));
@@ -152,20 +152,5 @@ public static class ChatMessageEndpoints
     }
 
     private static ChatMessageResponse ToResponse(ChatMessage m) =>
-        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber);
-
-    private static DateTime NormalizeTimestamp(DateTime? timestamp)
-    {
-        if (timestamp is null)
-        {
-            return DateTime.UtcNow;
-        }
-
-        return timestamp.Value.Kind switch
-        {
-            DateTimeKind.Utc => timestamp.Value,
-            DateTimeKind.Local => timestamp.Value.ToUniversalTime(),
-            _ => DateTime.SpecifyKind(timestamp.Value, DateTimeKind.Utc)
-        };
-    }
+        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber, m.Status);
 }

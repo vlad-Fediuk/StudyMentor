@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using StudyMentorApi.Data;
+using StudyMentorApi.AiChat;
 using StudyMentorApi.ChatMessages;
+using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
@@ -11,7 +13,7 @@ namespace StudyMentorApi;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,7 @@ public class Program
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.AddApplicationServices();
+        builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddCors(options =>
         {
@@ -56,7 +58,9 @@ public class Program
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();
         app.MapChatMessageEndpoints();
+        app.MapAiChatEndpoints();
         app.MapUserEndpoints();
+        app.MapChatSessionEndpoints();
         app.Run();
     }
 }

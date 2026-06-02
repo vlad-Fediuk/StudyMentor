@@ -17,6 +17,29 @@ public class ChatMessageService(AppDbContext dbContext) : BaseCrudService<ChatMe
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<ChatMessage>> GetMessagesAsync(
+        string chatId,
+        CancellationToken cancellationToken)
+    {
+        return await _collection
+            .Find(m => m.ChatSessionId == chatId)
+            .SortBy(m => m.Timestamp)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetNextSequenceNumberAsync(
+        string chatId,
+        CancellationToken cancellationToken)
+    {
+        var lastMessage = await _collection
+            .Find(m => m.ChatSessionId == chatId)
+            .SortByDescending(m => m.SequenceNumber)
+            .Limit(1)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return lastMessage is null ? 0 : lastMessage.SequenceNumber + 1;
+    }
+
     protected override IQueryable<ChatMessage> Query()
         => dbContext.ChatMessages.AsQueryable();
 
@@ -49,5 +72,6 @@ public class ChatMessageService(AppDbContext dbContext) : BaseCrudService<ChatMe
         existingEntity.Timestamp = updatedEntity.Timestamp;
         existingEntity.Role = updatedEntity.Role;
         existingEntity.SequenceNumber = updatedEntity.SequenceNumber;
+        existingEntity.Status = updatedEntity.Status;
     }
 }
