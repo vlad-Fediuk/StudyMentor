@@ -57,12 +57,15 @@ public sealed class NvidiaAiChatService : IAiChatService
                 : null,
             _settings.EnableThinking ? _settings.ReasoningBudget : null);
 
+        using var requestContent = new StringContent(
+            JsonSerializer.Serialize(payload, JsonOptions),
+            Encoding.UTF8,
+            "application/json");
+        requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, _settings.InvokeUrl)
         {
-            Content = new StringContent(
-                JsonSerializer.Serialize(payload, JsonOptions),
-                Encoding.UTF8,
-                "application/json")
+            Content = requestContent
         };
 
         httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);

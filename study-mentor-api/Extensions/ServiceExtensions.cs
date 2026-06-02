@@ -20,7 +20,14 @@ public static class ServiceExtensions
 
         services.Configure<NvidiaAiSettings>(
             configuration.GetSection(NvidiaAiSettings.SectionName));
-        services.AddHttpClient<IAiChatService, NvidiaAiChatService>();
+        services.AddHttpClient<IAiChatService, NvidiaAiChatService>((serviceProvider, client) =>
+        {
+            var settings = serviceProvider
+                .GetRequiredService<Microsoft.Extensions.Options.IOptions<NvidiaAiSettings>>()
+                .Value;
+
+            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        });
 
         return services;
     }
