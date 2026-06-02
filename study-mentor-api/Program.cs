@@ -1,5 +1,6 @@
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
+using StudyMentorApi.Authentication;
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
@@ -24,7 +25,7 @@ public class Program
             options.AddDefaultPolicy(policy =>
             {
                 policy
-                    .WithOrigins("http://localhost:5173", "http://localhost:4173")
+                    .WithOrigins("http://localhost:4200", "http://localhost:5173", "http://localhost:4173")
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
@@ -46,8 +47,10 @@ public class Program
         app.UseGlobalExceptionHandler();
         app.UseCors();
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+        app.MapAuthenticationEndpoints();
         app.MapMajorEndpoints();
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();

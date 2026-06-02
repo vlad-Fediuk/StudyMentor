@@ -7,9 +7,15 @@ public class User : BaseEntity<string>
     [BsonElement("name")]
     public required string Name { get; set; }
 
+    [BsonElement("email")]
+    public string? Email { get; set; }
+
     [BsonElement("password")]
     public required string Password { get; set; }
 
     [BsonElement("group_id")]
     public required string GroupId { get; set; }
+
+    [BsonElement("roles")]
+    public List<string> Roles { get; set; } = ["User"];
 }

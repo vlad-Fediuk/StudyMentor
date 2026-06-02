@@ -17,6 +17,13 @@ public class UserService(MongoDbService dbService) : BaseCrudService<User, strin
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
+    {
+        return await _collection
+            .Find(u => u.Email == email)
+            .FirstOrDefaultAsync(ct);
+    }
+
     protected override IQueryable<User> Query()
         => _collection.AsQueryable();
 
@@ -46,7 +53,9 @@ public class UserService(MongoDbService dbService) : BaseCrudService<User, strin
     protected override void UpdateEntityValues(User existing, User updated)
     {
         existing.Name = updated.Name;
+        existing.Email = updated.Email ?? existing.Email;
         existing.Password = updated.Password;
         existing.GroupId = updated.GroupId;
+        existing.Roles = updated.Roles;
     }
 }

@@ -3,5 +3,6 @@ namespace StudyMentorApi.Users;
 public record UserResponse(
     string Id,
     string Name,
-    string GroupId);
-    
+    string? Email,
+    string GroupId,
+    IReadOnlyCollection<string> Roles);

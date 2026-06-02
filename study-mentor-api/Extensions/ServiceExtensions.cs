@@ -1,5 +1,6 @@
 using StudyMentorApi.Services;
 using StudyMentorApi.Services.Ai;
+using StudyMentorApi.Authentication.Jwt;
 
 namespace StudyMentorApi.Extensions;
 
@@ -14,7 +15,11 @@ public static class ServiceExtensions
         services.AddScoped<Subjects.SubjectService>();
         services.AddScoped<Lectures.LectureService>();
         services.AddScoped<ChatMessages.ChatMessageService>();
+        services.AddScoped<ChatSessions.ChatSessionService>();
         services.AddScoped<Users.UserService>();
+        services.AddScoped<IJwtAuthenticationService, JwtAuthenticationService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddSingleton<JwtAuthenticationValidator>();
 
         services.Configure<MongoDbSettings>(
             configuration.GetSection("MongoDbSettings"));
@@ -23,6 +28,7 @@ public static class ServiceExtensions
         services.Configure<NvidiaAiSettings>(
             configuration.GetSection(NvidiaAiSettings.SectionName));
         services.AddHttpClient<IAiChatService, NvidiaAiChatService>();
+        services.AddJwtAuthentication(configuration);
 
         return services;
     }
