@@ -1,9 +1,8 @@
-using MongoDB.Bson.Serialization.Attributes;
-
 namespace StudyMentorApi.Data.Models;
 
-public class Major : BaseEntity<string>
+public class Major : BaseEntity
 {
-    [BsonElement("major_name")]
     public required string Name { get; set; }
+
+    public ICollection<Subject> Subjects { get; set; } = [];
 }
