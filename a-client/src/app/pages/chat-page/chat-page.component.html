@@ -1,0 +1,29 @@
+<main class="chat-page">
+  <form class="prompt-bar" aria-label="Ask anything" (submit)="$event.preventDefault()">
+    <input
+      class="prompt-input"
+      type="text"
+      placeholder="Запитайте будь-що"
+      aria-label="Повідомлення"
+    />
+
+    <button class="send-button" type="submit" aria-label="Надіслати">
+      <svg
+        aria-hidden="true"
+        width="30"
+        height="30"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5 12L3 4L21 12L3 20L5 12ZM5 12H13"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+  </form>
+</main>
