@@ -1,17 +1,50 @@
 <main class="chat-page">
-  <form class="prompt-bar" aria-label="Ask anything" (submit)="$event.preventDefault()">
+  <section class="messages" aria-live="polite">
+    @for (message of messages; track $index) {
+      <article class="message" [class.message-user]="message.role === 'user'">
+        {{ message.content }}
+      </article>
+    }
+
+    @if (isSending) {
+      <article class="message message-assistant">AI думає...</article>
+    }
+
+    @if (errorMessage) {
+      <p class="error-message">{{ errorMessage }}</p>
+    }
+  </section>
+
+  <form
+    class="prompt-bar"
+    aria-label="Ask anything"
+    autocomplete="off"
+    (submit)="sendMessage(messageInput, $event)"
+  >
     <input
+      #messageInput
       class="prompt-input"
       type="text"
-      placeholder="Запитайте будь-що"
+      name="study-mentor-chat-message"
+      placeholder="Напиши повідомлення..."
       aria-label="Повідомлення"
+      autocomplete="off"
+      autocapitalize="off"
+      autocorrect="off"
+      spellcheck="false"
+      [disabled]="isSending"
     />
 
-    <button class="send-button" type="submit" aria-label="Надіслати">
+    <button
+      class="send-button"
+      type="submit"
+      aria-label="Надіслати"
+      [disabled]="isSending"
+    >
       <svg
         aria-hidden="true"
-        width="30"
-        height="30"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

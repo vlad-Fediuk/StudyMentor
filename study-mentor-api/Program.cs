@@ -25,7 +25,11 @@ public class Program
             options.AddDefaultPolicy(policy =>
             {
                 policy
-                    .WithOrigins("http://localhost:5173", "http://localhost:4173")
+                    .WithOrigins(
+                        "http://localhost:4200",
+                        "http://localhost:4300",
+                        "http://localhost:5173",
+                        "http://localhost:4173")
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
