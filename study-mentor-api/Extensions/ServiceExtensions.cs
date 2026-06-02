@@ -15,6 +15,7 @@ public static class ServiceExtensions
         services.AddScoped<ChatMessages.ChatMessageService>();
         services.AddScoped<ChatSessions.ChatSessionService>();
         services.AddScoped<AiChat.AiChatService>();
+        services.AddScoped<Groups.GroupService>();
         services.AddScoped<Users.UserService>();
 
         services.Configure<NvidiaAiSettings>(

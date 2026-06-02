@@ -17,6 +17,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<Exercise> Exercises => Set<Exercise>();
 
+    public DbSet<Group> Groups => Set<Group>();
+
     public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -31,6 +33,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ConfigureBaseEntity<ChatMessage>(modelBuilder);
         ConfigureBaseEntity<ChatSession>(modelBuilder);
         ConfigureBaseEntity<Exercise>(modelBuilder);
+        ConfigureBaseEntity<Group>(modelBuilder);
         ConfigureBaseEntity<User>(modelBuilder);
 
         modelBuilder.Entity<Major>(entity =>
@@ -88,6 +91,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Exercise>(entity =>
         {
             entity.ToTable("exercises");
+            entity.Property(e => e.Name).IsRequired();
+        });
+
+        modelBuilder.Entity<Group>(entity =>
+        {
+            entity.ToTable("groups");
             entity.Property(e => e.Name).IsRequired();
         });
 
