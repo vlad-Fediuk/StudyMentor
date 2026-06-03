@@ -1,7 +1,7 @@
 namespace StudyMentorApi.ChatSessions;
 
 public record ChatSessionResponse(
-    string Id,
-    string UserId,
-    string LectureId);
+    Guid Id,
+    Guid UserId,
+    Guid LectureId);
     

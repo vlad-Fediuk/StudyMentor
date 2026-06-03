@@ -1,6 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using StudyMentorApi.AiChat;
+using StudyMentorApi.Data;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Extensions;
+using StudyMentorApi.Groups;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Subjects;
@@ -17,6 +21,9 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerGen();
+
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddCors(options =>
@@ -24,7 +31,11 @@ public class Program
             options.AddDefaultPolicy(policy =>
             {
                 policy
-                    .WithOrigins("http://localhost:5173", "http://localhost:4173")
+                    .WithOrigins(
+                        "http://localhost:4200",
+                        "http://localhost:4300",
+                        "http://localhost:5173",
+                        "http://localhost:4173")
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
@@ -52,6 +63,8 @@ public class Program
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();
         app.MapChatMessageEndpoints();
+        app.MapAiChatEndpoints();
+        app.MapGroupEndpoints();
         app.MapUserEndpoints();
         app.MapChatSessionEndpoints();
         app.Run();

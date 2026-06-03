@@ -42,7 +42,7 @@ public static class SubjectEndpoints
     }
 
     private static async Task<IResult> GetById(
-        string id,
+        Guid id,
         SubjectService service,
         MajorService majorService,
         CancellationToken ct)
@@ -89,7 +89,7 @@ public static class SubjectEndpoints
     }
 
     private static async Task<IResult> Update(
-        string id,
+        Guid id,
         SubjectRequest request,
         SubjectService service,
         MajorService majorService,
@@ -117,7 +117,7 @@ public static class SubjectEndpoints
     }
 
     private static async Task<IResult> Delete(
-        string id,
+        Guid id,
         SubjectService service,
         CancellationToken ct)
     {

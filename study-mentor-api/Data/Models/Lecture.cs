@@ -1,12 +1,12 @@
-using MongoDB.Bson.Serialization.Attributes;
-
 namespace StudyMentorApi.Data.Models;
 
-public class Lecture : BaseEntity<string>
+public class Lecture : BaseEntity
 {
-    [BsonElement("lecture_name")]
     public required string Name { get; set; }
 
-    [BsonElement("lecture_subject_id")]
-    public required string SubjectId { get; set; }
+    public Guid SubjectId { get; set; }
+
+    public Subject Subject { get; set; } = null!;
+
+    public ICollection<ChatSession> ChatSessions { get; set; } = [];
 }

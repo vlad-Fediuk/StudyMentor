@@ -27,7 +27,7 @@ public static class ChatSessionEndpoints
     }
 
     private static async Task<IResult> GetById(
-        string id,
+        Guid id,
         ChatSessionService service,
         CancellationToken ct)
     {
@@ -36,7 +36,7 @@ public static class ChatSessionEndpoints
     }
 
     private static async Task<IResult> GetByUser(
-        string userId,
+        Guid userId,
         ChatSessionService service,
         CancellationToken ct)
     {
@@ -52,14 +52,22 @@ public static class ChatSessionEndpoints
         var entity = new ChatSession
         {
             UserId = request.UserId,
-            LectureId = request.LectureId
+            LectureId = request.LectureId,
+            Title = string.IsNullOrWhiteSpace(request.Title)
+                ? "New chat"
+                : request.Title,
+            Topic = string.IsNullOrWhiteSpace(request.Topic)
+                ? "General learning"
+                : request.Topic,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
         var created = await service.CreateAsync(entity, ct);
         return Results.Created($"/chat-sessions/{created.Id}", ToResponse(created));
     }
 
     private static async Task<IResult> Update(
-        string id,
+        Guid id,
         ChatSessionRequest request,
         ChatSessionService service,
         CancellationToken ct)
@@ -67,14 +75,21 @@ public static class ChatSessionEndpoints
         var entity = new ChatSession
         {
             UserId = request.UserId,
-            LectureId = request.LectureId
+            LectureId = request.LectureId,
+            Title = string.IsNullOrWhiteSpace(request.Title)
+                ? "New chat"
+                : request.Title,
+            Topic = string.IsNullOrWhiteSpace(request.Topic)
+                ? "General learning"
+                : request.Topic,
+            UpdatedAt = DateTime.UtcNow
         };
         var updated = await service.UpdateAsync(id, entity, ct);
         return Results.Ok(ToResponse(updated));
     }
 
     private static async Task<IResult> Delete(
-        string id,
+        Guid id,
         ChatSessionService service,
         CancellationToken ct)
     {
@@ -83,5 +98,5 @@ public static class ChatSessionEndpoints
     }
 
     private static ChatSessionResponse ToResponse(ChatSession s) =>
-        new(s.Id, s.UserId, s.LectureId);
+        new(s.Id, s.UserId, s.LectureId, s.Title, s.Topic, s.CreatedAt, s.UpdatedAt);
 }

@@ -1,11 +1,10 @@
-using MongoDB.Bson.Serialization.Attributes;
 namespace StudyMentorApi.Data.Models;
 
-public abstract class Exercise : BaseEntity<string>
+public class Exercise : BaseEntity
 {
-    [BsonElement("exercise_name")]
     public required string Name { get; set; }
-    
-    [BsonElement("exercise_message_id")]
-    public required string MessageID { get; set; }
+
+    public Guid ChatMessageId { get; set; }
+
+    public ChatMessage ChatMessage { get; set; } = null!;
 }

@@ -1,5 +1,5 @@
-using StudyMentorApi.Services;
 using StudyMentorApi.Services.Ai;
+using StudyMentorApi.Services.Ai.Prompts;
 
 namespace StudyMentorApi.Extensions;
 
@@ -15,15 +15,21 @@ public static class ServiceExtensions
         services.AddScoped<Lectures.LectureService>();
         services.AddScoped<ChatMessages.ChatMessageService>();
         services.AddScoped<ChatSessions.ChatSessionService>();
+        services.AddScoped<AiChat.AiChatService>();
+        services.AddScoped<Groups.GroupService>();
         services.AddScoped<Users.UserService>();
-
-        services.Configure<MongoDbSettings>(
-            configuration.GetSection("MongoDbSettings"));
-        services.AddSingleton<MongoDbService>();
+        services.AddSingleton<PromptTemplateService>();
 
         services.Configure<NvidiaAiSettings>(
             configuration.GetSection(NvidiaAiSettings.SectionName));
-        services.AddHttpClient<IAiChatService, NvidiaAiChatService>();
+        services.AddHttpClient<IAiChatService, NvidiaAiChatService>((serviceProvider, client) =>
+        {
+            var settings = serviceProvider
+                .GetRequiredService<Microsoft.Extensions.Options.IOptions<NvidiaAiSettings>>()
+                .Value;
+
+            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+        });
 
         return services;
     }
