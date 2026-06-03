@@ -27,7 +27,7 @@ public static class ChatSessionEndpoints
     }
 
     private static async Task<IResult> GetById(
-        string id,
+        Guid id,
         ChatSessionService service,
         CancellationToken ct)
     {
@@ -36,7 +36,7 @@ public static class ChatSessionEndpoints
     }
 
     private static async Task<IResult> GetByUser(
-        string userId,
+        Guid userId,
         ChatSessionService service,
         CancellationToken ct)
     {
@@ -67,7 +67,7 @@ public static class ChatSessionEndpoints
     }
 
     private static async Task<IResult> Update(
-        string id,
+        Guid id,
         ChatSessionRequest request,
         ChatSessionService service,
         CancellationToken ct)
@@ -89,7 +89,7 @@ public static class ChatSessionEndpoints
     }
 
     private static async Task<IResult> Delete(
-        string id,
+        Guid id,
         ChatSessionService service,
         CancellationToken ct)
     {

@@ -1,52 +1,49 @@
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
+using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 
 namespace StudyMentorApi.Subjects;
 
-public class SubjectService : BaseCrudService<Subject, string>
+public class SubjectService : BaseCrudService<Subject>
 {
-    private const string CollectionName = "subjects";
-    private readonly IMongoCollection<Subject> _collection;
+    private readonly AppDbContext _dbContext;
     private readonly MajorService _majorService;
 
-    public SubjectService(MongoDbService dbService, MajorService majorService)
+    public SubjectService(AppDbContext dbContext, MajorService majorService)
     {
-        _collection = dbService.GetCollection<Subject>(CollectionName);
+        _dbContext = dbContext;
         _majorService = majorService;
     }
 
     protected override IQueryable<Subject> Query()
     {
-        return _collection.AsQueryable();
+        return _dbContext.Subjects.AsQueryable();
     }
 
-    protected override async Task<Subject?> FindByIdAsync(string id, CancellationToken cancellationToken)
+    protected override async Task<Subject?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _collection
-            .Find(s => s.Id == id)
-            .FirstOrDefaultAsync(cancellationToken);
+        return await _dbContext.Subjects.FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
     protected override async Task<Subject> AddEntityAsync(Subject entity, CancellationToken cancellationToken)
     {
-        await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
+        _dbContext.Subjects.Add(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
     protected override async Task<Subject> SaveUpdatedEntityAsync(Subject entity, CancellationToken cancellationToken)
     {
-        await _collection.ReplaceOneAsync(
-            s => s.Id == entity.Id,
-            entity,
-            cancellationToken: cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
     protected override async Task DeleteEntityAsync(Subject entity, CancellationToken cancellationToken)
     {
-        await _collection.DeleteOneAsync(s => s.Id == entity.Id, cancellationToken);
+        _dbContext.Subjects.Remove(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     protected override void UpdateEntityValues(Subject existingEntity, Subject updatedEntity)

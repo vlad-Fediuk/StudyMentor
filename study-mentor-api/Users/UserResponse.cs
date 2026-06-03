@@ -1,11 +1,7 @@
 namespace StudyMentorApi.Users;
 
 public record UserResponse(
-    string Id,
+    Guid Id,
     string Name,
-    string GroupId,
-    string LearningLevel,
-    string PreferredLanguage,
-    string CurrentProgress,
-    DateTime CreatedAt);
+    Guid GroupId);
     

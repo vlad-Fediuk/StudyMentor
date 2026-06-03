@@ -1,28 +1,22 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
 namespace StudyMentorApi.Data.Models;
 
-public class ChatMessage : BaseEntity<string>
+public class ChatMessage : BaseEntity
 {
-    [BsonElement("chat_session_id")]
-    public required string ChatSessionId { get; set; }
+    public Guid ChatSessionId { get; set; }
 
-    [BsonElement("content")]
+    public ChatSession ChatSession { get; set; } = null!;
+
     public required string Content { get; set; }
 
-    [BsonElement("timestamp")]
     public DateTime Timestamp { get; set; }
 
-    [BsonElement("role")]
-    [BsonRepresentation(BsonType.String)]
     public MessageRole Role { get; set; }
 
-    [BsonElement("sequence_number")]
     public int SequenceNumber { get; set; }
 
-    [BsonElement("status")]
     public string Status { get; set; } = "completed";
+
+    public ICollection<Exercise> Exercises { get; set; } = [];
 }
 
 public enum MessageRole

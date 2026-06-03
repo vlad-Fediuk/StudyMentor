@@ -1,73 +1,68 @@
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
+using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Services;
 
 namespace StudyMentorApi.ChatMessages;
 
-public class ChatMessageService(MongoDbService dbService) : BaseCrudService<ChatMessage, string>
+public class ChatMessageService(AppDbContext dbContext) : BaseCrudService<ChatMessage>
 {
-    private const string CollectionName = "chat_messages";
-    private readonly IMongoCollection<ChatMessage> _collection = 
-        dbService.GetCollection<ChatMessage>(CollectionName);
-
     public async Task<IEnumerable<ChatMessage>> GetBySessionAsync(
-        string sessionId,
+        Guid sessionId,
         CancellationToken cancellationToken)
     {
-        return await _collection
-            .Find(m => m.ChatSessionId == sessionId)
-            .SortBy(m => m.SequenceNumber)
+        return await dbContext.ChatMessages
+            .Where(m => m.ChatSessionId == sessionId)
+            .OrderBy(m => m.SequenceNumber)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<ChatMessage>> GetMessagesAsync(
-        string chatId,
+        Guid chatId,
         CancellationToken cancellationToken)
     {
-        return await _collection
-            .Find(m => m.ChatSessionId == chatId)
-            .SortBy(m => m.Timestamp)
+        return await dbContext.ChatMessages
+            .Where(m => m.ChatSessionId == chatId)
+            .OrderBy(m => m.Timestamp)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<int> GetNextSequenceNumberAsync(
-        string chatId,
+        Guid chatId,
         CancellationToken cancellationToken)
     {
-        var lastMessage = await _collection
-            .Find(m => m.ChatSessionId == chatId)
-            .SortByDescending(m => m.SequenceNumber)
-            .Limit(1)
+        var lastMessage = await dbContext.ChatMessages
+            .Where(m => m.ChatSessionId == chatId)
+            .OrderByDescending(m => m.SequenceNumber)
             .FirstOrDefaultAsync(cancellationToken);
 
         return lastMessage is null ? 0 : lastMessage.SequenceNumber + 1;
     }
 
     protected override IQueryable<ChatMessage> Query()
-        => _collection.AsQueryable();
+        => dbContext.ChatMessages.AsQueryable();
 
-    protected override async Task<ChatMessage?> FindByIdAsync(string id, CancellationToken cancellationToken)
-        => await _collection
-            .Find(m => m.Id == id)
-            .FirstOrDefaultAsync(cancellationToken);
+    protected override async Task<ChatMessage?> FindByIdAsync(Guid id, CancellationToken cancellationToken)
+        => await dbContext.ChatMessages.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
 
     protected override async Task<ChatMessage> AddEntityAsync(ChatMessage entity, CancellationToken cancellationToken)
     {
-        await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
+        dbContext.ChatMessages.Add(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
     protected override async Task<ChatMessage> SaveUpdatedEntityAsync(ChatMessage entity, CancellationToken cancellationToken)
     {
-        await _collection.ReplaceOneAsync(
-            m => m.Id == entity.Id,
-            entity,
-            cancellationToken: cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
     protected override async Task DeleteEntityAsync(ChatMessage entity, CancellationToken cancellationToken)
-        => await _collection.DeleteOneAsync(m => m.Id == entity.Id, cancellationToken);
+    {
+        dbContext.ChatMessages.Remove(entity);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 
     protected override void UpdateEntityValues(ChatMessage existingEntity, ChatMessage updatedEntity)
     {

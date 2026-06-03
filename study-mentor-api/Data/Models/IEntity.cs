@@ -1,6 +1,6 @@
 namespace StudyMentorApi.Data.Models;
 
-public interface IEntity<TKey> where TKey : notnull
+public interface IEntity
 {
-    TKey Id { get; }
+    Guid Id { get; }
 }

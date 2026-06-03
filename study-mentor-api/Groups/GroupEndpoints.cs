@@ -1,14 +1,14 @@
 using StudyMentorApi.Data.Models;
 
-namespace StudyMentorApi.Majors;
+namespace StudyMentorApi.Groups;
 
-public static class MajorEndpoints
+public static class GroupEndpoints
 {
-    public static void MapMajorEndpoints(this IEndpointRouteBuilder routes)
+    public static void MapGroupEndpoints(this IEndpointRouteBuilder routes)
     {
         var group = routes
-            .MapGroup("/majors")
-            .WithTags("Majors");
+            .MapGroup("/groups")
+            .WithTags("Groups");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);
@@ -18,49 +18,52 @@ public static class MajorEndpoints
     }
 
     private static async Task<IResult> GetAll(
-        MajorService service,
+        GroupService service,
         CancellationToken ct)
     {
         var items = await service.GetAllAsync(ct);
-        return Results.Ok(items.Select(m => new MajorResponse(m.Id, m.Name)));
+        return Results.Ok(items.Select(ToResponse));
     }
 
     private static async Task<IResult> GetById(
         Guid id,
-        MajorService service,
+        GroupService service,
         CancellationToken ct)
     {
         var item = await service.GetByIdAsync(id, ct);
-        return Results.Ok(new MajorResponse(item.Id, item.Name));
+        return Results.Ok(ToResponse(item));
     }
 
     private static async Task<IResult> Create(
-        MajorRequest request,
-        MajorService service,
+        GroupRequest request,
+        GroupService service,
         CancellationToken ct)
     {
-        var entity = new Major { Name = request.Name };
+        var entity = new Group { Name = request.Name };
         var created = await service.CreateAsync(entity, ct);
-        return Results.Created($"/majors/{created.Id}", new MajorResponse(created.Id, created.Name));
+        return Results.Created($"/groups/{created.Id}", ToResponse(created));
     }
 
     private static async Task<IResult> Update(
         Guid id,
-        MajorRequest request,
-        MajorService service,
+        GroupRequest request,
+        GroupService service,
         CancellationToken ct)
     {
-        var entity = new Major { Name = request.Name };
+        var entity = new Group { Name = request.Name };
         var updated = await service.UpdateAsync(id, entity, ct);
-        return Results.Ok(new MajorResponse(updated.Id, updated.Name));
+        return Results.Ok(ToResponse(updated));
     }
 
     private static async Task<IResult> Delete(
         Guid id,
-        MajorService service,
+        GroupService service,
         CancellationToken ct)
     {
         await service.DeleteAsync(id, ct);
         return Results.NoContent();
     }
+
+    private static GroupResponse ToResponse(Group group) =>
+        new(group.Id, group.Name);
 }

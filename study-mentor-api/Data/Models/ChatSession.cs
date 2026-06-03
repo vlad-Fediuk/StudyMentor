@@ -1,24 +1,14 @@
-using MongoDB.Bson.Serialization.Attributes;
-
 namespace StudyMentorApi.Data.Models;
 
-public class ChatSession : BaseEntity<string>
+public class ChatSession : BaseEntity
 {
-    [BsonElement("user_id")]
-    public required string UserId { get; set; }
+    public Guid UserId { get; set; }
 
-    [BsonElement("lecture_id")]
-    public required string LectureId { get; set; }
+    public User User { get; set; } = null!;
 
-    [BsonElement("title")]
-    public string Title { get; set; } = "New chat";
+    public Guid LectureId { get; set; }
 
-    [BsonElement("topic")]
-    public string Topic { get; set; } = "General learning";
+    public Lecture Lecture { get; set; } = null!;
 
-    [BsonElement("created_at")]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [BsonElement("updated_at")]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<ChatMessage> Messages { get; set; } = [];
 }

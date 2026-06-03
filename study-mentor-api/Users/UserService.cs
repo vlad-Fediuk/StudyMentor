@@ -1,68 +1,46 @@
-using MongoDB.Driver;
-using MongoDB.Bson;
+using Microsoft.EntityFrameworkCore;
+using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
 using StudyMentorApi.Services;
 
 namespace StudyMentorApi.Users;
 
-public class UserService(MongoDbService dbService) : BaseCrudService<User, string>
+public class UserService(AppDbContext dbContext) : BaseCrudService<User>
 {
-    private const string CollectionName = "users";
-    private readonly IMongoCollection<User> _collection =
-        dbService.GetCollection<User>(CollectionName);
-
-    public async Task<User?> GetByGroupAsync(string groupId, CancellationToken ct)
+    public async Task<User?> GetByGroupAsync(Guid groupId, CancellationToken ct)
     {
-        return await _collection
-            .Find(u => u.GroupId == groupId)
-            .FirstOrDefaultAsync(ct);
-    }
-
-    public async Task<User?> FindSafeByIdAsync(string id, CancellationToken ct)
-    {
-        if (!ObjectId.TryParse(id, out _))
-        {
-            return null;
-        }
-
-        return await _collection
-            .Find(u => u.Id == id)
-            .FirstOrDefaultAsync(ct);
+        return await dbContext.Users.FirstOrDefaultAsync(u => u.GroupId == groupId, ct);
     }
 
     protected override IQueryable<User> Query()
-        => _collection.AsQueryable();
+        => dbContext.Users.AsQueryable();
 
-    protected override async Task<User?> FindByIdAsync(string id, CancellationToken ct)
-        => await _collection
-            .Find(u => u.Id == id)
-            .FirstOrDefaultAsync(ct);
+    protected override async Task<User?> FindByIdAsync(Guid id, CancellationToken ct)
+        => await dbContext.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
 
     protected override async Task<User> AddEntityAsync(User entity, CancellationToken ct)
     {
-        await _collection.InsertOneAsync(entity, cancellationToken: ct);
+        dbContext.Users.Add(entity);
+        await dbContext.SaveChangesAsync(ct);
         return entity;
     }
 
     protected override async Task<User> SaveUpdatedEntityAsync(User entity, CancellationToken ct)
     {
-        await _collection.ReplaceOneAsync(
-            u => u.Id == entity.Id,
-            entity,
-            cancellationToken: ct);
+        await dbContext.SaveChangesAsync(ct);
         return entity;
     }
 
     protected override async Task DeleteEntityAsync(User entity, CancellationToken ct)
-        => await _collection.DeleteOneAsync(u => u.Id == entity.Id, ct);
+    {
+        dbContext.Users.Remove(entity);
+        await dbContext.SaveChangesAsync(ct);
+    }
 
     protected override void UpdateEntityValues(User existing, User updated)
     {
         existing.Name = updated.Name;
         existing.Password = updated.Password;
         existing.GroupId = updated.GroupId;
-        existing.LearningLevel = updated.LearningLevel;
-        existing.PreferredLanguage = updated.PreferredLanguage;
-        existing.CurrentProgress = updated.CurrentProgress;
     }
 }

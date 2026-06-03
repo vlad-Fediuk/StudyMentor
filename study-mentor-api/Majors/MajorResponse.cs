@@ -1,3 +1,3 @@
 namespace StudyMentorApi.Majors;
 
-public record MajorResponse(string Id, string Name);
+public record MajorResponse(Guid Id, string Name);

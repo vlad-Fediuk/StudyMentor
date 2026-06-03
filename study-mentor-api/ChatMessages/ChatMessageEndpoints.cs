@@ -35,7 +35,7 @@ public static class ChatMessageEndpoints
     }
 
     private static async Task<IResult> GetById(
-        string id,
+        Guid id,
         ChatMessageService service,
         CancellationToken ct)
     {
@@ -55,7 +55,7 @@ public static class ChatMessageEndpoints
     }
 
     private static async Task<IResult> GetBySession(
-        string sessionId,
+        Guid sessionId,
         ChatMessageService service,
         CancellationToken ct)
     {
@@ -81,7 +81,7 @@ public static class ChatMessageEndpoints
             {
                 ChatSessionId = request.ChatSessionId,
                 Content = request.Content,
-                Timestamp = request.Timestamp ?? DateTime.UtcNow,
+                Timestamp = NormalizeTimestamp(request.Timestamp),
                 Role = request.Role,
                 SequenceNumber = request.SequenceNumber,
                 Status = "completed"
@@ -100,7 +100,7 @@ public static class ChatMessageEndpoints
     }
 
     private static async Task<IResult> Update(
-        string id,
+        Guid id,
         ChatMessageRequest request,
         ChatMessageService service,
         CancellationToken ct)
@@ -111,7 +111,7 @@ public static class ChatMessageEndpoints
             {
                 ChatSessionId = request.ChatSessionId,
                 Content = request.Content,
-                Timestamp = request.Timestamp ?? DateTime.UtcNow,
+                Timestamp = NormalizeTimestamp(request.Timestamp),
                 Role = request.Role,
                 SequenceNumber = request.SequenceNumber,
                 Status = "completed"
@@ -134,7 +134,7 @@ public static class ChatMessageEndpoints
     }
 
     private static async Task<IResult> Delete(
-        string id,
+        Guid id,
         ChatMessageService service,
         CancellationToken ct)
     {
@@ -154,5 +154,8 @@ public static class ChatMessageEndpoints
     }
 
     private static ChatMessageResponse ToResponse(ChatMessage m) =>
-        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber);
+        new(m.Id, m.ChatSessionId, m.Content, m.Timestamp, m.Role, m.SequenceNumber, m.Status);
+
+    private static DateTime NormalizeTimestamp(DateTime? timestamp) =>
+        timestamp?.ToUniversalTime() ?? DateTime.UtcNow;
 }

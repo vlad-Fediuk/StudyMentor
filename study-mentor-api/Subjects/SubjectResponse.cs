@@ -2,4 +2,4 @@ using StudyMentorApi.Majors;
 
 namespace StudyMentorApi.Subjects;
 
-public record SubjectResponse(string Id, string Name, MajorResponse Major);
+public record SubjectResponse(Guid Id, string Name, MajorResponse Major);

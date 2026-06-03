@@ -6,12 +6,13 @@ public static class AiChatEndpoints
 {
     public static void MapAiChatEndpoints(this IEndpointRouteBuilder routes)
     {
-        var group = routes
-            .MapGroup("/api/ai-chat")
+        routes
+            .MapGet("/api/ai-chat/messages", GetMessages)
             .WithTags("AiChat");
 
-        group.MapGet("/messages", GetMessages);
-        group.MapPost("/messages", SendMessage);
+        routes
+            .MapPost("/api/ai-chat/messages", SendMessage)
+            .WithTags("AiChat");
     }
 
     private static async Task<IResult> GetMessages(
@@ -53,11 +54,19 @@ public static class AiChatEndpoints
         {
             return Results.NotFound(new { error = ex.Message });
         }
+        catch (ArgumentException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
         catch (AiChatFailedException ex)
         {
             return Results.Json(
                 new AiChatErrorResponse("failed", ex.Message),
                 statusCode: StatusCodes.Status500InternalServerError);
+        }
+        catch (Exception ex)
+        {
+            return Results.Problem(ex.Message, statusCode: 500);
         }
     }
 }
