@@ -43,7 +43,17 @@ public static class UserEndpoints
         {
             Name = request.Name,
             Password = request.Password,
-            GroupId = request.GroupId
+            GroupId = request.GroupId,
+            LearningLevel = string.IsNullOrWhiteSpace(request.LearningLevel)
+                ? "beginner"
+                : request.LearningLevel,
+            PreferredLanguage = string.IsNullOrWhiteSpace(request.PreferredLanguage)
+                ? "uk"
+                : request.PreferredLanguage,
+            CurrentProgress = string.IsNullOrWhiteSpace(request.CurrentProgress)
+                ? "No progress data yet."
+                : request.CurrentProgress,
+            CreatedAt = DateTime.UtcNow
         };
         var created = await service.CreateAsync(entity, ct);
         return Results.Created($"/users/{created.Id}", ToResponse(created));
@@ -59,7 +69,16 @@ public static class UserEndpoints
         {
             Name = request.Name,
             Password = request.Password,
-            GroupId = request.GroupId
+            GroupId = request.GroupId,
+            LearningLevel = string.IsNullOrWhiteSpace(request.LearningLevel)
+                ? "beginner"
+                : request.LearningLevel,
+            PreferredLanguage = string.IsNullOrWhiteSpace(request.PreferredLanguage)
+                ? "uk"
+                : request.PreferredLanguage,
+            CurrentProgress = string.IsNullOrWhiteSpace(request.CurrentProgress)
+                ? "No progress data yet."
+                : request.CurrentProgress
         };
         var updated = await service.UpdateAsync(id, entity, ct);
         return Results.Ok(ToResponse(updated));
@@ -75,5 +94,12 @@ public static class UserEndpoints
     }
 
     private static UserResponse ToResponse(User u) =>
-        new(u.Id, u.Name, u.GroupId);
+        new(
+            u.Id,
+            u.Name,
+            u.GroupId,
+            u.LearningLevel,
+            u.PreferredLanguage,
+            u.CurrentProgress,
+            u.CreatedAt);
 }
