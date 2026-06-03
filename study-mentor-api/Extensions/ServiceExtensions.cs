@@ -1,4 +1,5 @@
 using StudyMentorApi.Services.Ai;
+using StudyMentorApi.Services.Ai.Prompts;
 
 namespace StudyMentorApi.Extensions;
 
@@ -17,6 +18,7 @@ public static class ServiceExtensions
         services.AddScoped<AiChat.AiChatService>();
         services.AddScoped<Groups.GroupService>();
         services.AddScoped<Users.UserService>();
+        services.AddSingleton<PromptTemplateService>();
 
         services.Configure<NvidiaAiSettings>(
             configuration.GetSection(NvidiaAiSettings.SectionName));
