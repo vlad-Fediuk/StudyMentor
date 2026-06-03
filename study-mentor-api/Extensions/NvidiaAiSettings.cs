@@ -20,6 +20,8 @@ public sealed class NvidiaAiSettings
 
     public int ReasoningBudget { get; set; } = 16384;
 
+    public int TimeoutSeconds { get; set; } = 300;
+
     public double Temperature { get; set; } = 1.0;
 
     public double TopP { get; set; } = 0.95;

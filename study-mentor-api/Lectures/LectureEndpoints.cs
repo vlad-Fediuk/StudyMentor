@@ -39,7 +39,7 @@ public static class LectureEndpoints
     }
 
     private static async Task<IResult> GetById(
-        string id,
+        Guid id,
         LectureService service,
         SubjectService subjectService,
         MajorService majorService,
@@ -88,7 +88,7 @@ public static class LectureEndpoints
     }
 
     private static async Task<IResult> Update(
-        string id,
+        Guid id,
         LectureRequest request,
         LectureService service,
         SubjectService subjectService,
@@ -117,7 +117,7 @@ public static class LectureEndpoints
     }
 
     private static async Task<IResult> Delete(
-        string id,
+        Guid id,
         LectureService service,
         CancellationToken ct)
     {
@@ -136,7 +136,7 @@ public static class LectureEndpoints
         }
     }
 
-    private static async Task<Dictionary<string, SubjectResponse>> BuildSubjectResponsesAsync(
+    private static async Task<Dictionary<Guid, SubjectResponse>> BuildSubjectResponsesAsync(
         SubjectService subjectService,
         MajorService majorService,
         CancellationToken ct)
@@ -151,7 +151,7 @@ public static class LectureEndpoints
     }
 
     private static async Task<SubjectResponse> MapSubjectResponseAsync(
-        string subjectId,
+        Guid subjectId,
         SubjectService subjectService,
         MajorService majorService,
         CancellationToken ct)

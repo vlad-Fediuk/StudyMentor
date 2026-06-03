@@ -11,6 +11,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES)
   },
   {
+    path: 'chat',
+    loadComponent: () =>
+      import('./pages/chat-page/chat-page.component').then((m) => m.ChatPageComponent)
+  },
+  {
     path: '**',
     redirectTo: 'login'
   }

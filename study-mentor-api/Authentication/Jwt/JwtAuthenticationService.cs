@@ -69,7 +69,7 @@ public class JwtAuthenticationService(
                 Name = name,
                 Email = email,
                 Password = string.Empty,
-                GroupId = string.Empty,
+                GroupId = Guid.Empty,
                 Roles = ["User"]
             },
             CancellationToken.None);

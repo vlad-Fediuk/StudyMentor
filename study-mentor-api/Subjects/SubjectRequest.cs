@@ -1,3 +1,3 @@
 namespace StudyMentorApi.Subjects;
 
-public record SubjectRequest(string Name, string MajorId);
+public record SubjectRequest(string Name, Guid MajorId);

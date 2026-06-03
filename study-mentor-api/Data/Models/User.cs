@@ -1,21 +1,16 @@
-using MongoDB.Bson.Serialization.Attributes;
-
 namespace StudyMentorApi.Data.Models;
 
-public class User : BaseEntity<string>
+public class User : BaseEntity
 {
-    [BsonElement("name")]
     public required string Name { get; set; }
 
-    [BsonElement("email")]
     public string? Email { get; set; }
 
-    [BsonElement("password")]
     public required string Password { get; set; }
 
-    [BsonElement("group_id")]
-    public required string GroupId { get; set; }
+    public Guid GroupId { get; set; }
 
-    [BsonElement("roles")]
-    public List<string> Roles { get; set; } = ["User"];
+    public ICollection<string> Roles { get; set; } = ["User"];
+
+    public ICollection<ChatSession> ChatSessions { get; set; } = [];
 }

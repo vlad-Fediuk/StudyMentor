@@ -1,21 +1,20 @@
+using Microsoft.EntityFrameworkCore;
 using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
 
 namespace StudyMentorApi.Services;
 
-public abstract class BaseCrudService<TEntity, TKey>
-    where TEntity : class, IEntity<TKey>
-    where TKey : notnull
+public abstract class BaseCrudService<TEntity>
+    where TEntity : class, IEntity
 {
-    public virtual Task<IReadOnlyCollection<TEntity>> GetAllAsync(
+    public virtual async Task<IReadOnlyCollection<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        IReadOnlyCollection<TEntity> items = Query().ToList();
-        return Task.FromResult(items);
+        return await Query().ToListAsync(cancellationToken);
     }
 
     public virtual async Task<TEntity> GetByIdAsync(
-        TKey id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         var entity = await FindByIdAsync(id, cancellationToken);
@@ -32,7 +31,7 @@ public abstract class BaseCrudService<TEntity, TKey>
     }
 
     public virtual async Task<TEntity> UpdateAsync(
-        TKey id,
+        Guid id,
         TEntity updatedEntity,
         CancellationToken cancellationToken = default)
     {
@@ -46,7 +45,7 @@ public abstract class BaseCrudService<TEntity, TKey>
     }
 
     public virtual async Task DeleteAsync(
-        TKey id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         var entity = await FindByIdAsync(id, cancellationToken)
@@ -74,7 +73,7 @@ public abstract class BaseCrudService<TEntity, TKey>
     protected abstract IQueryable<TEntity> Query();
 
     protected abstract Task<TEntity?> FindByIdAsync(
-        TKey id,
+        Guid id,
         CancellationToken cancellationToken);
 
     protected abstract Task<TEntity> AddEntityAsync(

@@ -26,7 +26,7 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> GetById(
-        string id,
+        Guid id,
         UserService service,
         CancellationToken ct)
     {
@@ -52,7 +52,7 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> Update(
-        string id,
+        Guid id,
         UserRequest request,
         UserService service,
         CancellationToken ct)
@@ -70,7 +70,7 @@ public static class UserEndpoints
     }
 
     private static async Task<IResult> Delete(
-        string id,
+        Guid id,
         UserService service,
         CancellationToken ct)
     {
@@ -79,7 +79,7 @@ public static class UserEndpoints
     }
 
     private static UserResponse ToResponse(User u) =>
-        new(u.Id, u.Name, u.Email, u.GroupId, NormalizeRoles(u.Roles));
+        new(u.Id, u.Name, u.GroupId, u.Email, NormalizeRoles(u.Roles));
 
     private static string? NormalizeEmail(string? email)
     {

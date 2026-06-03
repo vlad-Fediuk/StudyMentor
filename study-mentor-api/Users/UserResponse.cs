@@ -1,8 +1,9 @@
 namespace StudyMentorApi.Users;
 
 public record UserResponse(
-    string Id,
+    Guid Id,
     string Name,
-    string? Email,
-    string GroupId,
-    IReadOnlyCollection<string> Roles);
+    Guid GroupId,
+    string? Email = null,
+    IEnumerable<string>? Roles = null);
+    

@@ -3,6 +3,7 @@ namespace StudyMentorApi.Users;
 public record UserRequest(
     string Name,
     string Password,
-    string GroupId,
+    Guid GroupId,
     string? Email = null,
-    List<string>? Roles = null);
+    IEnumerable<string>? Roles = null);
+    
