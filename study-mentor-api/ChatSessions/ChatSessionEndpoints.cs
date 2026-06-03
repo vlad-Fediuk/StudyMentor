@@ -8,7 +8,8 @@ public static class ChatSessionEndpoints
     {
         var group = routes
             .MapGroup("/chat-sessions")
-            .WithTags("ChatSessions");
+            .WithTags("ChatSessions")
+            .RequireAuthorization("user");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);

@@ -8,11 +8,13 @@ public static class AiChatEndpoints
     {
         routes
             .MapGet("/api/ai-chat/messages", GetMessages)
-            .WithTags("AiChat");
+            .WithTags("AiChat")
+            .RequireAuthorization("user");
 
         routes
             .MapPost("/api/ai-chat/messages", SendMessage)
-            .WithTags("AiChat");
+            .WithTags("AiChat")
+            .RequireAuthorization("user");
     }
 
     private static async Task<IResult> GetMessages(

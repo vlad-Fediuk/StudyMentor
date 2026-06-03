@@ -24,7 +24,7 @@ export class AuthRedirectPageComponent implements OnInit {
           this.authService.authenticateWithMicrosoftIdToken(result.idToken, result.account)
         );
         this.msalService.instance.setActiveAccount(result.account);
-        this.router.navigate(['/login']);
+        this.router.navigate(['/chat']);
       } else {
         this.redirectToLoginPageWithError('No account information was returned by Microsoft.');
       }

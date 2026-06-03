@@ -10,7 +10,8 @@ public static class SubjectEndpoints
     {
         var group = routes
             .MapGroup("/subjects")
-            .WithTags("Subjects");
+            .WithTags("Subjects")
+            .RequireAuthorization("user");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);

@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
 import { AuthService } from '../../data-access/auth.service';
 import { MicrosoftLoginButtonComponent } from '../../ui/microsoft-login-button/microsoft-login-button.component';
@@ -15,12 +15,18 @@ export class AuthPageComponent {
   readonly auth = inject(AuthService);
   private readonly msalService = inject(MsalService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   constructor() {
     const error = this.route.snapshot.queryParamMap.get('error');
 
     if (error) {
       this.auth.setError(error);
+      return;
+    }
+
+    if (this.auth.getToken()) {
+      this.router.navigate(['/chat']);
     }
   }
 
