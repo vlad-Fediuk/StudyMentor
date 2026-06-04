@@ -9,16 +9,46 @@ $message-role-gap: 30px;
 
 .chat-page {
   min-height: 100dvh;
+<<<<<<< Updated upstream
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 96px 24px 0;
   background: colors.$white;
+=======
+  display: grid;
+  grid-template-columns: minmax(286px, 286px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  padding: 32px 24px 0 0;
+  background: #f8fafc;
+>>>>>>> Stashed changes
   scroll-padding-bottom: 150px;
   scrollbar-color: colors.$scrollbar transparent;
   scrollbar-width: thin;
 }
 
+<<<<<<< Updated upstream
+=======
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.chat-page::after {
+  content: '';
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 128px;
+  background: #fff;
+  pointer-events: none;
+}
+
+>>>>>>> Stashed changes
 .chat-page::-webkit-scrollbar {
   width: 12px;
 }
@@ -36,7 +66,7 @@ $message-role-gap: 30px;
 }
 
 .messages {
-  width: min(100%, 680px);
+  width: min(100%, 760px);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -173,6 +203,7 @@ $message-role-gap: 30px;
   opacity: 0.45;
 }
 
+<<<<<<< Updated upstream
 .scroll-button {
   position: fixed;
   bottom: 104px;
@@ -197,6 +228,18 @@ $message-role-gap: 30px;
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, 0);
+=======
+@media (max-width: 980px) {
+  .chat-page {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 18px 0;
+  }
+
+  .chat-panel {
+    gap: 18px;
+  }
+>>>>>>> Stashed changes
 }
 
 @media (max-width: 640px) {

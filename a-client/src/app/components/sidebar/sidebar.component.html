@@ -1,0 +1,75 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed">
+  <div class="sidebar-actions">
+    <button
+      type="button"
+      class="sidebar-action-button"
+      [class.active]="activeTab === 'subjects'"
+      (click)="selectTab('subjects')"
+      aria-label="Subjects"
+    >
+      <img src="/assets/icons/sidebar-subject.svg" alt="" aria-hidden="true" />
+    </button>
+
+    <button
+      type="button"
+      class="sidebar-action-button"
+      [class.active]="activeTab === 'lectures'"
+      (click)="selectTab('lectures')"
+      aria-label="Lectures"
+    >
+      <img src="/assets/icons/sidebar-page.svg" alt="" aria-hidden="true" />
+    </button>
+  </div>
+
+  <div class="sidebar-card" *ngIf="!isCollapsed">
+    <div class="sidebar-card-pill">{{ cardTitle }}</div>
+
+    <div class="sidebar-card-list">
+      <ng-container *ngIf="isLoading">
+        <div class="sidebar-empty">Loading...</div>
+      </ng-container>
+
+      <ng-container *ngIf="error">
+        <div class="sidebar-empty sidebar-error">{{ error }}</div>
+      </ng-container>
+
+      <ng-container *ngIf="!isLoading && !error">
+        <ng-container *ngIf="activeTab === 'subjects'">
+          <button
+            type="button"
+            class="sidebar-card-item sidebar-card-item--subject"
+            *ngFor="let subject of subjects"
+            [class.active]="subject.id === selectedSubjectId"
+            (click)="selectSubject(subject.id)"
+          >
+            {{ subject.name }}
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'lectures'">
+          <ng-container *ngIf="selectedSubjectId && lecturesForSelectedSubject.length">
+            <button
+              type="button"
+              class="sidebar-card-item sidebar-card-item--lecture"
+              *ngFor="let lecture of lecturesForSelectedSubject"
+              [class.selected]="lecture.id === selectedLectureId"
+              (click)="selectLecture(lecture)"
+            >
+              {{ lecture.name }}
+            </button>
+          </ng-container>
+
+          <div *ngIf="!selectedSubjectId" class="sidebar-empty">
+            Select a subject first
+          </div>
+
+          <div *ngIf="selectedSubjectId && !lecturesForSelectedSubject.length" class="sidebar-empty">
+            No lectures for this subject
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>
+
+  <button type="button" class="sidebar-back" (click)="toggleCollapse()" aria-label="Back"></button>
+</aside>

@@ -1,4 +1,5 @@
 <main class="chat-page">
+<<<<<<< Updated upstream
   <section class="messages" aria-live="polite">
     @for (message of messages; track $index) {
       <article
@@ -8,11 +9,19 @@
         [innerHTML]="renderMessageContent(message)"
       ></article>
     }
+=======
+  <app-sidebar></app-sidebar>
+>>>>>>> Stashed changes
 
-    @if (isSending) {
-      <article class="message message-assistant">AI думає...</article>
-    }
+  <section class="chat-panel">
+    <section class="messages" aria-live="polite">
+      @for (message of messages; track $index) {
+        <article class="message" [class.message-user]="message.role === 'user'">
+          {{ message.content }}
+        </article>
+      }
 
+<<<<<<< Updated upstream
     @if (errorMessage) {
       <p class="error-message">{{ errorMessage }}</p>
     }
@@ -53,23 +62,60 @@
       type="submit"
       aria-label="Надіслати"
       [disabled]="isSending"
+=======
+      @if (isSending) {
+        <article class="message message-assistant">AI думає...</article>
+      }
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+    </section>
+
+    <form
+      class="prompt-bar"
+      aria-label="Ask anything"
+      autocomplete="off"
+      (submit)="sendMessage(messageInput, $event)"
+>>>>>>> Stashed changes
     >
-      <svg
-        aria-hidden="true"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+      <input
+        #messageInput
+        class="prompt-input"
+        type="text"
+        name="study-mentor-chat-message"
+        placeholder="Напиши повідомлення..."
+        aria-label="Повідомлення"
+        autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        [disabled]="isSending"
+      />
+
+      <button
+        class="send-button"
+        type="submit"
+        aria-label="Надіслати"
+        [disabled]="isSending"
       >
-        <path
-          d="M5 12L3 4L21 12L3 20L5 12ZM5 12H13"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
-  </form>
+        <svg
+          aria-hidden="true"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 12L3 4L21 12L3 20L5 12ZM5 12H13"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </form>
+  </section>
 </main>

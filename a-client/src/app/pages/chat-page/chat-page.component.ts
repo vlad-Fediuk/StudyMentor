@@ -1,5 +1,6 @@
-import { isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+<<<<<<< Updated upstream
 import {
   Component,
   ElementRef,
@@ -10,7 +11,13 @@ import {
   inject
 } from '@angular/core';
 import { marked } from 'marked';
+=======
+import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+>>>>>>> Stashed changes
 import { firstValueFrom } from 'rxjs';
+
+import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 
 type ChatRole = 'user' | 'assistant';
 
@@ -53,7 +60,7 @@ interface AiChatSendMessageResponse {
 @Component({
   selector: 'app-chat-page',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, SidebarComponent],
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })
@@ -61,6 +68,7 @@ export class ChatPageComponent implements OnInit {
   @ViewChild('messagesEnd') private messagesEnd?: ElementRef<HTMLElement>;
 
   private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly apiUrl = 'http://localhost:5132';
@@ -69,13 +77,18 @@ export class ChatPageComponent implements OnInit {
   private readonly guidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+  selectedLectureId: string | null = null;
   messages: ChatMessage[] = [];
   isSending = false;
   errorMessage = '';
   showScrollButton = false;
 
-  async ngOnInit(): Promise<void> {
-    await this.loadMessages();
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const lectureId = params.get('lectureId');
+      this.selectedLectureId = lectureId;
+      void this.loadMessages(false);
+    });
   }
 
   @HostListener('window:scroll')
@@ -148,15 +161,21 @@ export class ChatPageComponent implements OnInit {
     }
   }
 
+  private getLectureChatKey(lectureId: string): string {
+    return `${this.chatIdStorageKey}.${lectureId}`;
+  }
+
   private getStoredChatId(): string | null {
     if (!this.isBrowser) {
       return null;
     }
 
-    const urlChatId = new URLSearchParams(window.location.search).get('chatId');
-    if (urlChatId && this.guidPattern.test(urlChatId)) {
-      localStorage.setItem(this.chatIdStorageKey, urlChatId);
-      return urlChatId;
+    if (this.selectedLectureId) {
+      const lectureChatId = localStorage.getItem(this.getLectureChatKey(this.selectedLectureId));
+      if (lectureChatId && this.guidPattern.test(lectureChatId)) {
+        return lectureChatId;
+      }
+      return null;
     }
 
     const existingChatId = localStorage.getItem(this.chatIdStorageKey);
@@ -175,15 +194,17 @@ export class ChatPageComponent implements OnInit {
     }
 
     const user = await this.getOrCreateUser();
-    const lecture = await this.getOrCreateLecture();
+    const lectureId = this.selectedLectureId ?? (await this.getOrCreateLecture()).id;
     const session = await firstValueFrom(
       this.http.post<ChatSessionResponse>(`${this.apiUrl}/chat-sessions/`, {
         userId: user.id,
-        lectureId: lecture.id
+        lectureId
       })
     );
 
-    if (this.isBrowser) {
+    if (this.isBrowser && this.selectedLectureId) {
+      localStorage.setItem(this.getLectureChatKey(lectureId), session.id);
+    } else if (this.isBrowser) {
       localStorage.setItem(this.chatIdStorageKey, session.id);
     }
 
@@ -280,6 +301,7 @@ export class ChatPageComponent implements OnInit {
   private async loadMessages(shouldSetError = true): Promise<void> {
     const chatId = this.getStoredChatId();
     if (!chatId) {
+      this.messages = [];
       return;
     }
 
@@ -295,7 +317,11 @@ export class ChatPageComponent implements OnInit {
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         if (this.isBrowser) {
-          localStorage.removeItem(this.chatIdStorageKey);
+          if (this.selectedLectureId) {
+            localStorage.removeItem(this.getLectureChatKey(this.selectedLectureId));
+          } else {
+            localStorage.removeItem(this.chatIdStorageKey);
+          }
         }
 
         this.messages = [];
