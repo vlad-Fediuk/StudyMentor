@@ -1,3 +1,8 @@
+@use '../../../styles/colors';
+
+$message-gap: 10px;
+$message-role-gap: 30px;
+
 :host {
   display: block;
 }
@@ -8,22 +13,10 @@
   flex-direction: column;
   align-items: center;
   padding: 96px 24px 0;
-  background: #fff;
+  background: colors.$white;
   scroll-padding-bottom: 150px;
-  scrollbar-color: #8f8f8f transparent;
+  scrollbar-color: colors.$scrollbar transparent;
   scrollbar-width: thin;
-}
-
-.chat-page::after {
-  content: '';
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 0;
-  height: 128px;
-  background: #fff;
-  pointer-events: none;
 }
 
 .chat-page::-webkit-scrollbar {
@@ -38,7 +31,7 @@
   min-height: 72px;
   border: 3px solid transparent;
   border-radius: 999px;
-  background: #8f8f8f;
+  background: colors.$scrollbar;
   background-clip: content-box;
 }
 
@@ -47,32 +40,57 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: 150px;
+  gap: $message-gap;
+  padding-bottom: 98px;
 }
 
 .message {
   max-width: 82%;
   align-self: flex-start;
   padding: 11px 15px;
-  border: 1px solid #eee;
+  border: 1px solid mix(colors.$border, colors.$white, 55%);
   border-radius: 18px;
-  color: #1d1d1f;
-  background: #fff;
+  color: colors.$black;
+  background: colors.$white;
   line-height: 1.45;
   white-space: pre-wrap;
 }
 
+.message :is(p, ul, ol) {
+  margin: 0 0 10px;
+}
+
+.message :is(p, ul, ol):last-child {
+  margin-bottom: 0;
+}
+
+.message :is(ul, ol) {
+  padding-left: 22px;
+}
+
+.message pre {
+  overflow-x: auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: mix(colors.$surface, colors.$white, 70%);
+  white-space: pre;
+}
+
 .message-user {
   align-self: flex-end;
-  color: #1d1d1f;
-  background: #f5f5f5;
-  border-color: #eee;
+  color: colors.$black;
+  background: colors.$surface;
+  border-color: mix(colors.$border, colors.$white, 55%);
+}
+
+.message-user + .message-assistant,
+.message-assistant + .message-user {
+  margin-top: $message-role-gap - $message-gap;
 }
 
 .error-message {
   margin: 0;
-  color: #b00020;
+  color: colors.$error;
   font-size: 14px;
 }
 
@@ -82,17 +100,35 @@
   bottom: 34px;
   left: 24px;
   margin: 0 auto;
-  z-index: 1;
+  z-index: 3;
   width: min(100%, 680px);
   min-height: 52px;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px 8px 6px 20px;
-  border: 1px solid #eee;
+  border: 1px solid colors.$border;
   border-radius: 26px;
-  background: #fff;
-  box-shadow: 0 0 0 12px #fff;
+  background: colors.$surface;
+  box-shadow: 0 8px 22px rgba(colors.$black, 0.05);
+}
+
+.prompt-backdrop {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  height: 110px;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(colors.$white, 0) 0%,
+      rgba(colors.$white, 0.72) 24%,
+      colors.$white 54%,
+      colors.$white 100%
+    );
+  pointer-events: none;
 }
 
 .prompt-input {
@@ -100,18 +136,18 @@
   flex: 1;
   border: 0;
   outline: none;
-  color: #1d1d1f;
+  color: colors.$black;
   background: transparent;
   font-size: 16px;
 }
 
 .prompt-input::placeholder {
-  color: #9b9ba1;
+  color: colors.$muted;
 }
 
 .prompt-input::selection {
-  color: inherit;
-  background: transparent;
+  color: colors.$black;
+  background: colors.$selection;
 }
 
 .prompt-input:focus,
@@ -128,13 +164,39 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  color: #ffffff;
-  background: #151515;
+  color: colors.$white;
+  background: colors.$black;
   cursor: pointer;
 }
 
 .send-button:disabled {
   opacity: 0.45;
+}
+
+.scroll-button {
+  position: fixed;
+  bottom: 104px;
+  left: 50%;
+  z-index: 4;
+  width: 44px;
+  height: 44px;
+  border: 1px solid colors.$border;
+  border-radius: 50%;
+  background: colors.$surface;
+  box-shadow: 0 8px 22px rgba(colors.$black, 0.05);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 22px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.scroll-button-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
 }
 
 @media (max-width: 640px) {
@@ -143,7 +205,7 @@
   }
 
   .messages {
-    padding-bottom: 132px;
+    padding-bottom: 86px;
   }
 
   .prompt-bar {
@@ -154,13 +216,19 @@
     padding: 6px 7px 6px 16px;
   }
 
-  .chat-page::after {
-    height: 104px;
+  .prompt-backdrop {
+    height: 94px;
   }
 
   .send-button {
     width: 36px;
     height: 36px;
+  }
+
+  .scroll-button {
+    bottom: 88px;
+    width: 40px;
+    height: 40px;
   }
 
   .prompt-input {

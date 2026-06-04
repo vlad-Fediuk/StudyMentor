@@ -1,9 +1,12 @@
 <main class="chat-page">
   <section class="messages" aria-live="polite">
     @for (message of messages; track $index) {
-      <article class="message" [class.message-user]="message.role === 'user'">
-        {{ message.content }}
-      </article>
+      <article
+        class="message"
+        [class.message-assistant]="message.role === 'assistant'"
+        [class.message-user]="message.role === 'user'"
+        [innerHTML]="renderMessageContent(message)"
+      ></article>
     }
 
     @if (isSending) {
@@ -13,7 +16,18 @@
     @if (errorMessage) {
       <p class="error-message">{{ errorMessage }}</p>
     }
+
+    <div #messagesEnd aria-hidden="true"></div>
   </section>
+
+  <button
+    class="scroll-button"
+    [class.scroll-button-visible]="showScrollButton"
+    type="button"
+    (click)="goToLatestMessage()"
+  ></button>
+
+  <div class="prompt-backdrop" aria-hidden="true"></div>
 
   <form
     class="prompt-bar"
@@ -32,7 +46,6 @@
       autocapitalize="off"
       autocorrect="off"
       spellcheck="false"
-      [disabled]="isSending"
     />
 
     <button

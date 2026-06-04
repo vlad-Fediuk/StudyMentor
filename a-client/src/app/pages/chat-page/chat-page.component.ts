@@ -1,6 +1,15 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  PLATFORM_ID,
+  ViewChild,
+  inject
+} from '@angular/core';
+import { marked } from 'marked';
 import { firstValueFrom } from 'rxjs';
 
 type ChatRole = 'user' | 'assistant';
@@ -49,20 +58,45 @@ interface AiChatSendMessageResponse {
   styleUrl: './chat-page.component.scss'
 })
 export class ChatPageComponent implements OnInit {
+  @ViewChild('messagesEnd') private messagesEnd?: ElementRef<HTMLElement>;
+
   private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly apiUrl = 'http://localhost:5132';
   private readonly chatIdStorageKey = 'studyMentor.chatId';
+  private readonly scrollButtonOffset = 2000;
   private readonly guidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
   messages: ChatMessage[] = [];
   isSending = false;
   errorMessage = '';
+  showScrollButton = false;
 
   async ngOnInit(): Promise<void> {
     await this.loadMessages();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.showScrollButton = this.shouldShowScrollButton();
+  }
+
+  goToLatestMessage(): void {
+    this.scrollToBottom();
+  }
+
+  renderMessageContent(message: ChatMessage): string {
+    if (message.role === 'user') {
+      return this.escapeHtml(message.content);
+    }
+
+    return marked.parse(message.content, {
+      async: false,
+      breaks: true,
+      gfm: true
+    }) as string;
   }
 
   async sendMessage(input: HTMLInputElement, event: SubmitEvent): Promise<void> {
@@ -74,6 +108,7 @@ export class ChatPageComponent implements OnInit {
     }
 
     input.value = '';
+    input.focus();
     this.errorMessage = '';
     this.isSending = true;
 
@@ -83,6 +118,8 @@ export class ChatPageComponent implements OnInit {
       status: 'pending'
     };
     this.messages = [...this.messages, pendingMessage];
+    this.showScrollButton = false;
+    this.scrollToBottom(false);
 
     try {
       const response = await this.sendMessageToApi(content);
@@ -92,13 +129,22 @@ export class ChatPageComponent implements OnInit {
         response.userMessage,
         response.assistantMessage
       ];
+      if (this.isNearBottom()) {
+        this.scrollToBottom();
+      } else {
+        this.showScrollButton = true;
+      }
     } catch (error) {
       this.messages = this.messages.filter((message) => message !== pendingMessage);
-      input.value = content;
+      this.scrollToBottom();
+      if (!input.value.trim()) {
+        input.value = content;
+      }
       this.errorMessage = this.getErrorMessage(error);
       await this.loadMessages(false);
     } finally {
       this.isSending = false;
+      input.focus();
     }
   }
 
@@ -245,6 +291,7 @@ export class ChatPageComponent implements OnInit {
       );
 
       this.messages = messages.filter((message) => message.status !== 'failed');
+      this.scrollToBottom(false);
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         if (this.isBrowser) {
@@ -252,6 +299,7 @@ export class ChatPageComponent implements OnInit {
         }
 
         this.messages = [];
+        this.scrollToBottom(false);
         return;
       }
 
@@ -288,5 +336,50 @@ export class ChatPageComponent implements OnInit {
     }
 
     return 'Failed to get AI response.';
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;')
+      .replaceAll('\n', '<br>');
+  }
+
+  private scrollToBottom(smooth = true): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    this.showScrollButton = false;
+    const behavior: ScrollBehavior = smooth ? 'smooth' : 'auto';
+    const scroll = () => {
+      const scrollingElement = document.scrollingElement ?? document.documentElement;
+      window.scrollTo({
+        top: scrollingElement.scrollHeight,
+        behavior
+      });
+    };
+
+    requestAnimationFrame(() => {
+      this.messagesEnd?.nativeElement.scrollIntoView({ behavior, block: 'end' });
+      scroll();
+      requestAnimationFrame(scroll);
+    });
+  }
+
+  private isNearBottom(offset = 96): boolean {
+    if (!this.isBrowser) {
+      return true;
+    }
+
+    const scrollingElement = document.scrollingElement ?? document.documentElement;
+    return window.innerHeight + window.scrollY >= scrollingElement.scrollHeight - offset;
+  }
+
+  private shouldShowScrollButton(): boolean {
+    return this.messages.length > 0 && !this.isNearBottom(this.scrollButtonOffset);
   }
 }
