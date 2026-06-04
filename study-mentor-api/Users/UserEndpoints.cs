@@ -43,17 +43,7 @@ public static class UserEndpoints
         {
             Name = request.Name,
             Password = request.Password,
-            GroupId = request.GroupId,
-            LearningLevel = string.IsNullOrWhiteSpace(request.LearningLevel)
-                ? "beginner"
-                : request.LearningLevel,
-            PreferredLanguage = string.IsNullOrWhiteSpace(request.PreferredLanguage)
-                ? "uk"
-                : request.PreferredLanguage,
-            CurrentProgress = string.IsNullOrWhiteSpace(request.CurrentProgress)
-                ? "No progress data yet."
-                : request.CurrentProgress,
-            CreatedAt = DateTime.UtcNow
+            GroupId = request.GroupId
         };
         var created = await service.CreateAsync(entity, ct);
         return Results.Created($"/users/{created.Id}", ToResponse(created));
@@ -69,16 +59,7 @@ public static class UserEndpoints
         {
             Name = request.Name,
             Password = request.Password,
-            GroupId = request.GroupId,
-            LearningLevel = string.IsNullOrWhiteSpace(request.LearningLevel)
-                ? "beginner"
-                : request.LearningLevel,
-            PreferredLanguage = string.IsNullOrWhiteSpace(request.PreferredLanguage)
-                ? "uk"
-                : request.PreferredLanguage,
-            CurrentProgress = string.IsNullOrWhiteSpace(request.CurrentProgress)
-                ? "No progress data yet."
-                : request.CurrentProgress
+            GroupId = request.GroupId
         };
         var updated = await service.UpdateAsync(id, entity, ct);
         return Results.Ok(ToResponse(updated));
@@ -97,9 +78,5 @@ public static class UserEndpoints
         new(
             u.Id,
             u.Name,
-            u.GroupId,
-            u.LearningLevel,
-            u.PreferredLanguage,
-            u.CurrentProgress,
-            u.CreatedAt);
+            u.GroupId);
 }

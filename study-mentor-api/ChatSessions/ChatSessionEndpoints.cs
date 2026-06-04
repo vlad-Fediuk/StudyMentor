@@ -52,15 +52,7 @@ public static class ChatSessionEndpoints
         var entity = new ChatSession
         {
             UserId = request.UserId,
-            LectureId = request.LectureId,
-            Title = string.IsNullOrWhiteSpace(request.Title)
-                ? "New chat"
-                : request.Title,
-            Topic = string.IsNullOrWhiteSpace(request.Topic)
-                ? "General learning"
-                : request.Topic,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            LectureId = request.LectureId
         };
         var created = await service.CreateAsync(entity, ct);
         return Results.Created($"/chat-sessions/{created.Id}", ToResponse(created));
@@ -75,14 +67,7 @@ public static class ChatSessionEndpoints
         var entity = new ChatSession
         {
             UserId = request.UserId,
-            LectureId = request.LectureId,
-            Title = string.IsNullOrWhiteSpace(request.Title)
-                ? "New chat"
-                : request.Title,
-            Topic = string.IsNullOrWhiteSpace(request.Topic)
-                ? "General learning"
-                : request.Topic,
-            UpdatedAt = DateTime.UtcNow
+            LectureId = request.LectureId
         };
         var updated = await service.UpdateAsync(id, entity, ct);
         return Results.Ok(ToResponse(updated));
@@ -98,5 +83,5 @@ public static class ChatSessionEndpoints
     }
 
     private static ChatSessionResponse ToResponse(ChatSession s) =>
-        new(s.Id, s.UserId, s.LectureId, s.Title, s.Topic, s.CreatedAt, s.UpdatedAt);
+        new(s.Id, s.UserId, s.LectureId);
 }
