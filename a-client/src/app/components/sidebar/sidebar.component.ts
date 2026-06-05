@@ -1,6 +1,13 @@
 ﻿import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  inject
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -20,7 +27,7 @@ interface LectureResponse extends IdNameResponse {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss']
 })
@@ -38,6 +45,7 @@ export class SidebarComponent implements OnInit {
   selectedSubjectId: string | null = null;
   selectedLectureId: string | null = null;
   activeTab: 'subjects' | 'lectures' = 'subjects';
+  searchTerm = '';
   isCollapsed = false;
   isLoading = true;
   error = '';
@@ -53,14 +61,31 @@ export class SidebarComponent implements OnInit {
   }
 
   get cardTitle(): string {
-    return this.activeTab === 'subjects' ? 'Subject' : 'Lecture';
+    return this.activeTab === 'subjects' ? 'Тема' : 'Лекція';
+  }
+
+  get searchPlaceholder(): string {
+    return this.activeTab === 'subjects' ? 'Тема' : 'Лекція';
+  }
+
+  get filteredSubjects(): SubjectResponse[] {
+    return this.filterBySearch(this.subjects);
   }
 
   get lecturesForSelectedSubject(): LectureResponse[] {
     if (!this.selectedSubjectId) {
       return [];
     }
-    return this.subjectLectureMap[this.selectedSubjectId] ?? [];
+    return this.filterBySearch(this.subjectLectureMap[this.selectedSubjectId] ?? []);
+  }
+
+  private filterBySearch<T extends IdNameResponse>(items: T[]): T[] {
+    const term = this.searchTerm.trim().toLocaleLowerCase('uk-UA');
+    if (!term) {
+      return items;
+    }
+
+    return items.filter((item) => item.name.toLocaleLowerCase('uk-UA').includes(term));
   }
 
   async loadSubjectsAndLectures(): Promise<void> {
@@ -120,11 +145,13 @@ export class SidebarComponent implements OnInit {
     if (tab === 'lectures' && !this.selectedSubjectId && this.subjects.length > 0) {
       this.selectedSubjectId = this.subjects[0].id;
     }
+    this.searchTerm = '';
     this.activeTab = tab;
   }
 
   selectSubject(subjectId: string): void {
     this.selectedSubjectId = subjectId;
+    this.searchTerm = '';
     this.activeTab = 'lectures';
   }
 

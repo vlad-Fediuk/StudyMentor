@@ -1,11 +1,15 @@
-<aside class="sidebar" [class.collapsed]="isCollapsed">
+<aside
+  #sidebarElement
+  class="sidebar"
+  [class.collapsed]="isCollapsed"
+>
   <div class="sidebar-actions">
     <button
       type="button"
       class="sidebar-action-button"
       [class.active]="activeTab === 'subjects'"
       (click)="selectTab('subjects')"
-      aria-label="Subjects"
+      aria-label="Теми"
     >
       <img src="/assets/icons/sidebar-subject.svg" alt="" aria-hidden="true" />
     </button>
@@ -15,18 +19,26 @@
       class="sidebar-action-button"
       [class.active]="activeTab === 'lectures'"
       (click)="selectTab('lectures')"
-      aria-label="Lectures"
+      aria-label="Лекції"
     >
       <img src="/assets/icons/sidebar-page.svg" alt="" aria-hidden="true" />
     </button>
   </div>
 
   <div class="sidebar-card" *ngIf="!isCollapsed">
-    <div class="sidebar-card-pill">{{ cardTitle }}</div>
+    <label class="sidebar-card-search">
+      <span class="visually-hidden">Пошук: {{ cardTitle }}</span>
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        [placeholder]="searchPlaceholder"
+        autocomplete="off"
+      />
+    </label>
 
     <div class="sidebar-card-list">
       <ng-container *ngIf="isLoading">
-        <div class="sidebar-empty">Loading...</div>
+        <div class="sidebar-empty">Завантаження...</div>
       </ng-container>
 
       <ng-container *ngIf="error">
@@ -38,12 +50,16 @@
           <button
             type="button"
             class="sidebar-card-item sidebar-card-item--subject"
-            *ngFor="let subject of subjects"
+            *ngFor="let subject of filteredSubjects"
             [class.active]="subject.id === selectedSubjectId"
             (click)="selectSubject(subject.id)"
           >
             {{ subject.name }}
           </button>
+
+          <div *ngIf="!filteredSubjects.length" class="sidebar-empty">
+            Теми не знайдено
+          </div>
         </ng-container>
 
         <ng-container *ngIf="activeTab === 'lectures'">
@@ -60,16 +76,16 @@
           </ng-container>
 
           <div *ngIf="!selectedSubjectId" class="sidebar-empty">
-            Select a subject first
+            Спочатку оберіть тему
           </div>
 
           <div *ngIf="selectedSubjectId && !lecturesForSelectedSubject.length" class="sidebar-empty">
-            No lectures for this subject
+            Лекції не знайдено
           </div>
         </ng-container>
       </ng-container>
     </div>
   </div>
 
-  <button type="button" class="sidebar-back" (click)="toggleCollapse()" aria-label="Back"></button>
+  <button type="button" class="sidebar-back" (click)="toggleCollapse()" aria-label="Згорнути меню"></button>
 </aside>
