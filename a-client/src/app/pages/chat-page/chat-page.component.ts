@@ -1,6 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-<<<<<<< Updated upstream
 import {
   Component,
   ElementRef,
@@ -10,11 +9,8 @@ import {
   ViewChild,
   inject
 } from '@angular/core';
-import { marked } from 'marked';
-=======
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
->>>>>>> Stashed changes
+import { marked } from 'marked';
 import { firstValueFrom } from 'rxjs';
 
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
@@ -82,8 +78,14 @@ export class ChatPageComponent implements OnInit {
   isSending = false;
   errorMessage = '';
   showScrollButton = false;
+  isSidebarCollapsed = false;
 
   ngOnInit(): void {
+    if (this.isBrowser) {
+      history.scrollRestoration = 'manual';
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
     this.route.queryParamMap.subscribe((params) => {
       const lectureId = params.get('lectureId');
       this.selectedLectureId = lectureId;
@@ -157,7 +159,7 @@ export class ChatPageComponent implements OnInit {
       await this.loadMessages(false);
     } finally {
       this.isSending = false;
-      input.focus();
+      requestAnimationFrame(() => input.focus());
     }
   }
 
@@ -313,7 +315,6 @@ export class ChatPageComponent implements OnInit {
       );
 
       this.messages = messages.filter((message) => message.status !== 'failed');
-      this.scrollToBottom(false);
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         if (this.isBrowser) {
@@ -325,7 +326,6 @@ export class ChatPageComponent implements OnInit {
         }
 
         this.messages = [];
-        this.scrollToBottom(false);
         return;
       }
 

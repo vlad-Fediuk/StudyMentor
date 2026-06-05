@@ -30,6 +30,8 @@
   padding: 19px 10px;
   background: transparent;
   border-right: 0;
+  overflow: visible;
+  z-index: 12;
 }
 
 .sidebar.collapsed .sidebar-actions,
@@ -38,11 +40,13 @@
 }
 
 .sidebar.collapsed .sidebar-back {
-  position: absolute;
-  right: 18px;
+  position: fixed;
+  left: 47px;
+  right: auto;
   bottom: 24px;
   margin: 0;
   transform: rotate(180deg);
+  z-index: 20;
 }
 
 .sidebar-actions {
@@ -168,7 +172,7 @@
   justify-content: center;
   cursor: pointer;
   box-shadow: none;
-  z-index: 3;
+  z-index: 13;
   transition: transform 0.16s ease;
 }
 

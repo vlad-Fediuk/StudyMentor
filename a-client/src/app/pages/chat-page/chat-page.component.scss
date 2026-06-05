@@ -2,67 +2,40 @@
 
 $message-gap: 10px;
 $message-role-gap: 30px;
+$prompt-bottom: 34px;
+$prompt-height: 52px;
+$prompt-safe-gap: 48px;
+$prompt-reserved-space: $prompt-bottom + $prompt-height + $prompt-safe-gap;
 
 :host {
   display: block;
 }
 
 .chat-page {
+  --sidebar-width: 286px;
+  --content-padding-right: 24px;
+  --content-gap: 24px;
+
   min-height: 100dvh;
-<<<<<<< Updated upstream
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 96px 24px 0;
-  background: colors.$white;
-=======
   display: grid;
-  grid-template-columns: minmax(286px, 286px) minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  gap: var(--content-gap);
   align-items: stretch;
-  padding: 32px 24px 0 0;
-  background: #f8fafc;
->>>>>>> Stashed changes
-  scroll-padding-bottom: 150px;
-  scrollbar-color: colors.$scrollbar transparent;
-  scrollbar-width: thin;
+  padding: 32px var(--content-padding-right) 0 0;
+  background: colors.$white;
+  scroll-padding-bottom: $prompt-reserved-space;
 }
 
-<<<<<<< Updated upstream
-=======
+.chat-page.sidebar-collapsed {
+  --sidebar-width: 70px;
+  --prompt-backdrop-left: 0;
+}
+
 .chat-panel {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 20px;
-}
-
-.chat-page::after {
-  content: '';
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 0;
-  height: 128px;
-  background: #fff;
-  pointer-events: none;
-}
-
->>>>>>> Stashed changes
-.chat-page::-webkit-scrollbar {
-  width: 12px;
-}
-
-.chat-page::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chat-page::-webkit-scrollbar-thumb {
-  min-height: 72px;
-  border: 3px solid transparent;
-  border-radius: 999px;
-  background: colors.$scrollbar;
-  background-clip: content-box;
 }
 
 .messages {
@@ -71,11 +44,16 @@ $message-role-gap: 30px;
   display: flex;
   flex-direction: column;
   gap: $message-gap;
-  padding-bottom: 98px;
+}
+
+.messages-end-spacer {
+  flex: 0 0 $prompt-reserved-space;
 }
 
 .message {
   max-width: 82%;
+  width: fit-content;
+  min-width: 0;
   align-self: flex-start;
   padding: 11px 15px;
   border: 1px solid mix(colors.$border, colors.$white, 55%);
@@ -83,14 +61,21 @@ $message-role-gap: 30px;
   color: colors.$black;
   background: colors.$white;
   line-height: 1.45;
+  overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
-.message :is(p, ul, ol) {
-  margin: 0 0 10px;
+.message * {
+  max-width: 100%;
 }
 
-.message :is(p, ul, ol):last-child {
+.message :is(p, ul, ol) {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.message :is(p, ul, ol, hr):last-child {
   margin-bottom: 0;
 }
 
@@ -98,19 +83,57 @@ $message-role-gap: 30px;
   padding-left: 22px;
 }
 
+.message li {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.message li > :is(p, ul, ol) {
+  margin-top: 4px;
+  margin-bottom: 6px;
+}
+
+.message li > :is(ul, ol) {
+  padding-left: 18px;
+}
+
+.message hr {
+  margin: 14px 0;
+  border: 0;
+  border-top: 1px solid colors.$border;
+}
+
 .message pre {
   overflow-x: auto;
+  overflow-wrap: normal;
   padding: 10px 12px;
   border-radius: 8px;
   background: mix(colors.$surface, colors.$white, 70%);
   white-space: pre;
 }
 
+.message pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.message code:not(pre code) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .message-user {
   align-self: flex-end;
-  color: colors.$black;
   background: colors.$surface;
-  border-color: mix(colors.$border, colors.$white, 55%);
+}
+
+.message-assistant {
+  white-space: normal;
 }
 
 .message-user + .message-assistant,
@@ -126,13 +149,16 @@ $message-role-gap: 30px;
 
 .prompt-bar {
   position: fixed;
-  right: 24px;
-  bottom: 34px;
-  left: 24px;
+  right: var(--content-padding-right);
+  bottom: $prompt-bottom;
+  left: calc(var(--sidebar-width) + var(--content-gap));
   margin: 0 auto;
-  z-index: 3;
-  width: min(100%, 680px);
-  min-height: 52px;
+  z-index: 10;
+  width: min(
+    calc(100% - var(--sidebar-width) - var(--content-gap) - var(--content-padding-right)),
+    760px
+  );
+  min-height: $prompt-height;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -147,9 +173,9 @@ $message-role-gap: 30px;
   position: fixed;
   right: 0;
   bottom: 0;
-  left: 0;
+  left: var(--prompt-backdrop-left, var(--sidebar-width));
   z-index: 2;
-  height: 110px;
+  height: $prompt-reserved-space;
   background:
     linear-gradient(
       to bottom,
@@ -203,17 +229,20 @@ $message-role-gap: 30px;
   opacity: 0.45;
 }
 
-<<<<<<< Updated upstream
 .scroll-button {
   position: fixed;
   bottom: 104px;
-  left: 50%;
+  left: calc(var(--sidebar-width) + (100% - var(--sidebar-width)) / 2);
   z-index: 4;
   width: 44px;
   height: 44px;
   border: 1px solid colors.$border;
   border-radius: 50%;
   background: colors.$surface;
+  background-image: url('/assets/icons/chat-scroll-down.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
   box-shadow: 0 8px 22px rgba(colors.$black, 0.05);
   cursor: pointer;
   opacity: 0;
@@ -228,9 +257,14 @@ $message-role-gap: 30px;
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, 0);
-=======
+}
+
 @media (max-width: 980px) {
   .chat-page {
+    --sidebar-width: 0px;
+    --content-padding-right: 18px;
+    --content-gap: 0;
+
     display: flex;
     flex-direction: column;
     padding: 24px 18px 0;
@@ -239,28 +273,40 @@ $message-role-gap: 30px;
   .chat-panel {
     gap: 18px;
   }
->>>>>>> Stashed changes
+
+  .prompt-bar {
+    width: min(100%, 760px);
+  }
+
+  .scroll-button {
+    left: 50%;
+  }
 }
 
 @media (max-width: 640px) {
+  $mobile-prompt-bottom: 24px;
+  $mobile-prompt-height: 50px;
+  $mobile-prompt-safe-gap: 40px;
+  $mobile-prompt-reserved-space: $mobile-prompt-bottom + $mobile-prompt-height +
+    $mobile-prompt-safe-gap;
+
   .chat-page {
     padding: 72px 18px 0;
+    scroll-padding-bottom: $mobile-prompt-reserved-space;
   }
 
-  .messages {
-    padding-bottom: 86px;
+  .messages-end-spacer {
+    flex-basis: $mobile-prompt-reserved-space;
   }
 
   .prompt-bar {
-    right: 18px;
-    bottom: 24px;
-    left: 18px;
-    min-height: 50px;
+    bottom: $mobile-prompt-bottom;
+    min-height: $mobile-prompt-height;
     padding: 6px 7px 6px 16px;
   }
 
   .prompt-backdrop {
-    height: 94px;
+    height: $mobile-prompt-reserved-space;
   }
 
   .send-button {
