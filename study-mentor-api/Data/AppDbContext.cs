@@ -11,6 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<Lecture> Lectures => Set<Lecture>();
 
+    public DbSet<LectureChunk> LectureChunks => Set<LectureChunk>();
+
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
@@ -30,6 +32,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ConfigureBaseEntity<Major>(modelBuilder);
         ConfigureBaseEntity<Subject>(modelBuilder);
         ConfigureBaseEntity<Lecture>(modelBuilder);
+        ConfigureBaseEntity<LectureChunk>(modelBuilder);
         ConfigureBaseEntity<ChatMessage>(modelBuilder);
         ConfigureBaseEntity<ChatSession>(modelBuilder);
         ConfigureBaseEntity<Exercise>(modelBuilder);
@@ -64,6 +67,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithOne(e => e.Lecture)
                 .HasForeignKey(e => e.LectureId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(e => e.Chunks)
+                .WithOne(e => e.Lecture)
+                .HasForeignKey(e => e.LectureId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<LectureChunk>(entity =>
+        {
+            entity.ToTable("lecture_chunks");
+            entity.Property(e => e.Content).IsRequired();
         });
 
         modelBuilder.Entity<ChatSession>(entity =>

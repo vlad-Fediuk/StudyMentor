@@ -139,6 +139,30 @@ namespace StudyMentorApi.Migrations
                     b.ToTable("lectures", (string)null);
                 });
 
+            modelBuilder.Entity("StudyMentorApi.Data.Models.LectureChunk", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("LectureId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LectureId");
+
+                    b.ToTable("lecture_chunks", (string)null);
+                });
+
             modelBuilder.Entity("StudyMentorApi.Data.Models.Major", b =>
                 {
                     b.Property<Guid>("Id")
@@ -251,6 +275,17 @@ namespace StudyMentorApi.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("StudyMentorApi.Data.Models.LectureChunk", b =>
+                {
+                    b.HasOne("StudyMentorApi.Data.Models.Lecture", "Lecture")
+                        .WithMany("Chunks")
+                        .HasForeignKey("LectureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lecture");
+                });
+
             modelBuilder.Entity("StudyMentorApi.Data.Models.Subject", b =>
                 {
                     b.HasOne("StudyMentorApi.Data.Models.Major", "Major")
@@ -275,6 +310,8 @@ namespace StudyMentorApi.Migrations
             modelBuilder.Entity("StudyMentorApi.Data.Models.Lecture", b =>
                 {
                     b.Navigation("ChatSessions");
+
+                    b.Navigation("Chunks");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.Major", b =>
