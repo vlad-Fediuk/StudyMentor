@@ -29,8 +29,9 @@ public sealed class AiModelRouter(
             StringComparer.OrdinalIgnoreCase);
         Exception? lastException = null;
 
-        foreach (var candidate in candidates)
+        for (var index = 0; index < candidates.Count; index++)
         {
+            var candidate = candidates[index];
             if (!clients.TryGetValue(candidate.Provider.Type, out var client))
             {
                 logger.LogWarning(
@@ -45,7 +46,11 @@ public sealed class AiModelRouter(
                     CreateProviderRequest(request, candidate),
                     cancellationToken);
 
-                return new AiChatResponse(response.Provider, response.Model, response.Content);
+                return new AiChatResponse(
+                    response.Provider,
+                    response.Model,
+                    response.Content,
+                    FallbackUsed: index > 0);
             }
             catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
             {
