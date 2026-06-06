@@ -19,6 +19,7 @@ public static class ServiceExtensions
         services.AddScoped<AiChat.AiChatService>();
         services.AddScoped<Groups.GroupService>();
         services.AddScoped<Users.UserService>();
+        services.AddScoped<IPromptTemplateProvider, PromptTemplateProvider>();
         services.AddScoped<IPromptComposer, PromptComposer>();
         services.AddScoped<IAiStructuredOutputParser, AiStructuredOutputParser>();
         services.AddScoped<IAiGenerationService, AiGenerationService>();
