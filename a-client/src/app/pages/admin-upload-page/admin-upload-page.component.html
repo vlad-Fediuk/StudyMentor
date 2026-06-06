@@ -1,0 +1,103 @@
+<div class="admin-upload-container">
+  <h1>Admin Upload Page</h1>
+  <p>Upload lecture content files (.txt or .md) to create chunks for AI processing.</p>
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  <div class="form-section">
+    <div class="form-group">
+      <label for="subject-select">Subject</label>
+      <select
+        id="subject-select"
+        [(ngModel)]="selectedSubjectId"
+        (change)="onSubjectChange()"
+        [disabled]="isLoadingSubjects">
+        <option value="">-- Select Subject --</option>
+        @for (subject of subjects; track subject.id) {
+          <option [value]="subject.id">{{ subject.name }}</option>
+        }
+      </select>
+      @if (isLoadingSubjects) {
+        <span class="loading-text">Loading subjects...</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="lecture-select">Lecture</label>
+      <select
+        id="lecture-select"
+        [(ngModel)]="selectedLectureId"
+        (change)="onLectureChange()"
+        [disabled]="isLoadingLectures || !selectedSubjectId">
+        <option value="">-- Select Lecture --</option>
+        @for (lecture of filteredLectures; track lecture.id) {
+          <option [value]="lecture.id">{{ lecture.name }}</option>
+        }
+      </select>
+      @if (isLoadingLectures) {
+        <span class="loading-text">Loading lectures...</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="file-input">File (.txt or .md)</label>
+      <input
+        id="file-input"
+        type="file"
+        accept=".txt,.md"
+        (change)="onFileSelected($event)" />
+    </div>
+
+    <div class="button-group">
+      <button
+        (click)="uploadFile()"
+        [disabled]="!canUpload"
+        class="btn btn-primary">
+        @if (isUploading) {
+          Uploading...
+        } @else {
+          Upload File
+        }
+      </button>
+
+      <button
+        (click)="deleteChunks()"
+        [disabled]="!canDelete"
+        class="btn btn-danger">
+        @if (isDeleting) {
+          Deleting...
+        } @else {
+          Clear Chunks
+        }
+      </button>
+    </div>
+  </div>
+
+  <div class="chunks-section">
+    <h2>Lecture Chunks</h2>
+    @if (isLoadingChunks) {
+      <p>Loading chunks...</p>
+    } @else if (chunks.length === 0) {
+      <p class="empty-state">No chunks uploaded for this lecture yet.</p>
+    } @else {
+      <div class="chunks-list">
+        @for (chunk of chunks; track chunk.id) {
+          <div class="chunk-card">
+            <div class="chunk-header">
+              <span class="chunk-number">Chunk #{{ chunk.order }}</span>
+            </div>
+            <div class="chunk-content">
+              <pre>{{ chunk.content }}</pre>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
