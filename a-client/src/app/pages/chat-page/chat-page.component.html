@@ -1,4 +1,4 @@
-<main class="chat-page">
+<main class="chat-page" [class.exercise-panel-open]="isFlashcardsOpen">
   <section class="messages" aria-live="polite">
     @for (message of messages; track $index) {
       <article class="message" [class.message-user]="message.role === 'user'">
@@ -7,7 +7,7 @@
     }
 
     @if (isSending) {
-      <article class="message message-assistant">AI думає...</article>
+      <article class="message message-assistant">ШІ думає...</article>
     }
 
     @if (errorMessage) {
@@ -17,16 +17,25 @@
 
   <form
     class="prompt-bar"
-    aria-label="Ask anything"
+    aria-label="Запит до ментора"
     autocomplete="off"
     (submit)="sendMessage(messageInput, $event)"
   >
+    <button
+      class="cards-button"
+      type="button"
+      aria-label="Відкрити вправи"
+      (click)="openFlashcards()"
+    >
+      Вправи
+    </button>
+
     <input
       #messageInput
       class="prompt-input"
       type="text"
       name="study-mentor-chat-message"
-      placeholder="Напиши повідомлення..."
+      placeholder="Напишіть повідомлення..."
       aria-label="Повідомлення"
       autocomplete="off"
       autocapitalize="off"
@@ -59,4 +68,119 @@
       </svg>
     </button>
   </form>
+
+  @if (isFlashcardsOpen) {
+    <aside class="exercise-panel" aria-label="Панель вправ">
+      @if (!isCardStudyOpen) {
+        <header class="exercise-panel-header">
+          <div>
+            <p>Практика</p>
+            <h2>{{ selectedDeck?.name || 'Вправи' }}</h2>
+          </div>
+
+          <button
+            class="close-button"
+            type="button"
+            aria-label="Закрити вправи"
+            (click)="closeFlashcards()"
+          >
+            x
+          </button>
+        </header>
+
+        <section class="exercise-filters" aria-label="Фільтри вправ">
+          <label>
+            Тип
+            <select [value]="selectedExerciseType" (change)="selectExerciseType($event)">
+              <option value="all">Усі</option>
+              <option value="flashcards">Картки</option>
+              <option value="tests">Тести</option>
+              <option value="matching">Пари</option>
+              <option value="open">Відкриті відповіді</option>
+            </select>
+          </label>
+
+          <label>
+            Набір
+            <select [value]="selectedDeck?.id || ''" (change)="selectDeckById($event)">
+              @for (deck of decks; track deck.id) {
+                <option [value]="deck.id">{{ deck.name }}</option>
+              }
+            </select>
+          </label>
+        </section>
+
+        <section class="exercise-list-view">
+          <div class="exercise-list-header">
+            <span>Завдання</span>
+            <button type="button" (click)="createSampleDeck()" [disabled]="isCreatingSampleDeck">
+              {{ isCreatingSampleDeck ? 'Створення...' : 'Приклад' }}
+            </button>
+          </div>
+
+          @if (isLoadingFlashcards) {
+            <p class="state-text">Завантаження вправ...</p>
+          } @else if (flashcardsErrorMessage) {
+            <p class="flashcards-error">{{ flashcardsErrorMessage }}</p>
+          } @else if (!selectedDeck) {
+            <p class="state-text">Вправ поки немає.</p>
+          } @else if (selectedExerciseType === 'flashcards' || selectedExerciseType === 'all') {
+            <div class="cards-list">
+              @for (card of selectedDeck.cards; track card.id) {
+                <button
+                  type="button"
+                  class="card-list-item"
+                  [class.active-card]="currentCard?.id === card.id"
+                  (click)="selectCard(card)"
+                >
+                  <strong>{{ card.term }}</strong>
+                  <span>Картка {{ selectedDeck.cards.indexOf(card) + 1 }}</span>
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="state-text">Для цього фільтра поки немає завдань.</p>
+          }
+        </section>
+      } @else {
+        <section class="card-study-view">
+          <header class="card-study-header">
+            <button
+              class="back-button"
+              type="button"
+              aria-label="Назад до списку"
+              (click)="backToExerciseList()"
+            >
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Назад
+            </button>
+
+            <span>{{ currentCardIndex + 1 }} / {{ totalCount }}</span>
+          </header>
+
+          @if (currentCard) {
+            <button type="button" class="flashcard-large" (click)="flipCard()">
+              <strong>{{ isBackVisible ? currentCard.definition : currentCard.term }}</strong>
+            </button>
+
+            <div class="card-nav-actions">
+              <button type="button" aria-label="Попередня картка" (click)="showPreviousCard()">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+
+              <button type="button" aria-label="Наступна картка" (click)="showNextCard()">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          }
+        </section>
+      }
+    </aside>
+  }
 </main>

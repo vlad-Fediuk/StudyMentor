@@ -18,6 +18,7 @@ public static class ServiceExtensions
         services.AddScoped<AiChat.AiChatService>();
         services.AddScoped<Groups.GroupService>();
         services.AddScoped<Users.UserService>();
+        services.AddScoped<Flashcards.FlashcardService>();
         services.AddSingleton<PromptTemplateService>();
 
         services.Configure<NvidiaAiSettings>(

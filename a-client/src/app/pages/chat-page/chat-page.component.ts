@@ -41,6 +41,23 @@ interface AiChatSendMessageResponse {
   assistantMessage: ChatMessage;
 }
 
+interface ChatMessageResponse {
+  id: string;
+}
+
+interface CardResponse {
+  id: string;
+  term: string;
+  definition: string;
+}
+
+interface FlashcardResponse {
+  id: string;
+  name: string;
+  chatMessageId: string;
+  cards: CardResponse[];
+}
+
 @Component({
   selector: 'app-chat-page',
   standalone: true,
@@ -60,9 +77,159 @@ export class ChatPageComponent implements OnInit {
   messages: ChatMessage[] = [];
   isSending = false;
   errorMessage = '';
+  decks: FlashcardResponse[] = [];
+  selectedDeck: FlashcardResponse | null = null;
+  currentCard: CardResponse | null = null;
+  isBackVisible = false;
+  isFlashcardsOpen = false;
+  isLoadingFlashcards = false;
+  isCreatingSampleDeck = false;
+  isCardStudyOpen = false;
+  flashcardsErrorMessage = '';
+  selectedExerciseType = 'flashcards';
 
   async ngOnInit(): Promise<void> {
-    await this.loadMessages();
+    await Promise.all([this.loadMessages(), this.loadFlashcards(false)]);
+  }
+
+  get currentCardIndex(): number {
+    if (!this.selectedDeck || !this.currentCard) {
+      return -1;
+    }
+
+    return this.selectedDeck.cards.findIndex((card) => card.id === this.currentCard?.id);
+  }
+
+  get totalCount(): number {
+    return this.selectedDeck?.cards.length ?? 0;
+  }
+
+  async openFlashcards(): Promise<void> {
+    this.isFlashcardsOpen = !this.isFlashcardsOpen;
+
+    if (this.isFlashcardsOpen && this.decks.length === 0) {
+      await this.loadFlashcards();
+    }
+  }
+
+  closeFlashcards(): void {
+    this.isFlashcardsOpen = false;
+    this.isCardStudyOpen = false;
+  }
+
+  selectDeck(deck: FlashcardResponse): void {
+    this.selectedDeck = deck;
+    this.currentCard = deck.cards[0] ?? null;
+    this.isBackVisible = false;
+    this.isCardStudyOpen = false;
+    this.flashcardsErrorMessage = '';
+  }
+
+  selectDeckById(event: Event): void {
+    const deckId = (event.target as HTMLSelectElement).value;
+    const deck = this.decks.find((item) => item.id === deckId);
+    if (deck) {
+      this.selectDeck(deck);
+    }
+  }
+
+  selectExerciseType(event: Event): void {
+    this.selectedExerciseType = (event.target as HTMLSelectElement).value;
+  }
+
+  selectCard(card: CardResponse): void {
+    this.currentCard = card;
+    this.isBackVisible = false;
+    this.isCardStudyOpen = true;
+  }
+
+  backToExerciseList(): void {
+    this.isCardStudyOpen = false;
+    this.isBackVisible = false;
+  }
+
+  flipCard(): void {
+    this.isBackVisible = !this.isBackVisible;
+  }
+
+  showPreviousCard(): void {
+    if (!this.selectedDeck || this.selectedDeck.cards.length === 0) {
+      return;
+    }
+
+    const index = this.currentCardIndex <= 0
+      ? this.selectedDeck.cards.length - 1
+      : this.currentCardIndex - 1;
+    this.currentCard = this.selectedDeck.cards[index];
+    this.isBackVisible = false;
+  }
+
+  showNextCard(): void {
+    if (!this.selectedDeck || this.selectedDeck.cards.length === 0) {
+      return;
+    }
+
+    const index = this.currentCardIndex < 0 || this.currentCardIndex === this.selectedDeck.cards.length - 1
+      ? 0
+      : this.currentCardIndex + 1;
+    this.currentCard = this.selectedDeck.cards[index];
+    this.isBackVisible = false;
+  }
+
+  restartDeck(): void {
+    if (this.selectedDeck) {
+      this.selectDeck(this.selectedDeck);
+    }
+  }
+
+  async createSampleDeck(): Promise<void> {
+    if (this.isCreatingSampleDeck) {
+      return;
+    }
+
+    this.isCreatingSampleDeck = true;
+    this.flashcardsErrorMessage = '';
+
+    try {
+      const chatId = await this.getOrCreateChatId();
+      const message = await firstValueFrom(
+        this.http.post<ChatMessageResponse>(`${this.apiUrl}/chat-messages/`, {
+          chatSessionId: chatId,
+          content: 'Вправа з картками',
+          timestamp: null,
+          role: 1,
+          sequenceNumber: 0
+        })
+      );
+
+      const deck = await firstValueFrom(
+        this.http.post<FlashcardResponse>(`${this.apiUrl}/flashcards/`, {
+          name: 'Основи програмування',
+          chatMessageId: message.id,
+          cards: [
+            {
+              term: 'Змінна',
+              definition: 'Іменоване місце для зберігання значення, яке можна використати пізніше.'
+            },
+            {
+              term: 'Функція',
+              definition: 'Повторно використовуваний блок коду, який виконує конкретну задачу.'
+            },
+            {
+              term: 'Цикл',
+              definition: 'Конструкція керування, яка повторює код, доки умова істинна.'
+            }
+          ]
+        })
+      );
+
+      this.decks = [...this.decks, deck];
+      this.selectDeck(deck);
+    } catch (error) {
+      this.flashcardsErrorMessage = this.getErrorMessage(error);
+    } finally {
+      this.isCreatingSampleDeck = false;
+    }
   }
 
   async sendMessage(input: HTMLInputElement, event: SubmitEvent): Promise<void> {
@@ -231,6 +398,30 @@ export class ChatPageComponent implements OnInit {
     );
   }
 
+  private async loadFlashcards(shouldSetError = true): Promise<void> {
+    this.isLoadingFlashcards = true;
+    this.flashcardsErrorMessage = '';
+
+    try {
+      this.decks = await firstValueFrom(
+        this.http.get<FlashcardResponse[]>(`${this.apiUrl}/flashcards/`)
+      );
+
+      if (this.decks.length > 0) {
+        const existingDeck = this.selectedDeck
+          ? this.decks.find((deck) => deck.id === this.selectedDeck?.id)
+          : null;
+        this.selectDeck(existingDeck ?? this.decks[0]);
+      }
+    } catch (error) {
+      if (shouldSetError) {
+        this.flashcardsErrorMessage = this.getErrorMessage(error);
+      }
+    } finally {
+      this.isLoadingFlashcards = false;
+    }
+  }
+
   private async loadMessages(shouldSetError = true): Promise<void> {
     const chatId = this.getStoredChatId();
     if (!chatId) {
@@ -272,14 +463,14 @@ export class ChatPageComponent implements OnInit {
 
       if (apiMessage) {
         if (apiMessage.includes('HttpClient.Timeout')) {
-          return 'AI did not respond in time. Backend timed out while calling the external AI service.';
+          return 'ШІ не відповів вчасно. Backend перевищив час очікування відповіді зовнішнього AI-сервісу.';
         }
 
         return apiMessage;
       }
 
       if (error.status === 0) {
-        return 'API is unavailable. Check that the backend is running on localhost:5132.';
+        return 'API недоступний. Перевір, що backend запущений на localhost:5132.';
       }
     }
 
@@ -287,6 +478,6 @@ export class ChatPageComponent implements OnInit {
       return error.message;
     }
 
-    return 'Failed to get AI response.';
+    return 'Не вдалося отримати відповідь.';
   }
 }
