@@ -18,6 +18,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<Exercise> Exercises => Set<Exercise>();
 
+    public DbSet<Flashcard> Flashcards => Set<Flashcard>();
+
+    public DbSet<Card> Cards => Set<Card>();
+
     public DbSet<Group> Groups => Set<Group>();
 
     public DbSet<User> Users => Set<User>();
@@ -40,6 +44,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ConfigureBaseEntity<ChatMessage>(modelBuilder);
         ConfigureBaseEntity<ChatSession>(modelBuilder);
         ConfigureBaseEntity<Exercise>(modelBuilder);
+        ConfigureBaseEntity<Card>(modelBuilder);
         ConfigureBaseEntity<Group>(modelBuilder);
         ConfigureBaseEntity<User>(modelBuilder);
         ConfigureBaseEntity<AiProvider>(modelBuilder);
@@ -102,6 +107,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.ToTable("exercises");
             entity.Property(e => e.Name).IsRequired();
+            entity.HasDiscriminator<string>("ExerciseType")
+                .HasValue<Exercise>("Exercise")
+                .HasValue<Flashcard>("Flashcard");
+        });
+
+        modelBuilder.Entity<Flashcard>(entity =>
+        {
+            entity.HasMany(e => e.Cards)
+                .WithOne(e => e.Flashcard)
+                .HasForeignKey(e => e.FlashcardId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Card>(entity =>
+        {
+            entity.ToTable("cards");
+            entity.Property(e => e.Term).IsRequired();
+            entity.Property(e => e.Definition).IsRequired();
         });
 
         modelBuilder.Entity<Group>(entity =>
