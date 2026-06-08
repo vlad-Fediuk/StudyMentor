@@ -4,7 +4,9 @@ using StudyMentorApi.Data;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Extensions;
+using StudyMentorApi.Flashcards;
 using StudyMentorApi.Groups;
+using StudyMentorApi.LearningContent;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Subjects;
@@ -67,6 +69,8 @@ public class Program
         app.MapGroupEndpoints();
         app.MapUserEndpoints();
         app.MapChatSessionEndpoints();
+        app.MapFlashcardEndpoints();
+        app.MapLearningContentEndpoints();
         app.Run();
     }
 }
