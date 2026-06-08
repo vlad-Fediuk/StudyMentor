@@ -1,6 +1,8 @@
 using StudyMentorApi.Authentication.Jwt;
 using StudyMentorApi.Services.Ai;
 using StudyMentorApi.Services.Ai.Prompts;
+using StudyMentorApi.Services.Ai.StructuredOutput;
+using StudyMentorApi.LearningContent;
 
 namespace StudyMentorApi.Extensions;
 
@@ -24,7 +26,11 @@ public static class ServiceExtensions
         services.AddSingleton<JwtAuthenticationValidator>();
         services.AddScoped<Flashcards.FlashcardService>();
         services.AddSingleton<PromptTemplateService>();
-
+        services.AddScoped<LearningContentGenerationService>();
+        services.AddScoped<IPromptTemplateProvider, PromptTemplateProvider>();
+        services.AddScoped<IPromptComposer, PromptComposer>();
+        services.AddScoped<IAiStructuredOutputParser, AiStructuredOutputParser>();
+        services.AddScoped<IAiGenerationService, AiGenerationService>();
         services.AddScoped<IAiChatService, AiModelRouter>();
         services.AddHttpClient<IAiProviderClient, LmStudioProviderClient>(client =>
         {

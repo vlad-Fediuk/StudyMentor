@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudyMentorApi.Data;
@@ -11,9 +12,11 @@ using StudyMentorApi.Data;
 namespace StudyMentorApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260606133502_AddPromptTemplates")]
+    partial class AddPromptTemplates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,7 +163,7 @@ namespace StudyMentorApi.Migrations
                         new
                         {
                             Id = new Guid("58f2f8b9-0d72-4c49-9dd0-6da81f4d4a01"),
-                            BaseUrl = "http://localhost:1234/v1/chat/completions",
+                            BaseUrl = "http://localhost:1234/api/v1/chat",
                             IsEnabled = true,
                             Name = "LmStudio",
                             Priority = 1,
@@ -178,31 +181,6 @@ namespace StudyMentorApi.Migrations
                             TimeoutSeconds = 300,
                             Type = "nvidia"
                         });
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Card", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Definition")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("FlashcardId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Term")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlashcardId");
-
-                    b.ToTable("cards", (string)null);
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
@@ -273,11 +251,6 @@ namespace StudyMentorApi.Migrations
                     b.Property<Guid>("ChatMessageId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ExerciseType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -287,10 +260,6 @@ namespace StudyMentorApi.Migrations
                     b.HasIndex("ChatMessageId");
 
                     b.ToTable("exercises", (string)null);
-
-                    b.HasDiscriminator<string>("ExerciseType").HasValue("Exercise");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.Group", b =>
@@ -328,32 +297,6 @@ namespace StudyMentorApi.Migrations
                     b.HasIndex("SubjectId");
 
                     b.ToTable("lectures", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("7298c84c-3a33-4827-b643-8a12d5523c09"),
-                            Name = "Вступ до ООП",
-                            SubjectId = new Guid("05a89d91-f68b-46ab-b8ff-870e5a9d6114")
-                        },
-                        new
-                        {
-                            Id = new Guid("ef92d905-02ed-42ad-9583-6d1470461522"),
-                            Name = "Інкапсуляція та наслідування",
-                            SubjectId = new Guid("05a89d91-f68b-46ab-b8ff-870e5a9d6114")
-                        },
-                        new
-                        {
-                            Id = new Guid("647fda35-6dc0-46d3-8f10-829d4f670189"),
-                            Name = "Основи тестування",
-                            SubjectId = new Guid("ff026d26-6ba6-4a84-9056-9f8f35dd7701")
-                        },
-                        new
-                        {
-                            Id = new Guid("ee89226b-5a41-4dd8-a898-44a38941c1d2"),
-                            Name = "Unit-тестування",
-                            SubjectId = new Guid("ff026d26-6ba6-4a84-9056-9f8f35dd7701")
-                        });
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.Major", b =>
@@ -370,13 +313,6 @@ namespace StudyMentorApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("majors", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("b03b7164-1f6a-4f9f-b5de-078f394a42e1"),
-                            Name = "Комп'ютерні науки"
-                        });
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.PromptTemplate", b =>
@@ -475,20 +411,6 @@ namespace StudyMentorApi.Migrations
                     b.HasIndex("MajorId");
 
                     b.ToTable("subjects", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("05a89d91-f68b-46ab-b8ff-870e5a9d6114"),
-                            MajorId = new Guid("b03b7164-1f6a-4f9f-b5de-078f394a42e1"),
-                            Name = "ООП"
-                        },
-                        new
-                        {
-                            Id = new Guid("ff026d26-6ba6-4a84-9056-9f8f35dd7701"),
-                            MajorId = new Guid("b03b7164-1f6a-4f9f-b5de-078f394a42e1"),
-                            Name = "Тестування"
-                        });
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.User", b =>
@@ -497,9 +419,6 @@ namespace StudyMentorApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
 
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
@@ -512,20 +431,9 @@ namespace StudyMentorApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.PrimitiveCollection<string[]>("Roles")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.HasKey("Id");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Flashcard", b =>
-                {
-                    b.HasBaseType("StudyMentorApi.Data.Models.Exercise");
-
-                    b.HasDiscriminator().HasValue("Flashcard");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.AiModel", b =>
@@ -537,17 +445,6 @@ namespace StudyMentorApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Provider");
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Card", b =>
-                {
-                    b.HasOne("StudyMentorApi.Data.Models.Flashcard", "Flashcard")
-                        .WithMany("Cards")
-                        .HasForeignKey("FlashcardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Flashcard");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
@@ -646,11 +543,6 @@ namespace StudyMentorApi.Migrations
             modelBuilder.Entity("StudyMentorApi.Data.Models.User", b =>
                 {
                     b.Navigation("ChatSessions");
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Flashcard", b =>
-                {
-                    b.Navigation("Cards");
                 });
 #pragma warning restore 612, 618
         }

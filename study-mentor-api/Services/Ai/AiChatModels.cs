@@ -17,4 +17,5 @@ public sealed record AiChatRequest
 public sealed record AiChatResponse(
     string Provider,
     string Model,
-    string Content);
+    string Content,
+    bool FallbackUsed = false);
