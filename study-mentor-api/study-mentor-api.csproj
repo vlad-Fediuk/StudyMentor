@@ -25,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Content Include="Services\Ai\Prompts\*.md" CopyToOutputDirectory="PreserveNewest" />
         <Content Include="Services\Ai\Prompts\Templates\*.md" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
