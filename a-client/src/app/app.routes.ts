@@ -3,6 +3,13 @@ import { authGuard } from './features/auth/data-access/auth.guard';
 
 export const routes: Routes = [
   {
+    path: 'ai-disclaimer',
+    loadComponent: () =>
+      import('./pages/ai-disclaimer-page/ai-disclaimer-page.component').then(
+        (m) => m.AiDisclaimerPageComponent
+      )
+  },
+  {
     path: '',
     pathMatch: 'full',
     redirectTo: 'chat'

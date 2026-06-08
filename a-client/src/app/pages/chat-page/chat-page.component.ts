@@ -1,7 +1,19 @@
-import { isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  PLATFORM_ID,
+  ViewChild,
+  inject
+} from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { marked } from 'marked';
 import { firstValueFrom } from 'rxjs';
+
+import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 
 type ChatRole = 'user' | 'assistant';
 
@@ -44,25 +56,62 @@ interface AiChatSendMessageResponse {
 @Component({
   selector: 'app-chat-page',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, RouterLink, SidebarComponent],
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })
 export class ChatPageComponent implements OnInit {
+  @ViewChild('messagesEnd') private messagesEnd?: ElementRef<HTMLElement>;
+
   private readonly http = inject(HttpClient);
+  private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly apiUrl = 'http://localhost:5132';
   private readonly chatIdStorageKey = 'studyMentor.chatId';
+  private readonly scrollButtonOffset = 2000;
   private readonly guidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+  selectedLectureId: string | null = null;
   messages: ChatMessage[] = [];
   isSending = false;
   errorMessage = '';
+  showScrollButton = false;
+  isSidebarCollapsed = false;
 
-  async ngOnInit(): Promise<void> {
-    await this.loadMessages();
+  ngOnInit(): void {
+    if (this.isBrowser) {
+      history.scrollRestoration = 'manual';
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    this.route.queryParamMap.subscribe((params) => {
+      const lectureId = params.get('lectureId');
+      this.selectedLectureId = lectureId;
+      void this.loadMessages(false);
+    });
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.showScrollButton = this.shouldShowScrollButton();
+  }
+
+  goToLatestMessage(): void {
+    this.scrollToBottom();
+  }
+
+  renderMessageContent(message: ChatMessage): string {
+    if (message.role === 'user') {
+      return this.escapeHtml(message.content);
+    }
+
+    return marked.parse(message.content, {
+      async: false,
+      breaks: true,
+      gfm: true
+    }) as string;
   }
 
   async sendMessage(input: HTMLInputElement, event: SubmitEvent): Promise<void> {
@@ -74,6 +123,7 @@ export class ChatPageComponent implements OnInit {
     }
 
     input.value = '';
+    input.focus();
     this.errorMessage = '';
     this.isSending = true;
 
@@ -83,6 +133,8 @@ export class ChatPageComponent implements OnInit {
       status: 'pending'
     };
     this.messages = [...this.messages, pendingMessage];
+    this.showScrollButton = false;
+    this.scrollToBottom(false);
 
     try {
       const response = await this.sendMessageToApi(content);
@@ -92,14 +144,27 @@ export class ChatPageComponent implements OnInit {
         response.userMessage,
         response.assistantMessage
       ];
+      if (this.isNearBottom()) {
+        this.scrollToBottom();
+      } else {
+        this.showScrollButton = true;
+      }
     } catch (error) {
       this.messages = this.messages.filter((message) => message !== pendingMessage);
-      input.value = content;
+      this.scrollToBottom();
+      if (!input.value.trim()) {
+        input.value = content;
+      }
       this.errorMessage = this.getErrorMessage(error);
       await this.loadMessages(false);
     } finally {
       this.isSending = false;
+      requestAnimationFrame(() => input.focus());
     }
+  }
+
+  private getLectureChatKey(lectureId: string): string {
+    return `${this.chatIdStorageKey}.${lectureId}`;
   }
 
   private getStoredChatId(): string | null {
@@ -107,10 +172,12 @@ export class ChatPageComponent implements OnInit {
       return null;
     }
 
-    const urlChatId = new URLSearchParams(window.location.search).get('chatId');
-    if (urlChatId && this.guidPattern.test(urlChatId)) {
-      localStorage.setItem(this.chatIdStorageKey, urlChatId);
-      return urlChatId;
+    if (this.selectedLectureId) {
+      const lectureChatId = localStorage.getItem(this.getLectureChatKey(this.selectedLectureId));
+      if (lectureChatId && this.guidPattern.test(lectureChatId)) {
+        return lectureChatId;
+      }
+      return null;
     }
 
     const existingChatId = localStorage.getItem(this.chatIdStorageKey);
@@ -129,15 +196,17 @@ export class ChatPageComponent implements OnInit {
     }
 
     const user = await this.getOrCreateUser();
-    const lecture = await this.getOrCreateLecture();
+    const lectureId = this.selectedLectureId ?? (await this.getOrCreateLecture()).id;
     const session = await firstValueFrom(
       this.http.post<ChatSessionResponse>(`${this.apiUrl}/chat-sessions/`, {
         userId: user.id,
-        lectureId: lecture.id
+        lectureId
       })
     );
 
-    if (this.isBrowser) {
+    if (this.isBrowser && this.selectedLectureId) {
+      localStorage.setItem(this.getLectureChatKey(lectureId), session.id);
+    } else if (this.isBrowser) {
       localStorage.setItem(this.chatIdStorageKey, session.id);
     }
 
@@ -234,6 +303,7 @@ export class ChatPageComponent implements OnInit {
   private async loadMessages(shouldSetError = true): Promise<void> {
     const chatId = this.getStoredChatId();
     if (!chatId) {
+      this.messages = [];
       return;
     }
 
@@ -248,7 +318,11 @@ export class ChatPageComponent implements OnInit {
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         if (this.isBrowser) {
-          localStorage.removeItem(this.chatIdStorageKey);
+          if (this.selectedLectureId) {
+            localStorage.removeItem(this.getLectureChatKey(this.selectedLectureId));
+          } else {
+            localStorage.removeItem(this.chatIdStorageKey);
+          }
         }
 
         this.messages = [];
@@ -288,5 +362,50 @@ export class ChatPageComponent implements OnInit {
     }
 
     return 'Failed to get AI response.';
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;')
+      .replaceAll('\n', '<br>');
+  }
+
+  private scrollToBottom(smooth = true): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
+    this.showScrollButton = false;
+    const behavior: ScrollBehavior = smooth ? 'smooth' : 'auto';
+    const scroll = () => {
+      const scrollingElement = document.scrollingElement ?? document.documentElement;
+      window.scrollTo({
+        top: scrollingElement.scrollHeight,
+        behavior
+      });
+    };
+
+    requestAnimationFrame(() => {
+      this.messagesEnd?.nativeElement.scrollIntoView({ behavior, block: 'end' });
+      scroll();
+      requestAnimationFrame(scroll);
+    });
+  }
+
+  private isNearBottom(offset = 96): boolean {
+    if (!this.isBrowser) {
+      return true;
+    }
+
+    const scrollingElement = document.scrollingElement ?? document.documentElement;
+    return window.innerHeight + window.scrollY >= scrollingElement.scrollHeight - offset;
+  }
+
+  private shouldShowScrollButton(): boolean {
+    return this.messages.length > 0 && !this.isNearBottom(this.scrollButtonOffset);
   }
 }

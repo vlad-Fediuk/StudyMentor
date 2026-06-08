@@ -1,19 +1,37 @@
-<main class="chat-page">
-  <section class="messages" aria-live="polite">
-    @for (message of messages; track $index) {
-      <article class="message" [class.message-user]="message.role === 'user'">
-        {{ message.content }}
-      </article>
-    }
+<main class="chat-page" [class.sidebar-collapsed]="isSidebarCollapsed">
+  <app-sidebar (collapsedChange)="isSidebarCollapsed = $event"></app-sidebar>
 
-    @if (isSending) {
-      <article class="message message-assistant">AI думає...</article>
-    }
+  <section class="chat-panel">
+    <section class="messages" aria-live="polite">
+      @for (message of messages; track $index) {
+        <article
+          class="message"
+          [class.message-assistant]="message.role === 'assistant'"
+          [class.message-user]="message.role === 'user'"
+          [innerHTML]="renderMessageContent(message)"
+        ></article>
+      }
 
-    @if (errorMessage) {
-      <p class="error-message">{{ errorMessage }}</p>
-    }
+      @if (isSending) {
+        <article class="message message-assistant">AI думає...</article>
+      }
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      <div #messagesEnd class="messages-end-spacer" aria-hidden="true"></div>
+    </section>
   </section>
+
+  <button
+    class="scroll-button"
+    [class.scroll-button-visible]="showScrollButton"
+    type="button"
+    (click)="goToLatestMessage()"
+  ></button>
+
+  <div class="prompt-backdrop" aria-hidden="true"></div>
 
   <form
     class="prompt-bar"
@@ -32,7 +50,6 @@
       autocapitalize="off"
       autocorrect="off"
       spellcheck="false"
-      [disabled]="isSending"
     />
 
     <button
@@ -59,4 +76,9 @@
       </svg>
     </button>
   </form>
+
+  <p class="ai-disclaimer">
+    ШІ може помилятися. Перевіряйте відповіді.
+    <a routerLink="/ai-disclaimer">Детальніше</a>
+  </p>
 </main>
