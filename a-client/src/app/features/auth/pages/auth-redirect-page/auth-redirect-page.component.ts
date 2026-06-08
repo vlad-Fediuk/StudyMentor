@@ -1,7 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
+import type { AccountInfo } from '@azure/msal-browser';
 import { firstValueFrom } from 'rxjs';
+import { microsoftAuthConfig } from '../../auth.config';
 import { AuthService } from '../../data-access/auth.service';
 
 @Component({
@@ -17,19 +20,30 @@ export class AuthRedirectPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
-      const result = await this.msalService.instance.handleRedirectPromise();
+      if (this.authService.getToken()) {
+        await this.router.navigate(['/chat']);
+        return;
+      }
 
-      if (result && result.idToken) {
+      const result = await this.msalService.instance.handleRedirectPromise();
+      const account =
+        result?.account ??
+        this.msalService.instance.getActiveAccount() ??
+        this.msalService.instance.getAllAccounts()[0] ??
+        null;
+      const idToken = result?.idToken ?? (await this.getIdTokenForAccount(account));
+
+      if (account && idToken) {
+        this.msalService.instance.setActiveAccount(account);
         await firstValueFrom(
-          this.authService.authenticateWithMicrosoftIdToken(result.idToken, result.account)
+          this.authService.authenticateWithMicrosoftIdToken(idToken, account)
         );
-        this.msalService.instance.setActiveAccount(result.account);
-        this.router.navigate(['/chat']);
+        await this.router.navigate(['/chat']);
       } else {
         this.redirectToLoginPageWithError('No account information was returned by Microsoft.');
       }
-    } catch (_error) {
-      this.redirectToLoginPageWithError('Microsoft authentication failed. Please try again.');
+    } catch (error) {
+      this.redirectToLoginPageWithError(this.getAuthenticationErrorMessage(error));
     }
   }
 
@@ -37,5 +51,30 @@ export class AuthRedirectPageComponent implements OnInit {
     this.router.navigate(['/login'], {
       queryParams: { error }
     });
+  }
+
+  private async getIdTokenForAccount(account: AccountInfo | null): Promise<string> {
+    if (!account) {
+      return '';
+    }
+
+    try {
+      const result = await this.msalService.instance.acquireTokenSilent({
+        account,
+        scopes: microsoftAuthConfig.scopes
+      });
+      return result.idToken;
+    } catch {
+      return '';
+    }
+  }
+
+  private getAuthenticationErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage = typeof error.error?.message === 'string' ? error.error.message : '';
+      return backendMessage || 'Backend authentication failed. Please try again.';
+    }
+
+    return 'Microsoft authentication failed. Please try again.';
   }
 }

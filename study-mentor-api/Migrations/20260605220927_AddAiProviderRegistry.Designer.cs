@@ -163,7 +163,7 @@ namespace StudyMentorApi.Migrations
                         new
                         {
                             Id = new Guid("58f2f8b9-0d72-4c49-9dd0-6da81f4d4a01"),
-                            BaseUrl = "http://localhost:1234/api/v1/chat",
+                            BaseUrl = "http://localhost:1234/v1/chat/completions",
                             IsEnabled = true,
                             Name = "LmStudio",
                             Priority = 1,

@@ -196,7 +196,7 @@ export class ChatPageComponent implements OnInit {
     }
 
     const user = await this.getOrCreateUser();
-    const lectureId = this.selectedLectureId ?? (await this.getOrCreateLecture()).id;
+    const lectureId = this.selectedLectureId ?? (await this.getFirstAvailableLectureId());
     const session = await firstValueFrom(
       this.http.post<ChatSessionResponse>(`${this.apiUrl}/chat-sessions/`, {
         userId: user.id,
@@ -204,10 +204,8 @@ export class ChatPageComponent implements OnInit {
       })
     );
 
-    if (this.isBrowser && this.selectedLectureId) {
+    if (this.isBrowser) {
       localStorage.setItem(this.getLectureChatKey(lectureId), session.id);
-    } else if (this.isBrowser) {
-      localStorage.setItem(this.chatIdStorageKey, session.id);
     }
 
     return session.id;
@@ -242,51 +240,17 @@ export class ChatPageComponent implements OnInit {
     );
   }
 
-  private async getOrCreateLecture(): Promise<LectureResponse> {
+  private async getFirstAvailableLectureId(): Promise<string> {
     const lectures = await firstValueFrom(
       this.http.get<LectureResponse[]>(`${this.apiUrl}/lectures/`)
     );
+
     if (lectures.length > 0) {
-      return lectures[0];
+      this.selectedLectureId = lectures[0].id;
+      return lectures[0].id;
     }
 
-    const subject = await this.getOrCreateSubject();
-    return await firstValueFrom(
-      this.http.post<LectureResponse>(`${this.apiUrl}/lectures/`, {
-        name: 'Default lecture',
-        subjectId: subject.id
-      })
-    );
-  }
-
-  private async getOrCreateSubject(): Promise<SubjectResponse> {
-    const subjects = await firstValueFrom(
-      this.http.get<SubjectResponse[]>(`${this.apiUrl}/subjects/`)
-    );
-    if (subjects.length > 0) {
-      return subjects[0];
-    }
-
-    const major = await this.getOrCreateMajor();
-    return await firstValueFrom(
-      this.http.post<SubjectResponse>(`${this.apiUrl}/subjects/`, {
-        name: 'Default subject',
-        majorId: major.id
-      })
-    );
-  }
-
-  private async getOrCreateMajor(): Promise<IdNameResponse> {
-    const majors = await firstValueFrom(this.http.get<IdNameResponse[]>(`${this.apiUrl}/majors/`));
-    if (majors.length > 0) {
-      return majors[0];
-    }
-
-    return await firstValueFrom(
-      this.http.post<IdNameResponse>(`${this.apiUrl}/majors/`, {
-        name: 'Default major'
-      })
-    );
+    throw new Error('У базі немає лекцій. Додайте лекції або застосуйте seed-міграцію.');
   }
 
   private async sendMessageToApi(content: string): Promise<AiChatSendMessageResponse> {

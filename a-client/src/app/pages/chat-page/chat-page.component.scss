@@ -2,7 +2,7 @@
 
 $message-gap: 10px;
 $message-role-gap: 30px;
-$prompt-bottom: 34px;
+$prompt-bottom: 109px;
 $prompt-height: 52px;
 $disclaimer-height: 18px;
 $prompt-safe-gap: 48px;
@@ -66,46 +66,46 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   white-space: pre-wrap;
 }
 
-.message * {
+:host ::ng-deep .message * {
   max-width: 100%;
 }
 
-.message :is(p, ul, ol) {
+:host ::ng-deep .message :is(p, ul, ol) {
   margin: 0 0 8px;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-.message :is(p, ul, ol, hr):last-child {
+:host ::ng-deep .message :is(p, ul, ol, hr):last-child {
   margin-bottom: 0;
 }
 
-.message :is(ul, ol) {
+:host ::ng-deep .message :is(ul, ol) {
   padding-left: 22px;
 }
 
-.message li {
+:host ::ng-deep .message li {
   margin: 0 0 6px;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-.message li > :is(p, ul, ol) {
+:host ::ng-deep .message li > :is(p, ul, ol) {
   margin-top: 4px;
   margin-bottom: 6px;
 }
 
-.message li > :is(ul, ol) {
+:host ::ng-deep .message li > :is(ul, ol) {
   padding-left: 18px;
 }
 
-.message hr {
+:host ::ng-deep .message hr {
   margin: 14px 0;
   border: 0;
   border-top: 1px solid colors.$border;
 }
 
-.message pre {
+:host ::ng-deep .message pre {
   overflow-x: auto;
   overflow-wrap: normal;
   padding: 10px 12px;
@@ -114,7 +114,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   white-space: pre;
 }
 
-.message pre code {
+:host ::ng-deep .message pre code {
   display: block;
   width: max-content;
   min-width: 100%;
@@ -122,7 +122,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   word-break: normal;
 }
 
-.message code:not(pre code) {
+:host ::ng-deep .message code:not(pre code) {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -173,7 +173,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
 .ai-disclaimer {
   position: fixed;
   right: var(--content-padding-right);
-  bottom: 10px;
+  bottom: 85px;
   left: calc(var(--sidebar-width) + var(--content-gap));
   z-index: 10;
   width: min(
@@ -255,7 +255,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
 
 .scroll-button {
   position: fixed;
-  bottom: 104px;
+  bottom: 179px;
   left: calc(var(--sidebar-width) + (100% - var(--sidebar-width)) / 2);
   z-index: 4;
   width: 44px;
@@ -346,7 +346,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   }
 
   .scroll-button {
-    bottom: 88px;
+    bottom: 163px;
     width: 40px;
     height: 40px;
   }

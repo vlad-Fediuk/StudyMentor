@@ -66,7 +66,7 @@ namespace StudyMentorApi.Migrations
                 columns: new[] { "Id", "ApiKeyEnvironmentVariable", "BaseUrl", "IsEnabled", "Name", "Priority", "SettingsJson", "TimeoutSeconds", "Type" },
                 values: new object[,]
                 {
-                    { new Guid("58f2f8b9-0d72-4c49-9dd0-6da81f4d4a01"), null, "http://localhost:1234/api/v1/chat", true, "LmStudio", 1, null, 300, "lmstudio" },
+                    { new Guid("58f2f8b9-0d72-4c49-9dd0-6da81f4d4a01"), null, "http://localhost:1234/v1/chat/completions", true, "LmStudio", 1, null, 300, "lmstudio" },
                     { new Guid("cbe16bfc-6b2d-4d2f-a9e0-f0b3786c2102"), "NVIDIA_API_KEY", "https://integrate.api.nvidia.com/v1/chat/completions", true, "Nvidia", 2, null, 300, "nvidia" }
                 });
 

@@ -9,7 +9,7 @@
       class="sidebar-action-button"
       [class.active]="activeTab === 'subjects'"
       (click)="selectTab('subjects')"
-      aria-label="Теми"
+      aria-label="Предмети"
     >
       <img src="/assets/icons/sidebar-subject.svg" alt="" aria-hidden="true" />
     </button>
@@ -49,7 +49,7 @@
         <ng-container *ngIf="activeTab === 'subjects'">
           <button
             type="button"
-            class="sidebar-card-item sidebar-card-item--subject"
+            class="sidebar-card-item"
             *ngFor="let subject of filteredSubjects"
             [class.active]="subject.id === selectedSubjectId"
             (click)="selectSubject(subject.id)"
@@ -58,7 +58,7 @@
           </button>
 
           <div *ngIf="!filteredSubjects.length" class="sidebar-empty">
-            Теми не знайдено
+            Предмети не знайдено
           </div>
         </ng-container>
 
@@ -66,7 +66,7 @@
           <ng-container *ngIf="selectedSubjectId && lecturesForSelectedSubject.length">
             <button
               type="button"
-              class="sidebar-card-item sidebar-card-item--lecture"
+              class="sidebar-card-item"
               *ngFor="let lecture of lecturesForSelectedSubject"
               [class.selected]="lecture.id === selectedLectureId"
               (click)="selectLecture(lecture)"
@@ -76,7 +76,7 @@
           </ng-container>
 
           <div *ngIf="!selectedSubjectId" class="sidebar-empty">
-            Спочатку оберіть тему
+            Спочатку оберіть предмет
           </div>
 
           <div *ngIf="selectedSubjectId && !lecturesForSelectedSubject.length" class="sidebar-empty">

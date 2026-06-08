@@ -173,6 +173,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         var lmStudioProviderId = Guid.Parse("58f2f8b9-0d72-4c49-9dd0-6da81f4d4a01");
         var nvidiaProviderId = Guid.Parse("cbe16bfc-6b2d-4d2f-a9e0-f0b3786c2102");
+        var computerScienceMajorId = Guid.Parse("b03b7164-1f6a-4f9f-b5de-078f394a42e1");
+        var oopSubjectId = Guid.Parse("05a89d91-f68b-46ab-b8ff-870e5a9d6114");
+        var testingSubjectId = Guid.Parse("ff026d26-6ba6-4a84-9056-9f8f35dd7701");
 
         modelBuilder.Entity<AiProvider>().HasData(
             new
@@ -180,7 +183,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 Id = lmStudioProviderId,
                 Name = "LmStudio",
                 Type = "lmstudio",
-                BaseUrl = "http://localhost:1234/api/v1/chat",
+                BaseUrl = "http://localhost:1234/v1/chat/completions",
                 ApiKeyEnvironmentVariable = (string?)null,
                 IsEnabled = true,
                 Priority = 1,
@@ -232,6 +235,53 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 EnableThinking = false,
                 CapabilitiesJson = (string?)null,
                 SettingsJson = (string?)null
+            });
+
+        modelBuilder.Entity<Major>().HasData(
+            new
+            {
+                Id = computerScienceMajorId,
+                Name = "Комп'ютерні науки"
+            });
+
+        modelBuilder.Entity<Subject>().HasData(
+            new
+            {
+                Id = oopSubjectId,
+                Name = "ООП",
+                MajorId = computerScienceMajorId
+            },
+            new
+            {
+                Id = testingSubjectId,
+                Name = "Тестування",
+                MajorId = computerScienceMajorId
+            });
+
+        modelBuilder.Entity<Lecture>().HasData(
+            new
+            {
+                Id = Guid.Parse("7298c84c-3a33-4827-b643-8a12d5523c09"),
+                Name = "Вступ до ООП",
+                SubjectId = oopSubjectId
+            },
+            new
+            {
+                Id = Guid.Parse("ef92d905-02ed-42ad-9583-6d1470461522"),
+                Name = "Інкапсуляція та наслідування",
+                SubjectId = oopSubjectId
+            },
+            new
+            {
+                Id = Guid.Parse("647fda35-6dc0-46d3-8f10-829d4f670189"),
+                Name = "Основи тестування",
+                SubjectId = testingSubjectId
+            },
+            new
+            {
+                Id = Guid.Parse("ee89226b-5a41-4dd8-a898-44a38941c1d2"),
+                Name = "Unit-тестування",
+                SubjectId = testingSubjectId
             });
     }
 

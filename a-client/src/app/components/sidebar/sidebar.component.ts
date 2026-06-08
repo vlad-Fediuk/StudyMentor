@@ -61,11 +61,11 @@ export class SidebarComponent implements OnInit {
   }
 
   get cardTitle(): string {
-    return this.activeTab === 'subjects' ? 'Тема' : 'Лекція';
+    return this.activeTab === 'subjects' ? 'Предмет' : 'Лекція';
   }
 
   get searchPlaceholder(): string {
-    return this.activeTab === 'subjects' ? 'Тема' : 'Лекція';
+    return this.activeTab === 'subjects' ? 'Предмет' : 'Лекція';
   }
 
   get filteredSubjects(): SubjectResponse[] {

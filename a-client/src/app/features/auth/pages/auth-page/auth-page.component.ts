@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MsalService } from '@azure/msal-angular';
+import { microsoftAuthConfig } from '../../auth.config';
 import { AuthService } from '../../data-access/auth.service';
 import { MicrosoftLoginButtonComponent } from '../../ui/microsoft-login-button/microsoft-login-button.component';
 
@@ -32,7 +33,7 @@ export class AuthPageComponent {
 
   loginSSO(): void {
     this.auth.startMicrosoftLogin();
-    this.msalService.loginRedirect().subscribe({
+    this.msalService.loginRedirect({ scopes: microsoftAuthConfig.scopes }).subscribe({
       error: () => {
         this.auth.setError('Microsoft authentication failed. Please try again.');
       }
