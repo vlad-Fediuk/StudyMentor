@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudyMentorApi.Data;
@@ -11,9 +12,11 @@ using StudyMentorApi.Data;
 namespace StudyMentorApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260606133502_AddPromptTemplates")]
+    partial class AddPromptTemplates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,6 +25,163 @@ namespace StudyMentorApi.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pgcrypto");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("StudyMentorApi.Data.Models.AiModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("CapabilitiesJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EnableThinking")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<int>("MaxOutputTokens")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2048);
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProviderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("ReasoningBudget")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SettingsJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<double>("Temperature")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("TopP")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("double precision")
+                        .HasDefaultValue(1.0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProviderId", "ModelName")
+                        .IsUnique();
+
+                    b.ToTable("ai_models", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("70de4e65-5337-4ee4-9224-7eceadf3ed2d"),
+                            DisplayName = "gemma-4-e2b-it",
+                            EnableThinking = false,
+                            IsEnabled = true,
+                            MaxOutputTokens = 2048,
+                            ModelName = "gemma-4-e2b-it",
+                            Priority = 1,
+                            ProviderId = new Guid("58f2f8b9-0d72-4c49-9dd0-6da81f4d4a01"),
+                            Temperature = 0.14999999999999999,
+                            TopP = 1.0
+                        },
+                        new
+                        {
+                            Id = new Guid("902ab4f1-c498-4f62-979a-99860b8548fe"),
+                            DisplayName = "mistralai/mistral-large-3-675b-instruct-2512",
+                            EnableThinking = false,
+                            IsEnabled = true,
+                            MaxOutputTokens = 2048,
+                            ModelName = "mistralai/mistral-large-3-675b-instruct-2512",
+                            Priority = 1,
+                            ProviderId = new Guid("cbe16bfc-6b2d-4d2f-a9e0-f0b3786c2102"),
+                            ReasoningBudget = 2048,
+                            Temperature = 0.14999999999999999,
+                            TopP = 1.0
+                        });
+                });
+
+            modelBuilder.Entity("StudyMentorApi.Data.Models.AiProvider", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("ApiKeyEnvironmentVariable")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BaseUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SettingsJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("TimeoutSeconds")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(300);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Type")
+                        .IsUnique();
+
+                    b.ToTable("ai_providers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("58f2f8b9-0d72-4c49-9dd0-6da81f4d4a01"),
+                            BaseUrl = "http://localhost:1234/api/v1/chat",
+                            IsEnabled = true,
+                            Name = "LmStudio",
+                            Priority = 1,
+                            TimeoutSeconds = 300,
+                            Type = "lmstudio"
+                        },
+                        new
+                        {
+                            Id = new Guid("cbe16bfc-6b2d-4d2f-a9e0-f0b3786c2102"),
+                            ApiKeyEnvironmentVariable = "NVIDIA_API_KEY",
+                            BaseUrl = "https://integrate.api.nvidia.com/v1/chat/completions",
+                            IsEnabled = true,
+                            Name = "Nvidia",
+                            Priority = 2,
+                            TimeoutSeconds = 300,
+                            Type = "nvidia"
+                        });
+                });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
                 {
@@ -91,11 +251,6 @@ namespace StudyMentorApi.Migrations
                     b.Property<Guid>("ChatMessageId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ExerciseType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -105,10 +260,6 @@ namespace StudyMentorApi.Migrations
                     b.HasIndex("ChatMessageId");
 
                     b.ToTable("exercises", (string)null);
-
-                    b.HasDiscriminator<string>("ExerciseType").HasValue("Exercise");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.Group", b =>
@@ -285,6 +436,17 @@ namespace StudyMentorApi.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("StudyMentorApi.Data.Models.AiModel", b =>
+                {
+                    b.HasOne("StudyMentorApi.Data.Models.AiProvider", "Provider")
+                        .WithMany("Models")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
                 {
                     b.HasOne("StudyMentorApi.Data.Models.ChatSession", "ChatSession")
@@ -381,11 +543,6 @@ namespace StudyMentorApi.Migrations
             modelBuilder.Entity("StudyMentorApi.Data.Models.User", b =>
                 {
                     b.Navigation("ChatSessions");
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Flashcard", b =>
-                {
-                    b.Navigation("Cards");
                 });
 #pragma warning restore 612, 618
         }
