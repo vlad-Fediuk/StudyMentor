@@ -1,0 +1,20 @@
+<main class="auth-page">
+  <section class="auth-panel" aria-label="Microsoft OAuth">
+    <app-microsoft-login-button
+      [loading]="auth.state().status === 'loading'"
+      (login)="loginSSO()"
+    />
+
+    @if (auth.state().status === 'authenticated') {
+      <div class="auth-success">
+        <span>{{ auth.state().accountName }}</span>
+        <button type="button" (click)="auth.signOut()">Выйти</button>
+      </div>
+    }
+
+    @if (auth.state().status === 'error') {
+      <p class="auth-error">{{ auth.state().error }}</p>
+    }
+  </section>
+</main>
+

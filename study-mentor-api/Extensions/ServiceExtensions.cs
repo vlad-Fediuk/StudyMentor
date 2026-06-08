@@ -1,3 +1,4 @@
+using StudyMentorApi.Authentication.Jwt;
 using StudyMentorApi.Services.Ai;
 using StudyMentorApi.Services.Ai.Prompts;
 
@@ -18,6 +19,9 @@ public static class ServiceExtensions
         services.AddScoped<AiChat.AiChatService>();
         services.AddScoped<Groups.GroupService>();
         services.AddScoped<Users.UserService>();
+        services.AddScoped<IJwtAuthenticationService, JwtAuthenticationService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddSingleton<JwtAuthenticationValidator>();
         services.AddScoped<Flashcards.FlashcardService>();
         services.AddSingleton<PromptTemplateService>();
 
@@ -31,6 +35,7 @@ public static class ServiceExtensions
 
             client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
         });
+        services.AddJwtAuthentication(configuration);
 
         return services;
     }

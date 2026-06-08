@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StudyMentorApi.AiChat;
+using StudyMentorApi.Authentication;
 using StudyMentorApi.Data;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
@@ -58,8 +59,10 @@ public class Program
         app.UseGlobalExceptionHandler();
         app.UseCors();
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+        app.MapAuthenticationEndpoints();
         app.MapMajorEndpoints();
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();

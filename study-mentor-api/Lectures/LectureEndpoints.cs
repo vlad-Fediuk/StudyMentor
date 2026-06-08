@@ -11,7 +11,8 @@ public static class LectureEndpoints
     {
         var group = routes
             .MapGroup("/lectures")
-            .WithTags("Lectures");
+            .WithTags("Lectures")
+            .RequireAuthorization("user");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);

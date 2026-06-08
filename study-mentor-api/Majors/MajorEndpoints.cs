@@ -8,7 +8,8 @@ public static class MajorEndpoints
     {
         var group = routes
             .MapGroup("/majors")
-            .WithTags("Majors");
+            .WithTags("Majors")
+            .RequireAuthorization("user");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);

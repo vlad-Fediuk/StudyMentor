@@ -8,7 +8,8 @@ public static class UserEndpoints
     {
         var group = routes
             .MapGroup("/users")
-            .WithTags("Users");
+            .WithTags("Users")
+            .RequireAuthorization("user");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);
@@ -42,6 +43,7 @@ public static class UserEndpoints
         var entity = new User
         {
             Name = request.Name,
+            Email = NormalizeEmail(request.Email),
             Password = request.Password,
             GroupId = request.GroupId
         };
@@ -58,6 +60,7 @@ public static class UserEndpoints
         var entity = new User
         {
             Name = request.Name,
+            Email = NormalizeEmail(request.Email),
             Password = request.Password,
             GroupId = request.GroupId
         };
