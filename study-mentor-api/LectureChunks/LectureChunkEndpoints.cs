@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using StudyMentorApi.Common;
 using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
