@@ -45,8 +45,7 @@ public static class UserEndpoints
             Name = request.Name,
             Email = NormalizeEmail(request.Email),
             Password = request.Password,
-            GroupId = request.GroupId,
-            Roles = NormalizeRoles(request.Roles)
+            GroupId = request.GroupId
         };
         var created = await service.CreateAsync(entity, ct);
         return Results.Created($"/users/{created.Id}", ToResponse(created));
@@ -63,8 +62,7 @@ public static class UserEndpoints
             Name = request.Name,
             Email = NormalizeEmail(request.Email),
             Password = request.Password,
-            GroupId = request.GroupId,
-            Roles = NormalizeRoles(request.Roles)
+            GroupId = request.GroupId
         };
         var updated = await service.UpdateAsync(id, entity, ct);
         return Results.Ok(ToResponse(updated));
@@ -80,42 +78,8 @@ public static class UserEndpoints
     }
 
     private static UserResponse ToResponse(User u) =>
-        new(u.Id, u.Name, u.GroupId, u.Email, NormalizeRoles(u.Roles));
-
-    private static string? NormalizeEmail(string? email)
-    {
-        return string.IsNullOrWhiteSpace(email)
-            ? null
-            : email.Trim();
-    }
-
-    private static List<string> NormalizeRoles(IEnumerable<string>? roles)
-    {
-        var normalizedRoles = roles?
-            .Where(role => !string.IsNullOrWhiteSpace(role))
-            .Select(NormalizeRoleName)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        return normalizedRoles is { Count: > 0 }
-            ? normalizedRoles
-            : ["User"];
-    }
-
-    private static string NormalizeRoleName(string role)
-    {
-        var normalizedRole = role.Trim();
-
-        if (normalizedRole.Equals("admin", StringComparison.OrdinalIgnoreCase))
-        {
-            return "Admin";
-        }
-
-        if (normalizedRole.Equals("user", StringComparison.OrdinalIgnoreCase))
-        {
-            return "User";
-        }
-
-        return normalizedRole;
-    }
+        new(
+            u.Id,
+            u.Name,
+            u.GroupId);
 }

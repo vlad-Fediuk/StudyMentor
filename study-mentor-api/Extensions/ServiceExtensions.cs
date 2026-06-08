@@ -22,6 +22,7 @@ public static class ServiceExtensions
         services.AddScoped<IJwtAuthenticationService, JwtAuthenticationService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<JwtAuthenticationValidator>();
+        services.AddScoped<Flashcards.FlashcardService>();
         services.AddSingleton<PromptTemplateService>();
 
         services.Configure<NvidiaAiSettings>(
