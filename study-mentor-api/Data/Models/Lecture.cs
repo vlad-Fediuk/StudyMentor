@@ -9,4 +9,6 @@ public class Lecture : BaseEntity
     public Subject Subject { get; set; } = null!;
 
     public ICollection<ChatSession> ChatSessions { get; set; } = [];
+
+    public ICollection<LectureChunk> Chunks { get; set; } = [];
 }

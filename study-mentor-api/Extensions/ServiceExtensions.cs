@@ -16,6 +16,7 @@ public static class ServiceExtensions
         services.AddScoped<Majors.MajorService>();
         services.AddScoped<Subjects.SubjectService>();
         services.AddScoped<Lectures.LectureService>();
+        services.AddScoped<LectureChunks.LectureChunkService>();
         services.AddScoped<ChatMessages.ChatMessageService>();
         services.AddScoped<ChatSessions.ChatSessionService>();
         services.AddScoped<AiChat.AiChatService>();
