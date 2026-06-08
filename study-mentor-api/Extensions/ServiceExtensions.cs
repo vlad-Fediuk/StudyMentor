@@ -25,15 +25,14 @@ public static class ServiceExtensions
         services.AddScoped<Flashcards.FlashcardService>();
         services.AddSingleton<PromptTemplateService>();
 
-        services.Configure<NvidiaAiSettings>(
-            configuration.GetSection(NvidiaAiSettings.SectionName));
-        services.AddHttpClient<IAiChatService, NvidiaAiChatService>((serviceProvider, client) =>
+        services.AddScoped<IAiChatService, AiModelRouter>();
+        services.AddHttpClient<IAiProviderClient, LmStudioProviderClient>(client =>
         {
-            var settings = serviceProvider
-                .GetRequiredService<Microsoft.Extensions.Options.IOptions<NvidiaAiSettings>>()
-                .Value;
-
-            client.Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds);
+            client.Timeout = Timeout.InfiniteTimeSpan;
+        });
+        services.AddHttpClient<IAiProviderClient, NvidiaProviderClient>(client =>
+        {
+            client.Timeout = Timeout.InfiniteTimeSpan;
         });
         services.AddJwtAuthentication(configuration);
 

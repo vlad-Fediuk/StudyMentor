@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using StudyMentorApi.Data;
@@ -11,9 +12,11 @@ using StudyMentorApi.Data;
 namespace StudyMentorApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260605220927_AddAiProviderRegistry")]
+    partial class AddAiProviderRegistry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,31 +183,6 @@ namespace StudyMentorApi.Migrations
                         });
                 });
 
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Card", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("Definition")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("FlashcardId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Term")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlashcardId");
-
-                    b.ToTable("cards", (string)null);
-                });
-
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -273,11 +251,6 @@ namespace StudyMentorApi.Migrations
                     b.Property<Guid>("ChatMessageId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ExerciseType")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("character varying(13)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -287,10 +260,6 @@ namespace StudyMentorApi.Migrations
                     b.HasIndex("ChatMessageId");
 
                     b.ToTable("exercises", (string)null);
-
-                    b.HasDiscriminator<string>("ExerciseType").HasValue("Exercise");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.Group", b =>
@@ -377,9 +346,6 @@ namespace StudyMentorApi.Migrations
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -388,20 +354,9 @@ namespace StudyMentorApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<ICollection<string>>("Roles")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
                     b.HasKey("Id");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Flashcard", b =>
-                {
-                    b.HasBaseType("StudyMentorApi.Data.Models.Exercise");
-
-                    b.HasDiscriminator().HasValue("Flashcard");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.AiModel", b =>
@@ -413,17 +368,6 @@ namespace StudyMentorApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Provider");
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Card", b =>
-                {
-                    b.HasOne("StudyMentorApi.Data.Models.Flashcard", "Flashcard")
-                        .WithMany("Cards")
-                        .HasForeignKey("FlashcardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Flashcard");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
@@ -489,6 +433,11 @@ namespace StudyMentorApi.Migrations
                     b.Navigation("Major");
                 });
 
+            modelBuilder.Entity("StudyMentorApi.Data.Models.AiProvider", b =>
+                {
+                    b.Navigation("Models");
+                });
+
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
                 {
                     b.Navigation("Exercises");
@@ -517,11 +466,6 @@ namespace StudyMentorApi.Migrations
             modelBuilder.Entity("StudyMentorApi.Data.Models.User", b =>
                 {
                     b.Navigation("ChatSessions");
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.Flashcard", b =>
-                {
-                    b.Navigation("Cards");
                 });
 #pragma warning restore 612, 618
         }

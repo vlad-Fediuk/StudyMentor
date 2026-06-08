@@ -45,7 +45,8 @@ public static class UserEndpoints
             Name = request.Name,
             Email = NormalizeEmail(request.Email),
             Password = request.Password,
-            GroupId = request.GroupId
+            GroupId = request.GroupId,
+            Roles = request.Roles?.ToArray() ?? ["User"]
         };
         var created = await service.CreateAsync(entity, ct);
         return Results.Created($"/users/{created.Id}", ToResponse(created));
@@ -62,7 +63,8 @@ public static class UserEndpoints
             Name = request.Name,
             Email = NormalizeEmail(request.Email),
             Password = request.Password,
-            GroupId = request.GroupId
+            GroupId = request.GroupId,
+            Roles = request.Roles?.ToArray() ?? ["User"]
         };
         var updated = await service.UpdateAsync(id, entity, ct);
         return Results.Ok(ToResponse(updated));
@@ -81,5 +83,10 @@ public static class UserEndpoints
         new(
             u.Id,
             u.Name,
-            u.GroupId);
+            u.GroupId,
+            u.Email,
+            u.Roles);
+
+    private static string? NormalizeEmail(string? email) =>
+        string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
 }
