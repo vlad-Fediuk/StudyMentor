@@ -9,7 +9,7 @@ import {
   ViewChild,
   inject
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { marked } from 'marked';
 import { firstValueFrom } from 'rxjs';
 
@@ -56,7 +56,7 @@ interface AiChatSendMessageResponse {
 @Component({
   selector: 'app-chat-page',
   standalone: true,
-  imports: [CommonModule, SidebarComponent],
+  imports: [CommonModule, RouterLink, SidebarComponent],
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })

@@ -1,0 +1,84 @@
+@use '../../../styles/colors';
+
+:host {
+  display: block;
+}
+
+.disclaimer-page {
+  min-height: 100dvh;
+  padding: 48px 20px;
+  background: colors.$white;
+  color: colors.$black;
+}
+
+.disclaimer-content {
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+
+.back-link {
+  display: inline-flex;
+  margin-bottom: 28px;
+  color: colors.$muted;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  color: colors.$black;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+h1 {
+  margin: 0 0 20px;
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin: 32px 0 12px;
+  font-size: 22px;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+p,
+li {
+  color: mix(colors.$black, colors.$muted, 78%);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+p {
+  margin: 0 0 16px;
+}
+
+ul {
+  margin: 0 0 18px;
+  padding-left: 22px;
+}
+
+li {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  .disclaimer-page {
+    padding: 32px 18px;
+  }
+
+  .back-link {
+    margin-bottom: 22px;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}

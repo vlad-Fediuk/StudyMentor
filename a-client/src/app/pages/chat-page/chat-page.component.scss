@@ -4,8 +4,9 @@ $message-gap: 10px;
 $message-role-gap: 30px;
 $prompt-bottom: 34px;
 $prompt-height: 52px;
+$disclaimer-height: 18px;
 $prompt-safe-gap: 48px;
-$prompt-reserved-space: $prompt-bottom + $prompt-height + $prompt-safe-gap;
+$prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $prompt-safe-gap;
 
 :host {
   display: block;
@@ -169,6 +170,29 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $prompt-safe-gap;
   box-shadow: 0 8px 22px rgba(colors.$black, 0.05);
 }
 
+.ai-disclaimer {
+  position: fixed;
+  right: var(--content-padding-right);
+  bottom: 10px;
+  left: calc(var(--sidebar-width) + var(--content-gap));
+  z-index: 10;
+  width: min(
+    calc(100% - var(--sidebar-width) - var(--content-gap) - var(--content-padding-right)),
+    760px
+  );
+  margin: 0 auto;
+  color: colors.$muted;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.ai-disclaimer a {
+  color: colors.$black;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .prompt-backdrop {
   position: fixed;
   right: 0;
@@ -286,9 +310,10 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $prompt-safe-gap;
 @media (max-width: 640px) {
   $mobile-prompt-bottom: 24px;
   $mobile-prompt-height: 50px;
+  $mobile-disclaimer-height: 34px;
   $mobile-prompt-safe-gap: 40px;
   $mobile-prompt-reserved-space: $mobile-prompt-bottom + $mobile-prompt-height +
-    $mobile-prompt-safe-gap;
+    $mobile-disclaimer-height + $mobile-prompt-safe-gap;
 
   .chat-page {
     padding: 72px 18px 0;
@@ -300,9 +325,15 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $prompt-safe-gap;
   }
 
   .prompt-bar {
-    bottom: $mobile-prompt-bottom;
+    bottom: $mobile-prompt-bottom + $mobile-disclaimer-height;
     min-height: $mobile-prompt-height;
     padding: 6px 7px 6px 16px;
+  }
+
+  .ai-disclaimer {
+    bottom: 12px;
+    width: min(100%, 760px);
+    font-size: 11px;
   }
 
   .prompt-backdrop {
