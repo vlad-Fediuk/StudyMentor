@@ -1,35 +1,64 @@
 <main class="disclaimer-page">
+  <header class="support-header" aria-label="StudyMentor header">
+    <a class="brand" routerLink="/">StudyMentor</a>
+
+    <div class="language-switcher" aria-label="Change language">
+      @for (language of languages; track language) {
+        <button
+          class="language-option"
+          type="button"
+          [class.active]="selectedLanguage === language"
+          [attr.aria-pressed]="selectedLanguage === language"
+          (click)="selectLanguage(language)"
+        >
+          {{ language.toUpperCase() }}
+        </button>
+      }
+    </div>
+  </header>
+
   <article class="disclaimer-content">
-    <a class="back-link" routerLink="/">Повернутися до чату</a>
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a routerLink="/">{{ selectedLanguage === 'uk' ? 'Чат' : 'Chat' }}</a>
+      @for (item of copy.breadcrumbs; track item) {
+        <span aria-hidden="true">/</span>
+        <span>{{ item }}</span>
+      }
+    </nav>
 
-    <h1>Як працює ШІ в StudyMentor</h1>
+    <p class="article-kicker">{{ copy.kicker }}</p>
 
-    <p>
-      StudyMentor використовує штучний інтелект, щоб допомагати з навчальними
-      питаннями, поясненнями та пошуком ідей. Відповіді формуються на основі
-      вашого запиту, доступного контексту та мовних закономірностей, які модель
-      вивчила під час навчання.
-    </p>
+    <h1>{{ copy.title }}</h1>
 
-    <h2>Чому відповіді можуть бути неточними</h2>
-    <p>
-      ШІ може неправильно зрозуміти запит, пропустити важливий контекст,
-      використати застарілу інформацію або впевнено сформулювати помилковий
-      висновок. Він не замінює викладача, офіційні джерела, медичну, юридичну
-      чи фінансову консультацію.
-    </p>
+    <p class="lead">{{ copy.lead }}</p>
 
-    <h2>Як користуватися відповідями</h2>
-    <ul>
-      <li>Перевіряйте факти, дати, формули та посилання в надійних джерелах.</li>
-      <li>Ставте уточнювальні запитання, якщо відповідь виглядає неповною.</li>
-      <li>Не передавайте конфіденційні дані, паролі або приватну інформацію.</li>
-      <li>Використовуйте ШІ як помічника для навчання, а не як єдине джерело істини.</li>
-    </ul>
+    <section class="info-callout">
+      <span class="callout-label">{{ copy.calloutLabel }}</span>
+      <p>{{ copy.callout }}</p>
+    </section>
 
-    <p>
-      Якщо відповідь здається суперечливою або важливою для оцінювання,
-      обов'язково звірте її з матеріалами курсу чи зверніться до викладача.
-    </p>
+    <h2>{{ copy.whyTitle }}</h2>
+    @for (paragraph of copy.whyParagraphs; track paragraph) {
+      <p>{{ paragraph }}</p>
+    }
+
+    <div class="guidance-grid">
+      @for (card of copy.cards; track card.title; let index = $index) {
+        <section class="guidance-card">
+          <span class="card-index">{{ (index + 1).toString().padStart(2, '0') }}</span>
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.body }}</p>
+        </section>
+      }
+    </div>
+
+    <h2>{{ copy.bestTitle }}</h2>
+    @for (paragraph of copy.bestParagraphs; track paragraph) {
+      <p>{{ paragraph }}</p>
+    }
+
+    <footer class="article-footer">
+      <a class="back-link" routerLink="/">{{ copy.backLink }}</a>
+    </footer>
   </article>
 </main>
