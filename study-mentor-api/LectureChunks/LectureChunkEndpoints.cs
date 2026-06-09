@@ -15,7 +15,8 @@ public static class LectureChunkEndpoints
             .MapGroup("/lecture-chunks")
             .WithTags("LectureChunks");
 
-        group.MapPost("/upload", Upload);
+        group.MapPost("/upload", Upload)
+            .DisableAntiforgery();
         group.MapGet("/lecture/{lectureId}", GetByLectureId);
         group.MapDelete("/lecture/{lectureId}", DeleteByLectureId);
     }

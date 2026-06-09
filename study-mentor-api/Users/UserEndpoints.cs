@@ -8,14 +8,13 @@ public static class UserEndpoints
     {
         var group = routes
             .MapGroup("/users")
-            .WithTags("Users")
-            .RequireAuthorization("user");
+            .WithTags("Users");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);
         group.MapPost("/", Create);
-        group.MapPut("/{id}", Update);
-        group.MapDelete("/{id}", Delete);
+        group.MapPut("/{id}", Update).RequireAuthorization("user");
+        group.MapDelete("/{id}", Delete).RequireAuthorization("user");
     }
 
     private static async Task<IResult> GetAll(

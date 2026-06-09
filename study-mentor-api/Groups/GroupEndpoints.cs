@@ -8,14 +8,13 @@ public static class GroupEndpoints
     {
         var group = routes
             .MapGroup("/groups")
-            .WithTags("Groups")
-            .RequireAuthorization("user");
+            .WithTags("Groups");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);
         group.MapPost("/", Create);
-        group.MapPut("/{id}", Update);
-        group.MapDelete("/{id}", Delete);
+        group.MapPut("/{id}", Update).RequireAuthorization("user");
+        group.MapDelete("/{id}", Delete).RequireAuthorization("user");
     }
 
     private static async Task<IResult> GetAll(

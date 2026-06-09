@@ -119,8 +119,8 @@
   border: 1px solid colors.$border;
   box-shadow: none;
   flex: 0 0 auto;
-  max-height: 154px;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 .sidebar-card-search {
