@@ -2,6 +2,7 @@ using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
+using StudyMentorApi.LectureChunks;
 using StudyMentorApi.Services.Ai;
 using StudyMentorApi.Users;
 
@@ -11,6 +12,7 @@ public class AiChatService(
     ChatSessionService chatSessionService,
     ChatMessageService chatMessageService,
     UserService userService,
+    LectureChunkRetrievalService lectureChunkRetrievalService,
     IAiGenerationService aiGenerationService)
 {
     private const int MaxHistoryMessagesForAi = 20;
@@ -67,12 +69,17 @@ public class AiChatService(
             var history = await chatMessageService.GetMessagesAsync(parsedChatId, cancellationToken);
             var recentHistory = history.TakeLast(MaxHistoryMessagesForAi).ToList();
             var user = await userService.GetByIdAsync(chat.UserId, cancellationToken);
+            var lectureContext = await lectureChunkRetrievalService.GetRelevantContextAsync(
+                chat.LectureId,
+                request.Content.Trim(),
+                cancellationToken);
 
             var aiResponse = await aiGenerationService.GenerateAsync(new AiGenerationRequest
             {
                 TaskType = AiTaskType.ChatAnswer,
                 UserMessage = request.Content.Trim(),
                 ConversationHistory = ToAiChatMessages(recentHistory),
+                Context = lectureContext,
                 UserProfile = BuildUserProfile(chat, user),
                 OutputFormat = AiOutputFormat.Text
             }, cancellationToken);

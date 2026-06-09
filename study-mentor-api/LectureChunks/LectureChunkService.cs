@@ -1,12 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Pgvector;
 using StudyMentorApi.Common;
 using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
+using StudyMentorApi.Services.Ai.Embeddings;
 using System.Text.RegularExpressions;
 
 namespace StudyMentorApi.LectureChunks;
 
-public class LectureChunkService
+public class LectureChunkService(AppDbContext dbContext, IAiEmbeddingService embeddingService)
 {
     private const int TargetChunkLength = 1000;
     private const int MaxChunkLength = 1500;
@@ -16,18 +18,11 @@ public class LectureChunkService
         ".md"
     };
 
-    private readonly AppDbContext _dbContext;
-
-    public LectureChunkService(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public async Task<IReadOnlyCollection<LectureChunkResponse>> CreateFromFileAsync(
         LectureChunkRequest request,
         CancellationToken cancellationToken = default)
     {
-        var lecture = await _dbContext.Lectures
+        var lecture = await dbContext.Lectures
             .FirstOrDefaultAsync(l => l.Id == request.LectureId, cancellationToken);
 
         if (lecture is null)
@@ -50,17 +45,32 @@ public class LectureChunkService
             throw new ValidationException("No chunks were produced after processing");
         }
 
-        var entities = chunks
-            .Select((chunk, index) => new LectureChunk
-            {
-                Content = chunk,
-                LectureId = lecture.Id,
-                Order = index + 1
-            })
-            .ToList();
+        var entities = new List<LectureChunk>(chunks.Count);
+        for (var index = 0; index < chunks.Count; index++)
+        {
+            var embedding = await embeddingService.CreateEmbeddingAsync(chunks[index], cancellationToken);
 
-        _dbContext.LectureChunks.AddRange(entities);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+            entities.Add(new LectureChunk
+            {
+                Content = chunks[index],
+                LectureId = lecture.Id,
+                Order = index + 1,
+                Embedding = new Vector(embedding.Vector),
+                EmbeddingModel = embedding.Model,
+                EmbeddingDimensions = embedding.Dimensions
+            });
+        }
+
+        await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        var existingChunks = await dbContext.LectureChunks
+            .Where(chunk => chunk.LectureId == lecture.Id)
+            .ToListAsync(cancellationToken);
+
+        dbContext.LectureChunks.RemoveRange(existingChunks);
+        dbContext.LectureChunks.AddRange(entities);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         return entities
             .OrderBy(e => e.Order)

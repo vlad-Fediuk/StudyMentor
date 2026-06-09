@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyMentorApi.Common;
 using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
+using StudyMentorApi.Services.Ai.Embeddings;
 
 namespace StudyMentorApi.LectureChunks;
 
@@ -39,6 +40,12 @@ public static class LectureChunkEndpoints
         catch (NotFoundException ex)
         {
             return Results.NotFound(new { error = ex.Message });
+        }
+        catch (AiEmbeddingUnavailableException ex)
+        {
+            return Results.Json(
+                new { error = ex.Message },
+                statusCode: StatusCodes.Status503ServiceUnavailable);
         }
         catch (Exception ex)
         {

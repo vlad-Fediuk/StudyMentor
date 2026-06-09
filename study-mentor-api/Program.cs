@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Pgvector.EntityFrameworkCore;
 using StudyMentorApi.AiChat;
 using StudyMentorApi.Authentication;
 using StudyMentorApi.Data;
@@ -27,7 +28,9 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection"),
+                npgsqlOptions => npgsqlOptions.UseVector()));
         builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddCors(options =>
