@@ -19,6 +19,7 @@ public static class ServiceExtensions
         services.AddScoped<Groups.GroupService>();
         services.AddScoped<Users.UserService>();
         services.AddScoped<Flashcards.FlashcardService>();
+        services.AddScoped<Tests.TestService>();
         services.AddSingleton<PromptTemplateService>();
 
         services.Configure<NvidiaAiSettings>(

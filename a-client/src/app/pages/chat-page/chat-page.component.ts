@@ -1,6 +1,6 @@
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { Component, HostListener, OnInit, PLATFORM_ID, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 type ChatRole = 'user' | 'assistant';
@@ -41,10 +41,6 @@ interface AiChatSendMessageResponse {
   assistantMessage: ChatMessage;
 }
 
-interface ChatMessageResponse {
-  id: string;
-}
-
 interface CardResponse {
   id: string;
   term: string;
@@ -56,6 +52,37 @@ interface FlashcardResponse {
   name: string;
   chatMessageId: string;
   cards: CardResponse[];
+}
+
+interface TestAnswerVariantResponse {
+  id: string;
+  text: string;
+}
+
+interface TestQuestionResponse {
+  id: string;
+  prompt: string;
+  answerVariants: TestAnswerVariantResponse[];
+}
+
+interface TestResponse {
+  id: string;
+  name: string;
+  chatMessageId: string;
+  sourceFlashcardId: string | null;
+  questions: TestQuestionResponse[];
+}
+
+interface TestAnswerResultResponse {
+  questionId: string;
+  selectedAnswerVariantId: string;
+  correctAnswerVariantId: string;
+  isCorrect: boolean;
+}
+
+interface TestRunResult {
+  correct: number;
+  total: number;
 }
 
 @Component({
@@ -71,25 +98,47 @@ export class ChatPageComponent implements OnInit {
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly apiUrl = 'http://localhost:5132';
   private readonly chatIdStorageKey = 'studyMentor.chatId';
+  private readonly hiddenExerciseMessageContent = '__study_mentor_exercise_source__';
+  private readonly legacyExerciseMessageContents = new Set([
+    'Flashcard exercise',
+    'Вправа з картками',
+    'Упражнение с карточками'
+  ]);
   private readonly guidPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
   messages: ChatMessage[] = [];
   isSending = false;
   errorMessage = '';
+
   decks: FlashcardResponse[] = [];
   selectedDeck: FlashcardResponse | null = null;
   currentCard: CardResponse | null = null;
   isBackVisible = false;
   isFlashcardsOpen = false;
   isLoadingFlashcards = false;
-  isCreatingSampleDeck = false;
+  isDeletingExercise = false;
   isCardStudyOpen = false;
+  isTestPromptVisible = false;
   flashcardsErrorMessage = '';
-  selectedExerciseType = 'flashcards';
+
+  tests: TestResponse[] = [];
+  selectedTest: TestResponse | null = null;
+  currentQuestionIndex = 0;
+  selectedAnswerVariantId: string | null = null;
+  answerResult: TestAnswerResultResponse | null = null;
+  isTestRunOpen = false;
+  isTestResultOpen = false;
+  isCheckingAnswer = false;
+  isSuccessFeedbackVisible = false;
+  testCorrectAnswers = 0;
+  completedTestResults: Record<string, TestRunResult> = {};
+  testsErrorMessage = '';
+
+  selectedExerciseType: 'flashcards' | 'tests' = 'flashcards';
 
   async ngOnInit(): Promise<void> {
-    await Promise.all([this.loadMessages(), this.loadFlashcards(false)]);
+    await Promise.all([this.loadMessages(), this.loadFlashcards(false), this.loadTests(false)]);
   }
 
   get currentCardIndex(): number {
@@ -104,17 +153,96 @@ export class ChatPageComponent implements OnInit {
     return this.selectedDeck?.cards.length ?? 0;
   }
 
+  get currentQuestion(): TestQuestionResponse | null {
+    return this.selectedTest?.questions[this.currentQuestionIndex] ?? null;
+  }
+
+  get currentQuestionNumber(): number {
+    return this.currentQuestionIndex + 1;
+  }
+
+  get totalQuestions(): number {
+    return this.selectedTest?.questions.length ?? 0;
+  }
+
+  get selectedDeckTests(): TestResponse[] {
+    if (!this.selectedDeck) {
+      return this.tests;
+    }
+
+    return this.tests.filter((test) => test.sourceFlashcardId === this.selectedDeck?.id);
+  }
+
+  get testScorePercent(): number {
+    if (this.totalQuestions === 0) {
+      return 0;
+    }
+
+    return Math.round((this.testCorrectAnswers / this.totalQuestions) * 100);
+  }
+
+  get isPerfectTestResult(): boolean {
+    return this.totalQuestions > 0 && this.testCorrectAnswers === this.totalQuestions;
+  }
+
+  displayDeckName(deck: FlashcardResponse | null): string {
+    if (!deck) {
+      return 'Вправи';
+    }
+
+    return this.translateLegacyExerciseName(deck.name);
+  }
+
+  displayTestName(test: TestResponse): string {
+    return this.translateLegacyExerciseName(test.name);
+  }
+
+  displayCardTerm(card: CardResponse): string {
+    return this.translateLegacyCardText(card.term);
+  }
+
+  displayCardDefinition(card: CardResponse): string {
+    return this.translateLegacyCardText(card.definition);
+  }
+
+  displayQuestionPrompt(question: TestQuestionResponse): string {
+    return this.translateLegacyTestText(question.prompt);
+  }
+
+  displayAnswerText(answerVariant: TestAnswerVariantResponse): string {
+    return this.translateLegacyTestText(answerVariant.text);
+  }
+
+  testResultFor(test: TestResponse): TestRunResult | null {
+    return this.completedTestResults[test.id] ?? null;
+  }
+
+  testResultPercent(test: TestResponse): number {
+    const result = this.testResultFor(test);
+    if (!result || result.total === 0) {
+      return 0;
+    }
+
+    return Math.round((result.correct / result.total) * 100);
+  }
+
+  isPerfectTest(test: TestResponse): boolean {
+    const result = this.testResultFor(test);
+    return Boolean(result && result.total > 0 && result.correct === result.total);
+  }
+
   async openFlashcards(): Promise<void> {
     this.isFlashcardsOpen = !this.isFlashcardsOpen;
 
-    if (this.isFlashcardsOpen && this.decks.length === 0) {
-      await this.loadFlashcards();
+    if (this.isFlashcardsOpen) {
+      await Promise.all([this.loadFlashcards(), this.loadTests()]);
     }
   }
 
   closeFlashcards(): void {
     this.isFlashcardsOpen = false;
     this.isCardStudyOpen = false;
+    this.closeTestRun();
   }
 
   selectDeck(deck: FlashcardResponse): void {
@@ -122,30 +250,33 @@ export class ChatPageComponent implements OnInit {
     this.currentCard = deck.cards[0] ?? null;
     this.isBackVisible = false;
     this.isCardStudyOpen = false;
+    this.isTestPromptVisible = false;
     this.flashcardsErrorMessage = '';
-  }
 
-  selectDeckById(event: Event): void {
-    const deckId = (event.target as HTMLSelectElement).value;
-    const deck = this.decks.find((item) => item.id === deckId);
-    if (deck) {
-      this.selectDeck(deck);
+    const deckTest = this.selectedDeckTests[0];
+    if (deckTest) {
+      this.selectTest(deckTest);
+    } else if (this.selectedTest?.sourceFlashcardId !== deck.id) {
+      this.selectedTest = null;
     }
   }
 
-  selectExerciseType(event: Event): void {
-    this.selectedExerciseType = (event.target as HTMLSelectElement).value;
+  selectExerciseType(type: 'flashcards' | 'tests'): void {
+    this.selectedExerciseType = type;
+    this.closeTestRun();
   }
 
   selectCard(card: CardResponse): void {
     this.currentCard = card;
     this.isBackVisible = false;
     this.isCardStudyOpen = true;
+    this.isTestPromptVisible = false;
   }
 
   backToExerciseList(): void {
     this.isCardStudyOpen = false;
     this.isBackVisible = false;
+    this.isTestPromptVisible = false;
   }
 
   flipCard(): void {
@@ -162,6 +293,7 @@ export class ChatPageComponent implements OnInit {
       : this.currentCardIndex - 1;
     this.currentCard = this.selectedDeck.cards[index];
     this.isBackVisible = false;
+    this.isTestPromptVisible = false;
   }
 
   showNextCard(): void {
@@ -169,11 +301,15 @@ export class ChatPageComponent implements OnInit {
       return;
     }
 
-    const index = this.currentCardIndex < 0 || this.currentCardIndex === this.selectedDeck.cards.length - 1
-      ? 0
-      : this.currentCardIndex + 1;
+    if (this.currentCardIndex === this.selectedDeck.cards.length - 1) {
+      this.isTestPromptVisible = true;
+      return;
+    }
+
+    const index = this.currentCardIndex < 0 ? 0 : this.currentCardIndex + 1;
     this.currentCard = this.selectedDeck.cards[index];
     this.isBackVisible = false;
+    this.isTestPromptVisible = false;
   }
 
   restartDeck(): void {
@@ -182,54 +318,173 @@ export class ChatPageComponent implements OnInit {
     }
   }
 
-  async createSampleDeck(): Promise<void> {
-    if (this.isCreatingSampleDeck) {
+  selectTest(test: TestResponse): void {
+    this.selectedTest = test;
+    this.currentQuestionIndex = 0;
+    this.selectedAnswerVariantId = null;
+    this.answerResult = null;
+    this.testCorrectAnswers = 0;
+    this.isTestResultOpen = false;
+    this.isSuccessFeedbackVisible = false;
+    this.testsErrorMessage = '';
+  }
+
+  startTest(test: TestResponse): void {
+    this.selectTest(test);
+    this.isCardStudyOpen = false;
+    this.isTestRunOpen = true;
+    this.isTestPromptVisible = false;
+    this.selectedExerciseType = 'tests';
+  }
+
+  startDeckTest(): void {
+    const test = this.selectedDeckTests[0];
+
+    if (!test) {
+      this.testsErrorMessage = 'Для цього набору тест ще не створено.';
+      this.isCardStudyOpen = false;
+      this.selectedExerciseType = 'tests';
       return;
     }
 
-    this.isCreatingSampleDeck = true;
+    this.startTest(test);
+  }
+
+  dismissTestPrompt(): void {
+    this.isTestPromptVisible = false;
+  }
+
+  closeTestRun(): void {
+    this.isTestRunOpen = false;
+    this.isTestResultOpen = false;
+    this.selectedAnswerVariantId = null;
+    this.answerResult = null;
+    this.isSuccessFeedbackVisible = false;
+  }
+
+  backToTestsList(): void {
+    this.isTestRunOpen = false;
+    this.isTestResultOpen = false;
+    this.selectedExerciseType = 'tests';
+  }
+
+  restartTest(): void {
+    if (this.selectedTest) {
+      this.startTest(this.selectedTest);
+    }
+  }
+
+  @HostListener('window:keydown')
+  continueWrongAnswerWithKeyboard(): void {
+    if (this.isTestRunOpen && this.answerResult && !this.answerResult.isCorrect) {
+      this.continueAfterWrongAnswer();
+    }
+  }
+
+  async selectAnswerVariant(answerVariantId: string): Promise<void> {
+    if (this.answerResult) {
+      if (!this.answerResult.isCorrect && answerVariantId === this.answerResult.correctAnswerVariantId) {
+        this.continueAfterWrongAnswer();
+      }
+
+      return;
+    }
+
+    if (this.isCheckingAnswer) {
+      return;
+    }
+
+    this.selectedAnswerVariantId = answerVariantId;
+    await this.checkAnswer(answerVariantId);
+  }
+
+  continueAfterWrongAnswer(): void {
+    this.goToNextQuestion();
+  }
+
+  async deleteSelectedDeck(): Promise<void> {
+    if (!this.selectedDeck || this.isDeletingExercise) {
+      return;
+    }
+
+    const deck = this.selectedDeck;
+    if (this.isBrowser && !window.confirm(`Видалити набір "${this.displayDeckName(deck)}" і пов'язані тести?`)) {
+      return;
+    }
+
+    this.isDeletingExercise = true;
     this.flashcardsErrorMessage = '';
+    this.testsErrorMessage = '';
 
     try {
-      const chatId = await this.getOrCreateChatId();
-      const message = await firstValueFrom(
-        this.http.post<ChatMessageResponse>(`${this.apiUrl}/chat-messages/`, {
-          chatSessionId: chatId,
-          content: 'Вправа з картками',
-          timestamp: null,
-          role: 1,
-          sequenceNumber: 0
-        })
+      await Promise.all(
+        this.tests
+          .filter((test) => test.sourceFlashcardId === deck.id)
+          .map((test) => firstValueFrom(this.http.delete(`${this.apiUrl}/tests/${test.id}`)))
       );
+      await firstValueFrom(this.http.delete(`${this.apiUrl}/flashcards/${deck.id}`));
 
-      const deck = await firstValueFrom(
-        this.http.post<FlashcardResponse>(`${this.apiUrl}/flashcards/`, {
-          name: 'Основи програмування',
-          chatMessageId: message.id,
-          cards: [
-            {
-              term: 'Змінна',
-              definition: 'Іменоване місце для зберігання значення, яке можна використати пізніше.'
-            },
-            {
-              term: 'Функція',
-              definition: 'Повторно використовуваний блок коду, який виконує конкретну задачу.'
-            },
-            {
-              term: 'Цикл',
-              definition: 'Конструкція керування, яка повторює код, доки умова істинна.'
-            }
-          ]
-        })
-      );
+      this.tests = this.tests.filter((test) => test.sourceFlashcardId !== deck.id);
+      this.decks = this.decks.filter((item) => item.id !== deck.id);
+      this.selectedDeck = this.decks[0] ?? null;
 
-      this.decks = [...this.decks, deck];
-      this.selectDeck(deck);
+      if (this.selectedDeck) {
+        this.selectDeck(this.selectedDeck);
+      } else {
+        this.currentCard = null;
+        this.selectedTest = null;
+        this.isCardStudyOpen = false;
+      }
     } catch (error) {
       this.flashcardsErrorMessage = this.getErrorMessage(error);
     } finally {
-      this.isCreatingSampleDeck = false;
+      this.isDeletingExercise = false;
     }
+  }
+
+  async deleteTest(test: TestResponse, event?: Event): Promise<void> {
+    event?.stopPropagation();
+
+    if (this.isDeletingExercise) {
+      return;
+    }
+
+    if (this.isBrowser && !window.confirm(`Видалити тест "${this.displayTestName(test)}"?`)) {
+      return;
+    }
+
+    this.isDeletingExercise = true;
+    this.testsErrorMessage = '';
+
+    try {
+      await firstValueFrom(this.http.delete(`${this.apiUrl}/tests/${test.id}`));
+      this.tests = this.tests.filter((item) => item.id !== test.id);
+
+      if (this.selectedTest?.id === test.id) {
+        this.selectedTest = this.selectedDeckTests[0] ?? null;
+        this.closeTestRun();
+      }
+    } catch (error) {
+      this.testsErrorMessage = this.getErrorMessage(error);
+    } finally {
+      this.isDeletingExercise = false;
+    }
+  }
+
+  isSelectedAnswer(answerVariant: TestAnswerVariantResponse): boolean {
+    return this.selectedAnswerVariantId === answerVariant.id;
+  }
+
+  isCorrectAnswer(answerVariant: TestAnswerVariantResponse): boolean {
+    return this.answerResult?.correctAnswerVariantId === answerVariant.id;
+  }
+
+  isWrongSelectedAnswer(answerVariant: TestAnswerVariantResponse): boolean {
+    return Boolean(
+      this.answerResult &&
+      !this.answerResult.isCorrect &&
+      this.answerResult.selectedAnswerVariantId === answerVariant.id
+    );
   }
 
   async sendMessage(input: HTMLInputElement, event: SubmitEvent): Promise<void> {
@@ -266,6 +521,40 @@ export class ChatPageComponent implements OnInit {
       await this.loadMessages(false);
     } finally {
       this.isSending = false;
+    }
+  }
+
+  private async checkAnswer(answerVariantId: string): Promise<void> {
+    if (!this.selectedTest || !this.currentQuestion) {
+      return;
+    }
+
+    this.isCheckingAnswer = true;
+    this.testsErrorMessage = '';
+
+    try {
+      const result = await firstValueFrom(
+        this.http.post<TestAnswerResultResponse>(
+          `${this.apiUrl}/tests/${this.selectedTest.id}/questions/${this.currentQuestion.id}/answer`,
+          { answerVariantId }
+        )
+      );
+
+      this.answerResult = result;
+
+      if (result.isCorrect) {
+        this.testCorrectAnswers += 1;
+        this.isSuccessFeedbackVisible = true;
+        window.setTimeout(() => {
+          this.isSuccessFeedbackVisible = false;
+          this.goToNextQuestion();
+        }, 750);
+      }
+    } catch (error) {
+      this.selectedAnswerVariantId = null;
+      this.testsErrorMessage = this.getErrorMessage(error);
+    } finally {
+      this.isCheckingAnswer = false;
     }
   }
 
@@ -422,6 +711,20 @@ export class ChatPageComponent implements OnInit {
     }
   }
 
+  private async loadTests(shouldSetError = true): Promise<void> {
+    try {
+      this.tests = await firstValueFrom(this.http.get<TestResponse[]>(`${this.apiUrl}/tests/`));
+
+      if (this.selectedDeckTests.length > 0 && !this.selectedTest) {
+        this.selectTest(this.selectedDeckTests[0]);
+      }
+    } catch (error) {
+      if (shouldSetError) {
+        this.testsErrorMessage = this.getErrorMessage(error);
+      }
+    }
+  }
+
   private async loadMessages(shouldSetError = true): Promise<void> {
     const chatId = this.getStoredChatId();
     if (!chatId) {
@@ -435,7 +738,7 @@ export class ChatPageComponent implements OnInit {
         })
       );
 
-      this.messages = messages.filter((message) => message.status !== 'failed');
+      this.messages = messages.filter((message) => this.isVisibleChatMessage(message));
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 404) {
         if (this.isBrowser) {
@@ -452,6 +755,33 @@ export class ChatPageComponent implements OnInit {
     }
   }
 
+  private goToNextQuestion(): void {
+    if (!this.selectedTest) {
+      return;
+    }
+
+    if (this.currentQuestionIndex >= this.selectedTest.questions.length - 1) {
+      this.completedTestResults = {
+        ...this.completedTestResults,
+        [this.selectedTest.id]: {
+          correct: this.testCorrectAnswers,
+          total: this.selectedTest.questions.length
+        }
+      };
+      this.currentQuestionIndex = 0;
+      this.isTestRunOpen = false;
+      this.isTestResultOpen = true;
+      this.selectedAnswerVariantId = null;
+      this.answerResult = null;
+      this.selectedExerciseType = 'tests';
+      return;
+    }
+
+    this.currentQuestionIndex += 1;
+    this.selectedAnswerVariantId = null;
+    this.answerResult = null;
+  }
+
   private getErrorMessage(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
       const apiMessage =
@@ -463,7 +793,7 @@ export class ChatPageComponent implements OnInit {
 
       if (apiMessage) {
         if (apiMessage.includes('HttpClient.Timeout')) {
-          return 'ШІ не відповів вчасно. Backend перевищив час очікування відповіді зовнішнього AI-сервісу.';
+          return 'AI не відповів вчасно. Backend перевищив час очікування відповіді зовнішнього AI-сервісу.';
         }
 
         return apiMessage;
@@ -479,5 +809,74 @@ export class ChatPageComponent implements OnInit {
     }
 
     return 'Не вдалося отримати відповідь.';
+  }
+
+  private isVisibleChatMessage(message: ChatMessage): boolean {
+    return message.status !== 'failed' &&
+      message.content !== this.hiddenExerciseMessageContent &&
+      !this.legacyExerciseMessageContents.has(message.content);
+  }
+
+  private translateLegacyExerciseName(name: string): string {
+    const legacyNames: Record<string, string> = {
+      'Programming basics': 'Основи програмування',
+      'Основы программирования': 'Основи програмування',
+      'Основи програмування': 'Основи програмування',
+      'Тест: Основы программирования': 'Тест: Основи програмування',
+      'Тест: Основи програмування': 'Тест: Основи програмування',
+      'Flashcard exercise': 'Вправа з картками',
+      'Упражнение с карточками': 'Вправа з картками',
+      'Вправа з картками': 'Вправа з картками',
+      'OOP': 'ООП'
+    };
+
+    return legacyNames[name] ?? name;
+  }
+
+  private translateLegacyCardText(text: string): string {
+    const legacyCardTexts: Record<string, string> = {
+      'Переменная': 'Змінна',
+      'Функция': 'Функція',
+      'Цикл': 'Цикл',
+      'Именованное место для хранения значения, которое можно использовать позже.':
+        'Іменоване місце для зберігання значення, яке можна використати пізніше.',
+      'Повторно используемый блок кода, который выполняет конкретную задачу.':
+        'Повторно використовуваний блок коду, який виконує конкретну задачу.',
+      'Конструкция управления, которая повторяет код, пока условие истинно.':
+        'Конструкція керування, яка повторює код, доки умова істинна.',
+      'Variable': 'Змінна',
+      'Function': 'Функція',
+      'Loop': 'Цикл',
+      'A named storage location for a value that can be used later.':
+        'Іменоване місце для зберігання значення, яке можна використати пізніше.',
+      'A reusable block of code that performs a specific task.':
+        'Повторно використовуваний блок коду, який виконує конкретну задачу.',
+      'A control structure that repeats code while a condition is true.':
+        'Конструкція керування, яка повторює код, доки умова істинна.'
+    };
+
+    return legacyCardTexts[text] ?? text;
+  }
+
+  private translateLegacyTestText(text: string): string {
+    const legacyTestTexts: Record<string, string> = {
+      'Что такое переменная?': 'Що таке змінна?',
+      'Для чего нужна функция?': 'Для чого потрібна функція?',
+      'Что делает цикл?': 'Що робить цикл?',
+      'Именованное место для хранения значения': 'Іменоване місце для зберігання значення',
+      'Ошибка в программе': 'Помилка у програмі',
+      'Команда для запуска сервера': 'Команда для запуску сервера',
+      'Файл с настройками': 'Файл із налаштуваннями',
+      'Чтобы повторно использовать блок кода': 'Щоб повторно використовувати блок коду',
+      'Чтобы удалить все данные': 'Щоб видалити всі дані',
+      'Чтобы изменить цвет экрана': 'Щоб змінити колір екрана',
+      'Чтобы остановить компилятор': 'Щоб зупинити компілятор',
+      'Повторяет код, пока выполняется условие': 'Повторює код, доки виконується умова',
+      'Сохраняет пароль пользователя': 'Зберігає пароль користувача',
+      'Создает новую базу данных': 'Створює нову базу даних',
+      'Проверяет интернет-соединение': 'Перевіряє інтернет-з’єднання'
+    };
+
+    return legacyTestTexts[text] ?? text;
   }
 }

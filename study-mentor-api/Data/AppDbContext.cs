@@ -21,6 +21,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public DbSet<Card> Cards => Set<Card>();
 
+    public DbSet<Test> Tests => Set<Test>();
+
+    public DbSet<TestQuestion> TestQuestions => Set<TestQuestion>();
+
+    public DbSet<TestAnswerVariant> TestAnswerVariants => Set<TestAnswerVariant>();
+
     public DbSet<Group> Groups => Set<Group>();
 
     public DbSet<User> Users => Set<User>();
@@ -38,6 +44,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         ConfigureBaseEntity<ChatSession>(modelBuilder);
         ConfigureBaseEntity<Exercise>(modelBuilder);
         ConfigureBaseEntity<Card>(modelBuilder);
+        ConfigureBaseEntity<TestQuestion>(modelBuilder);
+        ConfigureBaseEntity<TestAnswerVariant>(modelBuilder);
         ConfigureBaseEntity<Group>(modelBuilder);
         ConfigureBaseEntity<User>(modelBuilder);
 
@@ -99,7 +107,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.Name).IsRequired();
             entity.HasDiscriminator<string>("ExerciseType")
                 .HasValue<Exercise>("Exercise")
-                .HasValue<Flashcard>("Flashcard");
+                .HasValue<Flashcard>("Flashcard")
+                .HasValue<Test>("Test");
         });
 
         modelBuilder.Entity<Flashcard>(entity =>
@@ -108,6 +117,34 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .WithOne(e => e.Flashcard)
                 .HasForeignKey(e => e.FlashcardId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Test>(entity =>
+        {
+            entity.HasOne(e => e.SourceFlashcard)
+                .WithMany()
+                .HasForeignKey(e => e.SourceFlashcardId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasMany(e => e.Questions)
+                .WithOne(e => e.Test)
+                .HasForeignKey(e => e.TestId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TestQuestion>(entity =>
+        {
+            entity.ToTable("test_questions");
+            entity.Property(e => e.Prompt).IsRequired();
+            entity.HasMany(e => e.AnswerVariants)
+                .WithOne(e => e.TestQuestion)
+                .HasForeignKey(e => e.TestQuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TestAnswerVariant>(entity =>
+        {
+            entity.ToTable("test_answer_variants");
+            entity.Property(e => e.Text).IsRequired();
         });
 
         modelBuilder.Entity<Card>(entity =>
