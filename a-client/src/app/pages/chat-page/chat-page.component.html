@@ -1,38 +1,98 @@
-<main class="chat-page">
-  <section class="messages" aria-live="polite">
-    @for (message of messages; track $index) {
-      <article class="message" [class.message-user]="message.role === 'user'">
-        {{ message.content }}
-      </article>
-    }
+<main
+  class="chat-page"
+  [class.sidebar-collapsed]="isSidebarCollapsed"
+  [class.exercise-panel-open]="isFlashcardsOpen"
+>
+  <app-sidebar
+    (collapsedChange)="isSidebarCollapsed = $event"
+    (practiceOpen)="openFlashcards()"
+  ></app-sidebar>
 
-    @if (isSending) {
-      <article class="message message-assistant">AI думає...</article>
-    }
+  <section class="chat-panel">
+    <section class="messages" aria-live="polite">
+      @for (message of messages; track $index) {
+        <article
+          class="message"
+          [class.message-assistant]="message.role === 'assistant'"
+          [class.message-system]="message.role === 'system'"
+          [class.message-user]="message.role === 'user'"
+          [innerHTML]="renderMessageContent(message)"
+        ></article>
+      }
 
-    @if (errorMessage) {
-      <p class="error-message">{{ errorMessage }}</p>
-    }
+      @if (isSending) {
+        <article class="message message-assistant">AI думає...</article>
+      }
+
+      @if (errorMessage) {
+        <p class="error-message">{{ errorMessage }}</p>
+      }
+
+      <div #messagesEnd class="messages-end-spacer" aria-hidden="true"></div>
+    </section>
   </section>
+
+  <button
+    class="scroll-button"
+    [class.scroll-button-visible]="showScrollButton"
+    type="button"
+    (click)="goToLatestMessage()"
+  ></button>
+
+  <div class="prompt-backdrop" aria-hidden="true"></div>
 
   <form
     class="prompt-bar"
-    aria-label="Ask anything"
+    aria-label="Запит до ментора"
     autocomplete="off"
     (submit)="sendMessage(messageInput, $event)"
   >
+    <div class="generation-menu-wrap">
+      <button
+        class="add-button"
+        type="button"
+        aria-label="Додати генерацію"
+        [class.active]="isGenerationMenuOpen"
+        (click)="toggleGenerationMenu()"
+      >
+        +
+      </button>
+
+      @if (isGenerationMenuOpen) {
+        <div class="generation-menu">
+          <span>Генерація</span>
+          <button type="button" (click)="selectGenerationType('flashcard', messageInput)">
+            Картки
+          </button>
+          <button type="button" (click)="selectGenerationType('test', messageInput)">
+            Тести
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (selectedGenerationType) {
+      <button
+        class="generation-chip"
+        type="button"
+        aria-label="Скасувати режим генерації"
+        (click)="clearGenerationType()"
+      >
+        {{ selectedGenerationType === 'test' ? 'Тести' : 'Картки' }}
+      </button>
+    }
+
     <input
       #messageInput
       class="prompt-input"
       type="text"
       name="study-mentor-chat-message"
-      placeholder="Напиши повідомлення..."
+      [placeholder]="selectedGenerationType ? 'Опишіть, що згенерувати...' : 'Напишіть повідомлення...'"
       aria-label="Повідомлення"
       autocomplete="off"
       autocapitalize="off"
       autocorrect="off"
       spellcheck="false"
-      [disabled]="isSending"
     />
 
     <button
@@ -59,4 +119,328 @@
       </svg>
     </button>
   </form>
+
+  <p class="ai-disclaimer">
+    ШІ може помилятися. Перевіряйте відповіді.
+    <a routerLink="/ai-disclaimer">Детальніше</a>
+  </p>
+
+  @if (isFlashcardsOpen) {
+    <aside class="exercise-panel" aria-label="Панель вправ">
+      @if (isTestResultOpen && selectedTest) {
+        <section class="test-result-view">
+          <header class="card-study-header">
+            <button
+              class="back-button"
+              type="button"
+              aria-label="Назад до тестів"
+              (click)="backToTestsList()"
+            >
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Назад
+            </button>
+          </header>
+
+          <article class="test-result-card" [class.perfect]="isPerfectTestResult">
+            <span>Результат тесту</span>
+            <h2>{{ displayTestName(selectedTest) }}</h2>
+            @if (isPerfectTestResult) {
+              <div class="result-check" aria-hidden="true">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="none">
+                  <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </div>
+            }
+            <strong>{{ testScorePercent }}%</strong>
+            <p>{{ testCorrectAnswers }} правильних з {{ totalQuestions }}</p>
+            @if (isPerfectTestResult) {
+              <small>Усе вірно</small>
+            } @else {
+              <small>Є помилки, які варто повторити</small>
+            }
+
+            <div class="test-result-actions">
+              <button type="button" (click)="restartTest()">Пройти ще раз</button>
+              <button type="button" (click)="backToTestsList()">До списку тестів</button>
+            </div>
+          </article>
+        </section>
+      } @else if (isTestRunOpen && selectedTest && currentQuestion) {
+        <section
+          class="test-run-view"
+          [class.correct-feedback]="isSuccessFeedbackVisible"
+          [class.wrong-feedback]="answerResult && !answerResult.isCorrect"
+        >
+          <header class="test-progress" aria-label="Прогрес тесту">
+            <button
+              class="test-exit-button"
+              type="button"
+              aria-label="Вийти з тесту"
+              (click)="backToTestsList()"
+            >
+              Вийти
+            </button>
+            <span class="progress-counter">{{ currentQuestionIndex }}</span>
+            <div class="progress-track">
+              @for (question of selectedTest.questions; track question.id; let i = $index) {
+                <span
+                  class="progress-segment"
+                  [class.completed]="i < currentQuestionIndex"
+                  [class.current]="i === currentQuestionIndex"
+                ></span>
+              }
+            </div>
+            <span class="progress-total">{{ totalQuestions }}</span>
+          </header>
+
+          @if (isSuccessFeedbackVisible) {
+            <div class="success-check" aria-hidden="true">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+          }
+
+          <article class="test-card">
+            <div class="question-kind">
+              <span>Визначення</span>
+            </div>
+
+            <h2>{{ displayQuestionPrompt(currentQuestion) }}</h2>
+
+            @if (answerResult && !answerResult.isCorrect) {
+              <p class="wrong-copy">Не зовсім вірно. Правильну відповідь підсвічено.</p>
+            } @else if (isCheckingAnswer) {
+              <p class="answer-label">Перевіряємо...</p>
+            } @else {
+              <p class="answer-label">Виберіть відповідь</p>
+            }
+
+            <div class="answer-grid">
+              @for (answerVariant of currentQuestion.answerVariants; track answerVariant.id; let i = $index) {
+                <button
+                  type="button"
+                  class="answer-option"
+                  [class.selected]="isSelectedAnswer(answerVariant)"
+                  [class.correct]="isCorrectAnswer(answerVariant)"
+                  [class.wrong]="isWrongSelectedAnswer(answerVariant)"
+                  [disabled]="isCheckingAnswer"
+                  (click)="selectAnswerVariant(answerVariant.id)"
+                >
+                  @if (isCorrectAnswer(answerVariant)) {
+                    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  } @else if (isWrongSelectedAnswer(answerVariant)) {
+                    <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                    </svg>
+                  } @else {
+                    <strong>{{ i + 1 }}</strong>
+                  }
+                  <span>{{ displayAnswerText(answerVariant) }}</span>
+                </button>
+              }
+            </div>
+
+            @if (testsErrorMessage) {
+              <p class="flashcards-error">{{ testsErrorMessage }}</p>
+            }
+          </article>
+
+          @if (answerResult && !answerResult.isCorrect) {
+            <div class="wrong-answer-popover">
+              <strong>Натисніть правильну відповідь або будь-яку клавішу, щоб продовжити</strong>
+              <button type="button" (click)="continueAfterWrongAnswer()">Продовжити</button>
+            </div>
+          }
+        </section>
+      } @else if (!isCardStudyOpen) {
+        <header class="exercise-panel-header">
+          <div>
+            <p>Практика</p>
+            <h2>{{ displayDeckName(selectedDeck) }}</h2>
+          </div>
+
+          <button
+            class="close-button"
+            type="button"
+            aria-label="Закрити вправи"
+            (click)="closeFlashcards()"
+          >
+            x
+          </button>
+        </header>
+
+        <section class="exercise-switcher" aria-label="Тип вправ">
+          <button
+            type="button"
+            [class.active]="selectedExerciseType === 'flashcards'"
+            (click)="selectExerciseType('flashcards')"
+          >
+            Картки
+          </button>
+          <button
+            type="button"
+            [class.active]="selectedExerciseType === 'tests'"
+            (click)="selectExerciseType('tests')"
+          >
+            Тести
+          </button>
+        </section>
+
+        @if (decks.length > 0) {
+          <section class="deck-strip" aria-label="Набори">
+            @for (deck of decks; track deck.id) {
+              <button
+                type="button"
+                [class.active]="selectedDeck?.id === deck.id"
+                (click)="selectDeck(deck)"
+              >
+                {{ displayDeckName(deck) }}
+              </button>
+            }
+          </section>
+        }
+
+        <section class="exercise-list-view">
+          <div class="exercise-list-header">
+            <span>{{ selectedExerciseType === 'tests' ? 'Тести' : 'Картки' }}</span>
+            <div class="exercise-header-actions">
+              @if (selectedDeck) {
+                <button
+                  class="delete-button"
+                  type="button"
+                  (click)="deleteSelectedDeck()"
+                  [disabled]="isDeletingExercise"
+                >
+                  Видалити набір
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (isLoadingFlashcards) {
+            <p class="state-text">Завантаження вправ...</p>
+          } @else if (flashcardsErrorMessage || (selectedExerciseType === 'tests' && testsErrorMessage)) {
+            <p class="flashcards-error">{{ flashcardsErrorMessage || testsErrorMessage }}</p>
+          } @else if (selectedExerciseType === 'flashcards' && !selectedDeck) {
+            <p class="state-text">Вправ поки немає.</p>
+          } @else if (selectedExerciseType === 'flashcards') {
+            <div class="cards-list">
+              @for (card of selectedDeck?.cards ?? []; track card.id) {
+                <button
+                  type="button"
+                  class="card-list-item"
+                  [class.active-card]="currentCard?.id === card.id"
+                  (click)="selectCard(card)"
+                >
+                  <strong>{{ displayCardTerm(card) }}</strong>
+                  <span>Картка {{ (selectedDeck?.cards?.indexOf(card) ?? 0) + 1 }}</span>
+                </button>
+              }
+            </div>
+          } @else {
+            @if (visibleTests.length > 0) {
+              <div class="cards-list">
+                @for (test of visibleTests; track test.id) {
+                  <div class="exercise-row">
+                    <button type="button" class="card-list-item test-list-open" (click)="startTest(test)">
+                      <strong>{{ displayTestName(test) }}</strong>
+                      @if (testResultFor(test); as result) {
+                        <span class="test-result-inline" [class.perfect]="isPerfectTest(test)">
+                          @if (isPerfectTest(test)) {
+                            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                              <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          }
+                          {{ result.correct }} / {{ result.total }} · {{ testResultPercent(test) }}%
+                        </span>
+                      } @else {
+                        <span>{{ test.questions.length }} питань</span>
+                      }
+                    </button>
+                    <button
+                      class="delete-icon-button"
+                      type="button"
+                      aria-label="Видалити тест"
+                      [disabled]="isDeletingExercise"
+                      (click)="deleteTest(test, $event)"
+                    >
+                      x
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="state-text">Тестів поки немає.</p>
+            }
+          }
+        </section>
+      } @else {
+        <section class="card-study-view">
+          <header class="card-study-header">
+            <button
+              class="back-button"
+              type="button"
+              aria-label="Назад до списку"
+              (click)="backToExerciseList()"
+            >
+              <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Назад
+            </button>
+
+            <span>{{ currentCardIndex + 1 }} / {{ totalCount }}</span>
+          </header>
+
+          @if (currentCard) {
+            <button
+              type="button"
+              class="flashcard-large"
+              [class.is-flipped]="isBackVisible"
+              (click)="flipCard()"
+            >
+              <span class="flashcard-inner">
+                <span class="flashcard-face flashcard-front">
+                  <strong>{{ displayCardTerm(currentCard) }}</strong>
+                </span>
+                <span class="flashcard-face flashcard-back">
+                  <strong>{{ displayCardDefinition(currentCard) }}</strong>
+                </span>
+              </span>
+            </button>
+
+            @if (isTestPromptVisible) {
+              <div class="test-invite">
+                <strong>Картки пройдено</strong>
+                <span>Хочете закріпити матеріал тестом?</span>
+                <div>
+                  <button type="button" (click)="startDeckTest()">Пройти тест</button>
+                  <button type="button" (click)="dismissTestPrompt()">Пізніше</button>
+                </div>
+              </div>
+            }
+
+            <div class="card-nav-actions">
+              <button type="button" aria-label="Попередня картка" (click)="showPreviousCard()">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+
+              <button type="button" aria-label="Наступна картка" (click)="showNextCard()">
+                <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          }
+        </section>
+      }
+    </aside>
+  }
 </main>

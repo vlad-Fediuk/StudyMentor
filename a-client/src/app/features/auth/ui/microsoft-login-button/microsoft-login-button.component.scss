@@ -1,0 +1,57 @@
+.microsoft-button {
+  align-items: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  box-shadow: 0 12px 32px var(--color-shadow);
+  color: var(--color-black);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  gap: 12px;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 22px;
+  transition: all 0.15s ease;
+}
+
+.microsoft-button:hover:not(:disabled) {
+  border-color: var(--color-black);
+}
+
+.microsoft-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.microsoft-mark {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(2, 10px);
+  grid-template-rows: repeat(2, 10px);
+}
+
+.microsoft-mark span:nth-child(1) {
+  background: #f25022;
+}
+
+.microsoft-mark span:nth-child(2) {
+  background: #7fba00;
+}
+
+.microsoft-mark span:nth-child(3) {
+  background: #00a4ef;
+}
+
+.microsoft-mark span:nth-child(4) {
+  background: #ffb900;
+}
+
+@media (max-width: 520px) {
+  .microsoft-button {
+    font-size: 15px;
+    width: 100%;
+  }
+}

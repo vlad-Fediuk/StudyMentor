@@ -14,9 +14,9 @@ public static class SubjectEndpoints
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);
-        group.MapPost("/", Create);
-        group.MapPut("/{id}", Update);
-        group.MapDelete("/{id}", Delete);
+        group.MapPost("/", Create).RequireAuthorization("user");
+        group.MapPut("/{id}", Update).RequireAuthorization("user");
+        group.MapDelete("/{id}", Delete).RequireAuthorization("user");
     }
 
     private static async Task<IResult> GetAll(

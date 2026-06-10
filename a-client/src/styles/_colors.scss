@@ -1,0 +1,54 @@
+:root {
+  --color-white: #ffffff;
+  --color-black: #1d1d1f;
+  --color-muted: #9b9ba1;
+  --color-surface: #f5f5f5;
+  --color-border: #e3e3e5;
+  --color-scrollbar: #8f8f8f;
+  --color-selection: #cfe1ff;
+  --color-error: #b00020;
+
+  --color-shadow: rgba(0, 0, 0, 0.05);
+  --color-exercise-panel-shadow: rgba(0, 0, 0, 0.12);
+  --color-message-border: rgba(227, 227, 229, 0.55);
+  --color-message-bg: #ffffff;
+  --color-message-user-bg: #f5f5f5;
+  --color-message-code-bg: #f5f5f5;
+  --color-generation-menu-shadow: rgba(0, 0, 0, 0.14);
+
+  --filter-active-icon: invert(1);
+  --filter-inactive-icon: none;
+  --filter-icon-on-surface: none;
+}
+
+[data-theme="dark"] {
+  --color-white: #121212;
+  --color-black: #f5f5f7;
+  --color-muted: #86868b;
+  --color-surface: #1c1c1e;
+  --color-border: #2c2c2e;
+  --color-scrollbar: #515154;
+  --color-selection: #0071e3;
+  --color-error: #ff453a;
+
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-exercise-panel-shadow: rgba(0, 0, 0, 0.4);
+  --color-message-border: #2c2c2e;
+  --color-message-bg: #1c1c1e;
+  --color-message-user-bg: #2c2c2e;
+  --color-message-code-bg: #2c2c2e;
+  --color-generation-menu-shadow: rgba(0, 0, 0, 0.4);
+
+  --filter-active-icon: none;
+  --filter-inactive-icon: invert(1);
+  --filter-icon-on-surface: invert(1);
+}
+
+$white: var(--color-white);
+$black: var(--color-black);
+$muted: var(--color-muted);
+$surface: var(--color-surface);
+$border: var(--color-border);
+$scrollbar: var(--color-scrollbar);
+$selection: var(--color-selection);
+$error: var(--color-error);

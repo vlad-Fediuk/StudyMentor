@@ -14,8 +14,8 @@ public static class ChatSessionEndpoints
         group.MapGet("/{id}", GetById);
         group.MapGet("/user/{userId}", GetByUser);
         group.MapPost("/", Create);
-        group.MapPut("/{id}", Update);
-        group.MapDelete("/{id}", Delete);
+        group.MapPut("/{id}", Update).RequireAuthorization("user");
+        group.MapDelete("/{id}", Delete).RequireAuthorization("user");
     }
 
     private static async Task<IResult> GetAll(

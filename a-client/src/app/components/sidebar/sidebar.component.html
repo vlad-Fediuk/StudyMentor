@@ -1,0 +1,122 @@
+<aside
+  #sidebarElement
+  class="sidebar"
+  [class.collapsed]="isCollapsed"
+>
+  <div class="sidebar-actions">
+    <button
+      type="button"
+      class="sidebar-action-button"
+      [class.active]="activeTab === 'subjects'"
+      (click)="selectTab('subjects')"
+      aria-label="Предмети"
+    >
+      <img src="/assets/icons/sidebar-subject.svg" alt="" aria-hidden="true" />
+    </button>
+
+    <button
+      type="button"
+      class="sidebar-action-button"
+      [class.active]="activeTab === 'lectures'"
+      (click)="selectTab('lectures')"
+      aria-label="Лекції"
+    >
+      <img src="/assets/icons/sidebar-page.svg" alt="" aria-hidden="true" />
+    </button>
+
+    <button
+      type="button"
+      class="sidebar-action-button theme-toggle-button"
+      (click)="toggleTheme()"
+      [attr.aria-label]="isDarkTheme ? 'Світла тема' : 'Темна тема'"
+    >
+      <svg *ngIf="isDarkTheme" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg *ngIf="!isDarkTheme" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="sidebar-card" *ngIf="!isCollapsed">
+    <label class="sidebar-card-search">
+      <span class="visually-hidden">Пошук: {{ cardTitle }}</span>
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        [placeholder]="searchPlaceholder"
+        autocomplete="off"
+      />
+    </label>
+
+    <div class="sidebar-card-list">
+      <ng-container *ngIf="isLoading">
+        <div class="sidebar-empty">Завантаження...</div>
+      </ng-container>
+
+      <ng-container *ngIf="error">
+        <div class="sidebar-empty sidebar-error">{{ error }}</div>
+      </ng-container>
+
+      <ng-container *ngIf="!isLoading && !error">
+        <ng-container *ngIf="activeTab === 'subjects'">
+          <button
+            type="button"
+            class="sidebar-card-item"
+            *ngFor="let subject of filteredSubjects"
+            [class.active]="subject.id === selectedSubjectId"
+            (click)="selectSubject(subject.id)"
+          >
+            {{ subject.name }}
+          </button>
+
+          <div *ngIf="!filteredSubjects.length" class="sidebar-empty">
+            Предмети не знайдено
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="activeTab === 'lectures'">
+          <ng-container *ngIf="selectedSubjectId && lecturesForSelectedSubject.length">
+            <button
+              type="button"
+              class="sidebar-card-item"
+              *ngFor="let lecture of lecturesForSelectedSubject"
+              [class.selected]="lecture.id === selectedLectureId"
+              (click)="selectLecture(lecture)"
+            >
+              {{ lecture.name }}
+            </button>
+          </ng-container>
+
+          <div *ngIf="!selectedSubjectId" class="sidebar-empty">
+            Спочатку оберіть предмет
+          </div>
+
+          <div *ngIf="selectedSubjectId && !lecturesForSelectedSubject.length" class="sidebar-empty">
+            Лекції не знайдено
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="sidebar-practice-button"
+    *ngIf="!isCollapsed"
+    (click)="openPractice()"
+  >
+    Практичні завдання
+  </button>
+
+  <button type="button" class="sidebar-back" (click)="toggleCollapse()" aria-label="Згорнути меню"></button>
+</aside>

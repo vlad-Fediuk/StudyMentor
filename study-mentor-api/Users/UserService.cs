@@ -12,6 +12,11 @@ public class UserService(AppDbContext dbContext) : BaseCrudService<User>
         return await dbContext.Users.FirstOrDefaultAsync(u => u.GroupId == groupId, ct);
     }
 
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
+    {
+        return await dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+    }
+
     protected override IQueryable<User> Query()
         => dbContext.Users.AsQueryable();
 
@@ -40,7 +45,9 @@ public class UserService(AppDbContext dbContext) : BaseCrudService<User>
     protected override void UpdateEntityValues(User existing, User updated)
     {
         existing.Name = updated.Name;
+        existing.Email = updated.Email ?? existing.Email;
         existing.Password = updated.Password;
         existing.GroupId = updated.GroupId;
+        existing.Roles = updated.Roles;
     }
 }
