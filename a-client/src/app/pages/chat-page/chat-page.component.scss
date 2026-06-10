@@ -61,11 +61,11 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   width: fit-content;
   min-width: 0;
   align-self: flex-start;
-  padding: 11px 15px;
-  border: 1px solid mix(colors.$border, colors.$white, 55%);
+  padding: 12px 16px;
+  border: 1px solid var(--color-message-border);
   border-radius: 18px;
   color: colors.$black;
-  background: colors.$white;
+  background: var(--color-message-bg);
   line-height: 1.45;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -115,7 +115,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   overflow-wrap: normal;
   padding: 10px 12px;
   border-radius: 8px;
-  background: mix(colors.$surface, colors.$white, 70%);
+  background: var(--color-message-code-bg);
   white-space: pre;
 }
 
@@ -257,6 +257,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   background: colors.$black;
 }
 
+
 .send-button:disabled {
   opacity: 0.45;
 }
@@ -280,9 +281,11 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, 22px);
+  filter: var(--filter-icon-on-surface);
   transition:
     opacity 180ms ease,
-    transform 180ms ease;
+    transform 180ms ease,
+    filter 180ms ease;
 }
 
 .scroll-button-visible {

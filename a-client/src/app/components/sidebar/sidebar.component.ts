@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
   Component,
@@ -50,8 +50,10 @@ export class SidebarComponent implements OnInit {
   isCollapsed = false;
   isLoading = true;
   error = '';
+  isDarkTheme = false;
 
   async ngOnInit(): Promise<void> {
+    this.initTheme();
     this.route.queryParamMap.subscribe((params) => {
       const lectureId = params.get('lectureId');
       this.selectedLectureId = lectureId;
@@ -59,6 +61,33 @@ export class SidebarComponent implements OnInit {
     });
 
     await this.loadSubjectsAndLectures();
+  }
+
+  initTheme(): void {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      this.isDarkTheme = savedTheme === 'dark' ||
+        (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      this.applyTheme();
+    }
+  }
+
+  toggleTheme(): void {
+    this.isDarkTheme = !this.isDarkTheme;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', this.isDarkTheme ? 'dark' : 'light');
+    }
+    this.applyTheme();
+  }
+
+  private applyTheme(): void {
+    if (typeof window !== 'undefined') {
+      if (this.isDarkTheme) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    }
   }
 
   get cardTitle(): string {
