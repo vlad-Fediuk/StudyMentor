@@ -29,6 +29,7 @@ public static class ServiceExtensions
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddSingleton<JwtAuthenticationValidator>();
         services.AddScoped<Flashcards.FlashcardService>();
+        services.AddScoped<Tests.TestService>();
         services.AddSingleton<PromptTemplateService>();
         services.AddScoped<LearningContentGenerationService>();
         services.AddScoped<IPromptTemplateProvider, PromptTemplateProvider>();

@@ -123,6 +123,26 @@
   overflow: visible;
 }
 
+.sidebar-practice-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: auto;
+  margin-bottom: 46px;
+  border: 1px solid colors.$border;
+  border-radius: 10px;
+  padding: 0 14px;
+  color: colors.$black;
+  background: colors.$white;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebar-practice-button:hover {
+  background: colors.$black;
+  color: colors.$white;
+}
+
 .sidebar-card-search {
   width: calc(100% - 16px);
   margin: 0 8px 8px;

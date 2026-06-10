@@ -16,6 +16,7 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   --sidebar-width: 286px;
   --content-padding-right: 24px;
   --content-gap: 24px;
+  --panel-width: min(50vw, 560px);
 
   min-height: 100dvh;
   display: grid;
@@ -30,6 +31,10 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
 .chat-page.sidebar-collapsed {
   --sidebar-width: 70px;
   --prompt-backdrop-left: 0;
+}
+
+.chat-page.exercise-panel-open {
+  --content-padding-right: calc(var(--panel-width) + 24px);
 }
 
 .chat-panel {
@@ -230,6 +235,15 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   background: colors.$selection;
 }
 
+.send-button {
+  height: 38px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
 .prompt-input:focus,
 .prompt-input:focus-visible {
   outline: none;
@@ -237,16 +251,10 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
 
 .send-button {
   width: 38px;
-  height: 38px;
-  border: 0;
   border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   flex: 0 0 auto;
   color: colors.$white;
   background: colors.$black;
-  cursor: pointer;
 }
 
 .send-button:disabled {
@@ -281,6 +289,12 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, 0);
+}
+
+@media (max-width: 900px) {
+  .chat-page.exercise-panel-open {
+    --content-padding-right: 24px;
+  }
 }
 
 @media (max-width: 980px) {
@@ -354,4 +368,5 @@ $prompt-reserved-space: $prompt-bottom + $prompt-height + $disclaimer-height + $
   .prompt-input {
     font-size: 15px;
   }
+
 }

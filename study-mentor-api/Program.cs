@@ -13,6 +13,7 @@ using StudyMentorApi.LectureChunks;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Subjects;
+using StudyMentorApi.Tests;
 using StudyMentorApi.Users;
 
 namespace StudyMentorApi;
@@ -79,6 +80,7 @@ public class Program
         app.MapChatSessionEndpoints();
         app.MapFlashcardEndpoints();
         app.MapLearningContentEndpoints();
+        app.MapTestEndpoints();
         app.Run();
     }
 }

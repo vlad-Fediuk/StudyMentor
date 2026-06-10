@@ -33,6 +33,7 @@ interface LectureResponse extends IdNameResponse {
 })
 export class SidebarComponent implements OnInit {
   @Output() collapsedChange = new EventEmitter<boolean>();
+  @Output() practiceOpen = new EventEmitter<void>();
 
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
@@ -167,5 +168,9 @@ export class SidebarComponent implements OnInit {
   toggleCollapse(): void {
     this.isCollapsed = !this.isCollapsed;
     this.collapsedChange.emit(this.isCollapsed);
+  }
+
+  openPractice(): void {
+    this.practiceOpen.emit();
   }
 }

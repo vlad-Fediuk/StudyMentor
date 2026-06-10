@@ -87,5 +87,14 @@
     </div>
   </div>
 
+  <button
+    type="button"
+    class="sidebar-practice-button"
+    *ngIf="!isCollapsed"
+    (click)="openPractice()"
+  >
+    Практичні завдання
+  </button>
+
   <button type="button" class="sidebar-back" (click)="toggleCollapse()" aria-label="Згорнути меню"></button>
 </aside>

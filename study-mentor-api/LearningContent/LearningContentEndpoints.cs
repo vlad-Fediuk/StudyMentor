@@ -11,6 +11,10 @@ public static class LearningContentEndpoints
         routes
             .MapPost("/api/learning-content/generate", Generate)
             .WithTags("LearningContent");
+
+        routes
+            .MapPost("/api/learning-content/generate/chat", GenerateForChat)
+            .WithTags("LearningContent");
     }
 
     private static async Task<IResult> Generate(
@@ -42,6 +46,26 @@ public static class LearningContentEndpoints
             return Results.Json(
                 new { error = ex.Message },
                 statusCode: StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    private static async Task<IResult> GenerateForChat(
+        GenerateLearningContentChatRequest request,
+        LearningContentGenerationService service,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var response = await service.GenerateForChatAsync(request, cancellationToken);
+            return Results.Ok(response);
+        }
+        catch (ValidationException ex)
+        {
+            return Results.BadRequest(new { error = ex.Message });
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
         }
     }
 }

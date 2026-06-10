@@ -26,5 +26,7 @@ public sealed class RagRetrievalOptions
 
     public int MaxContextChars { get; set; } = 6000;
 
+    public double MinSimilarity { get; set; } = 0.35;
+
     public bool Strict { get; set; }
 }

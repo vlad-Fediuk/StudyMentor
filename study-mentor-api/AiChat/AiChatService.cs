@@ -16,6 +16,7 @@ public class AiChatService(
     IAiGenerationService aiGenerationService)
 {
     private const int MaxHistoryMessagesForAi = 20;
+    private const string MissingKnowledgeMessage = "Потрібної інформації немає в доступних матеріалах.";
 
     public async Task<IReadOnlyCollection<AiChatMessageDto>> GetMessagesAsync(
         string chatId,
@@ -73,6 +74,24 @@ public class AiChatService(
                 chat.LectureId,
                 request.Content.Trim(),
                 cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(lectureContext))
+            {
+                var missingKnowledgeMessage = await chatMessageService.CreateAsync(new ChatMessage
+                {
+                    ChatSessionId = parsedChatId,
+                    Content = MissingKnowledgeMessage,
+                    Timestamp = DateTime.UtcNow,
+                    Role = MessageRole.Assistant,
+                    SequenceNumber = nextSequenceNumber + 1,
+                    Status = "completed"
+                }, cancellationToken);
+
+                return new AiChatSendMessageResponse(
+                    "completed",
+                    ToDto(userMessage),
+                    ToDto(missingKnowledgeMessage));
+            }
 
             var aiResponse = await aiGenerationService.GenerateAsync(new AiGenerationRequest
             {
@@ -159,6 +178,8 @@ public class AiChatService(
             Chat:
             ChatId: {chat.Id}
             LectureId: {chat.LectureId}
+            ActiveLectureName: {chat.Lecture.Name}
+            ActiveSubjectName: {chat.Lecture.Subject.Name}
             """;
     }
 }
