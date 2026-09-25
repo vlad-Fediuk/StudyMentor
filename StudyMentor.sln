@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "study-mentor-api", "study-m
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "study-mentor-api.Tests", "study-mentor-api.Tests\study-mentor-api.Tests.csproj", "{AD9674ED-F6A9-4E87-A0EE-0FDD7F7A508C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "study-mentor-api.IntegrationTests", "study-mentor-api.IntegrationTests\study-mentor-api.IntegrationTests.csproj", "{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{AD9674ED-F6A9-4E87-A0EE-0FDD7F7A508C}.Release|x64.Build.0 = Release|Any CPU
 		{AD9674ED-F6A9-4E87-A0EE-0FDD7F7A508C}.Release|x86.ActiveCfg = Release|Any CPU
 		{AD9674ED-F6A9-4E87-A0EE-0FDD7F7A508C}.Release|x86.Build.0 = Release|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Debug|x64.Build.0 = Debug|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Debug|x86.Build.0 = Debug|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Release|x64.ActiveCfg = Release|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Release|x64.Build.0 = Release|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A1007A6-AE6D-4C5C-A8DF-8804A5B980C4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
