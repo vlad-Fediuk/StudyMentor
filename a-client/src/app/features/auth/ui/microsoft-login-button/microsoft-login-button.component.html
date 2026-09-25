@@ -1,0 +1,21 @@
+<button
+  class="microsoft-button"
+  type="button"
+  [disabled]="loading"
+  (click)="login.emit()"
+>
+  <span class="microsoft-mark" aria-hidden="true">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+  </span>
+  <span>
+    @if (loading) {
+      Входим...
+    } @else {
+      Войти через Microsoft
+    }
+  </span>
+</button>
+

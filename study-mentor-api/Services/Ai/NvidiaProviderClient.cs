@@ -2,14 +2,12 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Options;
-using StudyMentorApi.Extensions;
 
 namespace StudyMentorApi.Services.Ai;
 
-public sealed class NvidiaAiChatService : IAiChatService
+public sealed class NvidiaProviderClient(HttpClient httpClient) : IAiProviderClient
 {
-    private const string ProviderName = "nvidia";
+    public string ProviderType => "nvidia";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -17,45 +15,27 @@ public sealed class NvidiaAiChatService : IAiChatService
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private readonly HttpClient _httpClient;
-    private readonly NvidiaAiSettings _settings;
-
-    public NvidiaAiChatService(
-        HttpClient httpClient,
-        IOptions<NvidiaAiSettings> settings)
-    {
-        _httpClient = httpClient;
-        _settings = settings.Value;
-    }
-
-    public async Task<AiChatResponse> CompleteAsync(
-        AiChatRequest request,
+    public async Task<AiProviderResponse> CompleteAsync(
+        AiProviderRequest request,
         CancellationToken cancellationToken = default)
     {
-        if (request.Messages.Count == 0)
-        {
-            throw new ArgumentException("AI chat request must contain at least one message.");
-        }
-
-        var apiKey = GetApiKey();
+        var apiKey = GetApiKey(request.ApiKeyEnvironmentVariable);
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            throw new InvalidOperationException(
-                "NVIDIA API key is not configured. Set NVIDIA_API_KEY or AiProviders:Nvidia:ApiKey.");
+            throw new InvalidOperationException("NVIDIA API key is not configured. Set NVIDIA_API_KEY.");
         }
 
-        var model = ResolveModel(request.Model);
         var payload = new NvidiaChatCompletionRequest(
-            model,
+            request.Model,
             request.Messages.Select(message => new NvidiaChatMessage(message.Role, message.Content)).ToArray(),
-            _settings.MaxOutputTokens,
-            _settings.Temperature,
-            _settings.TopP,
+            request.MaxOutputTokens,
+            request.Temperature,
+            request.TopP,
             false,
-            _settings.EnableThinking
-                ? new NvidiaChatTemplateOptions(_settings.EnableThinking)
+            request.EnableThinking
+                ? new NvidiaChatTemplateOptions(request.EnableThinking)
                 : null,
-            _settings.EnableThinking ? _settings.ReasoningBudget : null);
+            request.EnableThinking ? request.ReasoningBudget : null);
 
         using var requestContent = new StringContent(
             JsonSerializer.Serialize(payload, JsonOptions),
@@ -63,7 +43,7 @@ public sealed class NvidiaAiChatService : IAiChatService
             "application/json");
         requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, _settings.InvokeUrl)
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, request.BaseUrl)
         {
             Content = requestContent
         };
@@ -71,8 +51,11 @@ public sealed class NvidiaAiChatService : IAiChatService
         httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(TimeSpan.FromSeconds(Math.Max(1, request.TimeoutSeconds)));
+
+        using var response = await httpClient.SendAsync(httpRequest, timeout.Token);
+        var responseBody = await response.Content.ReadAsStringAsync(timeout.Token);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -90,29 +73,16 @@ public sealed class NvidiaAiChatService : IAiChatService
             throw new InvalidOperationException("NVIDIA AI response did not contain a completion message.");
         }
 
-        return new AiChatResponse(ProviderName, completion?.Model ?? model, content);
+        return new AiProviderResponse(request.ProviderType, completion?.Model ?? request.Model, content);
     }
 
-    private string GetApiKey()
+    private static string GetApiKey(string? environmentVariable)
     {
-        return !string.IsNullOrWhiteSpace(_settings.ApiKey)
-            ? _settings.ApiKey
-            : Environment.GetEnvironmentVariable("NVIDIA_API_KEY") ?? string.Empty;
-    }
+        var variableName = string.IsNullOrWhiteSpace(environmentVariable)
+            ? "NVIDIA_API_KEY"
+            : environmentVariable;
 
-    private string ResolveModel(string? requestedModel)
-    {
-        var model = string.IsNullOrWhiteSpace(requestedModel)
-            ? _settings.DefaultModel
-            : requestedModel;
-
-        if (!_settings.SupportedModels.Contains(model, StringComparer.OrdinalIgnoreCase))
-        {
-            throw new ArgumentException(
-                $"AI model '{model}' is not supported. Supported models: {string.Join(", ", _settings.SupportedModels)}.");
-        }
-
-        return model;
+        return Environment.GetEnvironmentVariable(variableName) ?? string.Empty;
     }
 
     private sealed record NvidiaChatCompletionRequest(

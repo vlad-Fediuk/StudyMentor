@@ -11,17 +11,19 @@ internal static class AiSmokeTestRunner
     {
         var aiChatService = services.GetRequiredService<IAiChatService>();
         var prompt = Environment.GetEnvironmentVariable("AI_SMOKE_TEST_PROMPT");
+        var provider = Environment.GetEnvironmentVariable("AI_SMOKE_TEST_PROVIDER");
         var model = Environment.GetEnvironmentVariable("AI_SMOKE_TEST_MODEL");
 
         var request = new AiChatRequest
         {
+            Provider = string.IsNullOrWhiteSpace(provider) ? "lmstudio" : provider,
             Model = string.IsNullOrWhiteSpace(model) ? null : model,
             Messages =
             [
                 new AiChatMessage(
                     "user",
                     string.IsNullOrWhiteSpace(prompt)
-                        ? "Reply with a short confirmation that the NVIDIA integration works."
+                        ? "Reply with a short confirmation that the local LM Studio integration works."
                         : prompt)
             ]
         };

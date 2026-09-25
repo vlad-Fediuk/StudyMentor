@@ -21,8 +21,8 @@ public class PromptTemplateService(IWebHostEnvironment environment)
             .Replace("{{retrieved_context}}", Safe(context.RetrievedContext))
             .Replace("{{user_profile}}", Safe(context.UserProfile))
             .Replace("{{user_memory}}", Safe(context.UserMemory))
-            .Replace("{{response_style}}", Safe(context.ResponseStyle, "simple"))
-            .Replace("{{language}}", Safe(context.Language, "uk"))
+            .Replace("{{response_style}}", Safe(context.ResponseStyle, "глибокий аналіз дозволеного контексту"))
+            .Replace("{{language}}", Safe(context.Language, "українська"))
             .Replace("{{answer_rules}}", Safe(context.AnswerRules));
     }
 

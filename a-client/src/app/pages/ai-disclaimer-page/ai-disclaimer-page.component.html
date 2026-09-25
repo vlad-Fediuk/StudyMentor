@@ -1,0 +1,64 @@
+<main class="disclaimer-page">
+  <header class="support-header" aria-label="StudyMentor header">
+    <a class="brand" routerLink="/">StudyMentor</a>
+
+    <div class="language-switcher" aria-label="Change language">
+      @for (language of languages; track language) {
+        <button
+          class="language-option"
+          type="button"
+          [class.active]="selectedLanguage === language"
+          [attr.aria-pressed]="selectedLanguage === language"
+          (click)="selectLanguage(language)"
+        >
+          {{ language.toUpperCase() }}
+        </button>
+      }
+    </div>
+  </header>
+
+  <article class="disclaimer-content">
+    <nav class="breadcrumbs" aria-label="Breadcrumbs">
+      <a routerLink="/">{{ selectedLanguage === 'uk' ? 'Чат' : 'Chat' }}</a>
+      @for (item of copy.breadcrumbs; track item) {
+        <span aria-hidden="true">/</span>
+        <span>{{ item }}</span>
+      }
+    </nav>
+
+    <p class="article-kicker">{{ copy.kicker }}</p>
+
+    <h1>{{ copy.title }}</h1>
+
+    <p class="lead">{{ copy.lead }}</p>
+
+    <section class="info-callout">
+      <span class="callout-label">{{ copy.calloutLabel }}</span>
+      <p>{{ copy.callout }}</p>
+    </section>
+
+    <h2>{{ copy.whyTitle }}</h2>
+    @for (paragraph of copy.whyParagraphs; track paragraph) {
+      <p>{{ paragraph }}</p>
+    }
+
+    <div class="guidance-grid">
+      @for (card of copy.cards; track card.title; let index = $index) {
+        <section class="guidance-card">
+          <span class="card-index">{{ (index + 1).toString().padStart(2, '0') }}</span>
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.body }}</p>
+        </section>
+      }
+    </div>
+
+    <h2>{{ copy.bestTitle }}</h2>
+    @for (paragraph of copy.bestParagraphs; track paragraph) {
+      <p>{{ paragraph }}</p>
+    }
+
+    <footer class="article-footer">
+      <a class="back-link" routerLink="/">{{ copy.backLink }}</a>
+    </footer>
+  </article>
+</main>

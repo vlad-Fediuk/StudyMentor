@@ -9,7 +9,8 @@ public static class ChatMessageEndpoints
     {
         var group = routes
             .MapGroup("/chat-messages")
-            .WithTags("ChatMessages");
+            .WithTags("ChatMessages")
+            .RequireAuthorization("user");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);

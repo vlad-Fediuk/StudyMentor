@@ -20,10 +20,13 @@ public class ChatSessionService(AppDbContext dbContext) : BaseCrudService<ChatSe
     }
 
     protected override IQueryable<ChatSession> Query()
-        => dbContext.ChatSessions.AsQueryable();
+        => dbContext.ChatSessions
+            .Include(s => s.Lecture)
+            .ThenInclude(l => l.Subject)
+            .AsQueryable();
 
     protected override async Task<ChatSession?> FindByIdAsync(Guid id, CancellationToken ct)
-        => await dbContext.ChatSessions.FirstOrDefaultAsync(s => s.Id == id, ct);
+        => await Query().FirstOrDefaultAsync(s => s.Id == id, ct);
 
     protected override async Task<ChatSession> AddEntityAsync(ChatSession entity, CancellationToken ct)
     {

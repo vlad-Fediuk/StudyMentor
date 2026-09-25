@@ -1,0 +1,287 @@
+@use '../../../styles/colors';
+
+:host {
+  display: block;
+  width: 286px;
+  min-width: 286px;
+  transition: width 0.2s ease, min-width 0.2s ease;
+}
+
+.sidebar {
+  width: 286px;
+  max-width: 286px;
+  min-width: 286px;
+  height: 100dvh;
+  min-height: 0;
+  margin-top: 0;
+  padding: 24px 20px;
+  font-family:
+    "SF Pro Display",
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Inter,
+    sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: colors.$surface;
+  border-right: 1px solid colors.$border;
+  box-shadow: none;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  overflow: visible;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+:host-context(.sidebar-collapsed) {
+  width: 70px;
+  min-width: 70px;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+  max-width: 70px;
+  min-width: 70px;
+  min-height: 0;
+  padding: 24px 10px;
+  background: transparent;
+  border-right: 0;
+  overflow: visible;
+  z-index: 12;
+}
+
+.sidebar.collapsed .sidebar-actions,
+.sidebar.collapsed .sidebar-card {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-back {
+  position: fixed;
+  left: 47px;
+  right: auto;
+  bottom: 24px;
+  margin: 0;
+  transform: rotate(180deg);
+  z-index: 20;
+}
+
+.sidebar-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+.sidebar-action-button {
+  width: 46px;
+  height: 46px;
+  border: 1px solid colors.$border;
+  border-radius: 12px;
+  background: colors.$white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: colors.$black;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, color 0.16s ease;
+}
+
+.sidebar-action-button.active,
+.sidebar-action-button:hover {
+  background: colors.$black;
+  border-color: colors.$black;
+  color: colors.$white;
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.sidebar-action-button img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  filter: var(--filter-inactive-icon);
+  transition: filter 0.16s ease;
+}
+
+.sidebar-action-button.active img,
+.sidebar-action-button:hover img {
+  filter: var(--filter-active-icon);
+}
+
+.sidebar-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 0 0;
+  border-radius: 10px;
+  background: colors.$surface;
+  border: 1px solid colors.$border;
+  box-shadow: none;
+  flex: 0 0 auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.sidebar-practice-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: auto;
+  margin-bottom: 46px;
+  border: 1px solid colors.$border;
+  border-radius: 10px;
+  padding: 0 14px;
+  color: colors.$black;
+  background: colors.$white;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebar-practice-button:hover {
+  background: colors.$black;
+  color: colors.$white;
+}
+
+.sidebar-card-search {
+  width: calc(100% - 16px);
+  margin: 0 8px 8px;
+  display: block;
+}
+
+.sidebar-card-search input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  padding: 12px 14px;
+  border-radius: 999px;
+  background: colors.$white;
+  color: colors.$black;
+  font-size: 14px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 20px;
+  transition: all 0.15s ease;
+}
+
+.sidebar-card-search input::placeholder {
+  color: colors.$muted;
+}
+
+.sidebar-card-search input:focus {
+  box-shadow: inset 0 0 0 1px colors.$black;
+}
+
+.sidebar-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.sidebar-card-item {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid colors.$border;
+  border-radius: 0;
+  background: transparent;
+  min-height: 48px;
+  padding: 13px 14px;
+  text-align: left;
+  cursor: pointer;
+  color: colors.$black;
+  font-family:
+    "SF Pro Display",
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Inter,
+    sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.sidebar-card-item.active,
+.sidebar-card-item.selected,
+.sidebar-card-item:hover {
+  background: colors.$white;
+}
+
+.sidebar-card-item-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar-back {
+  position: absolute;
+  right: 26px;
+  bottom: 24px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0;
+  background-color: transparent;
+  background-image: url('/assets/icons/sidebar-back.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 22px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: none;
+  z-index: 13;
+  filter: var(--filter-icon-on-surface);
+  transition: transform 0.16s ease, filter 0.16s ease;
+}
+
+.sidebar-empty {
+  padding: 14px;
+  background: colors.$white;
+  color: colors.$muted;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.sidebar-error {
+  color: colors.$error;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 980px) {
+  :host {
+    width: 0;
+    min-width: 0;
+  }
+
+  .sidebar {
+    max-width: 100%;
+  }
+}

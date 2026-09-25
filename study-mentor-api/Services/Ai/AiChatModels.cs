@@ -6,6 +6,8 @@ public sealed record AiChatMessage(
 
 public sealed record AiChatRequest
 {
+    public string? Provider { get; init; }
+
     public string? Model { get; init; }
 
     public IReadOnlyCollection<AiChatMessage> Messages { get; init; } =
@@ -15,4 +17,5 @@ public sealed record AiChatRequest
 public sealed record AiChatResponse(
     string Provider,
     string Model,
-    string Content);
+    string Content,
+    bool FallbackUsed = false);

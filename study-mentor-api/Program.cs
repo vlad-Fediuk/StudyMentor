@@ -1,14 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using Pgvector.EntityFrameworkCore;
 using StudyMentorApi.AiChat;
+using StudyMentorApi.Authentication;
 using StudyMentorApi.Data;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Extensions;
 using StudyMentorApi.Flashcards;
 using StudyMentorApi.Groups;
+using StudyMentorApi.LearningContent;
+using StudyMentorApi.LectureChunks;
 using StudyMentorApi.Lectures;
 using StudyMentorApi.Majors;
 using StudyMentorApi.Subjects;
+using StudyMentorApi.Tests;
 using StudyMentorApi.Users;
 
 namespace StudyMentorApi;
@@ -24,7 +29,9 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString("DefaultConnection"),
+                npgsqlOptions => npgsqlOptions.UseVector()));
         builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddCors(options =>
@@ -58,17 +65,22 @@ public class Program
         app.UseGlobalExceptionHandler();
         app.UseCors();
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+        app.MapAuthenticationEndpoints();
         app.MapMajorEndpoints();
         app.MapSubjectEndpoints();
         app.MapLectureEndpoints();
+        app.MapLectureChunkEndpoints();
         app.MapChatMessageEndpoints();
         app.MapAiChatEndpoints();
         app.MapGroupEndpoints();
         app.MapUserEndpoints();
         app.MapChatSessionEndpoints();
         app.MapFlashcardEndpoints();
+        app.MapLearningContentEndpoints();
+        app.MapTestEndpoints();
         app.Run();
     }
 }
