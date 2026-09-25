@@ -76,6 +76,58 @@ public class FlashcardIntegrationTests
     }
 
     [Test]
+    public async Task GetAllFlashcards_ShouldReturn200OkWithList()
+    {
+        var createRequest = new FlashcardRequest(
+            "Algorithms Set",
+            _factory.SeededChatMessageId,
+            [
+                new CardRequest("Sorting", "Ordering elements")
+            ]
+        );
+        await _client.PostAsJsonAsync("/flashcards", createRequest);
+
+        var response = await _client.GetAsync("/flashcards");
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        var list = await response.Content.ReadFromJsonAsync<List<FlashcardResponse>>();
+        Assert.That(list, Is.Not.Null);
+        Assert.That(list!.Count, Is.GreaterThanOrEqualTo(1));
+    }
+
+    [Test]
+    public async Task PutFlashcards_ShouldReturn200Ok_WhenUpdatedSuccessfully()
+    {
+        var createRequest = new FlashcardRequest(
+            "Initial Title",
+            _factory.SeededChatMessageId,
+            [
+                new CardRequest("Initial Term", "Initial Def")
+            ]
+        );
+
+        var createResponse = await _client.PostAsJsonAsync("/flashcards", createRequest);
+        var created = await createResponse.Content.ReadFromJsonAsync<FlashcardResponse>();
+        Assert.That(created, Is.Not.Null);
+
+        var updateRequest = new FlashcardRequest(
+            "Updated Title",
+            _factory.SeededChatMessageId,
+            [
+                new CardRequest("Updated Term", "Updated Def")
+            ]
+        );
+
+        var updateResponse = await _client.PutAsJsonAsync($"/flashcards/{created!.Id}", updateRequest);
+        Assert.That(updateResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+        var updated = await updateResponse.Content.ReadFromJsonAsync<FlashcardResponse>();
+        Assert.That(updated, Is.Not.Null);
+        Assert.That(updated!.Name, Is.EqualTo("Updated Title"));
+        Assert.That(updated.Cards.First().Term, Is.EqualTo("Updated Term"));
+    }
+
+    [Test]
     public async Task DeleteFlashcard_ShouldReturn204NoContentAndSubsequentGetShouldReturn404()
     {
         var createRequest = new FlashcardRequest(
