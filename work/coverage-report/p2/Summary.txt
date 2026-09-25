@@ -1,0 +1,96 @@
+Summary
+  Generated on: 9/25/2026 - 9:19:34 PM
+  Coverage date: 9/25/2026 - 9:18:11 PM - 9/25/2026 - 9:19:31 PM
+  Parser: MultiReport (5x Cobertura)
+  Assemblies: 1
+  Classes: 74
+  Files: 74
+  Line coverage: 13.1%
+  Covered lines: 446
+  Uncovered lines: 2935
+  Coverable lines: 3381
+  Total lines: 5027
+  Branch coverage: 8% (24 of 298)
+  Covered branches: 24
+  Total branches: 298
+  Method coverage: 20.2% (75 of 371)
+  Full method coverage: 18.5% (69 of 371)
+  Covered methods: 75
+  Fully covered methods: 69
+  Total methods: 371
+
+study-mentor-api                                             13.1%
+  Microsoft.AspNetCore.OpenApi.Generated                        1%
+  StudyMentorApi.AiChat.AiChatEndpoints                      19.5%
+  StudyMentorApi.AiChat.AiChatErrorResponse                     0%
+  StudyMentorApi.AiChat.AiChatFailedException                   0%
+  StudyMentorApi.AiChat.AiChatMessageDto                        0%
+  StudyMentorApi.AiChat.AiChatSendMessageRequest                0%
+  StudyMentorApi.AiChat.AiChatSendMessageResponse               0%
+  StudyMentorApi.AiChat.AiChatService                           0%
+  StudyMentorApi.ChatMessages.ChatMessageEndpoints           11.7%
+  StudyMentorApi.ChatMessages.ChatMessageRequest                0%
+  StudyMentorApi.ChatMessages.ChatMessageResponse               0%
+  StudyMentorApi.ChatMessages.ChatMessageService              4.6%
+  StudyMentorApi.ChatSessions.ChatSessionEndpoints           23.9%
+  StudyMentorApi.ChatSessions.ChatSessionRequest                0%
+  StudyMentorApi.ChatSessions.ChatSessionResponse               0%
+  StudyMentorApi.ChatSessions.ChatSessionService                0%
+  StudyMentorApi.Common.NotFoundException                     100%
+  StudyMentorApi.Common.ValidationException                   100%
+  StudyMentorApi.Data.AppDbContext                           93.1%
+  StudyMentorApi.Data.Models.BaseEntity                       100%
+  StudyMentorApi.Data.Models.Card                              75%
+  StudyMentorApi.Data.Models.ChatMessage                     87.5%
+  StudyMentorApi.Data.Models.ChatSession                        0%
+  StudyMentorApi.Data.Models.Exercise                         100%
+  StudyMentorApi.Data.Models.Flashcard                        100%
+  StudyMentorApi.Data.Models.Group                              0%
+  StudyMentorApi.Data.Models.Lecture                            0%
+  StudyMentorApi.Data.Models.Major                              0%
+  StudyMentorApi.Data.Models.Subject                            0%
+  StudyMentorApi.Data.Models.User                               0%
+  StudyMentorApi.Diagnostics.AiSmokeTestRunner                  0%
+  StudyMentorApi.Extensions.ExceptionHandlerExtensions       38.4%
+  StudyMentorApi.Extensions.NvidiaAiSettings                    0%
+  StudyMentorApi.Extensions.ServiceExtensions                78.2%
+  StudyMentorApi.Flashcards.CardRequest                       100%
+  StudyMentorApi.Flashcards.CardResponse                      100%
+  StudyMentorApi.Flashcards.FlashcardEndpoints               80.7%
+  StudyMentorApi.Flashcards.FlashcardRequest                  100%
+  StudyMentorApi.Flashcards.FlashcardResponse                 100%
+  StudyMentorApi.Flashcards.FlashcardService                  100%
+  StudyMentorApi.Groups.GroupEndpoints                       30.3%
+  StudyMentorApi.Groups.GroupRequest                            0%
+  StudyMentorApi.Groups.GroupResponse                           0%
+  StudyMentorApi.Groups.GroupService                            0%
+  StudyMentorApi.Lectures.LectureEndpoints                   11.6%
+  StudyMentorApi.Lectures.LectureRequest                        0%
+  StudyMentorApi.Lectures.LectureResponse                       0%
+  StudyMentorApi.Lectures.LectureService                        0%
+  StudyMentorApi.Majors.MajorEndpoints                       31.2%
+  StudyMentorApi.Majors.MajorRequest                            0%
+  StudyMentorApi.Majors.MajorResponse                           0%
+  StudyMentorApi.Majors.MajorService                            0%
+  StudyMentorApi.Migrations.AddChatSessions                     0%
+  StudyMentorApi.Migrations.AddFlashcards                       0%
+  StudyMentorApi.Migrations.AddGroups                           0%
+  StudyMentorApi.Migrations.AppDbContextModelSnapshot           0%
+  StudyMentorApi.Migrations.InitialPostgresCreate               0%
+  StudyMentorApi.Program                                      100%
+  StudyMentorApi.Services.Ai.AiChatMessage                      0%
+  StudyMentorApi.Services.Ai.AiChatRequest                      0%
+  StudyMentorApi.Services.Ai.AiChatResponse                     0%
+  StudyMentorApi.Services.Ai.NvidiaAiChatService                0%
+  StudyMentorApi.Services.Ai.Prompts.PromptContext              0%
+  StudyMentorApi.Services.Ai.Prompts.PromptTemplateService      0%
+  StudyMentorApi.Services.BaseCrudService<T>                 81.2%
+  StudyMentorApi.Subjects.SubjectEndpoints                   12.9%
+  StudyMentorApi.Subjects.SubjectRequest                        0%
+  StudyMentorApi.Subjects.SubjectResponse                       0%
+  StudyMentorApi.Subjects.SubjectService                        0%
+  StudyMentorApi.Users.UserEndpoints                         21.7%
+  StudyMentorApi.Users.UserRequest                              0%
+  StudyMentorApi.Users.UserResponse                             0%
+  StudyMentorApi.Users.UserService                              0%
+  System.Runtime.CompilerServices                               0%
