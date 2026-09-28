@@ -7,13 +7,13 @@ using StudyMentorApi.Services.Ai.Embeddings;
 
 namespace StudyMentorApi.LectureChunks;
 
-public sealed class LectureChunkRetrievalService(
+public class LectureChunkRetrievalService(
     AppDbContext dbContext,
     IAiEmbeddingService embeddingService,
     IOptions<AiEmbeddingOptions> options,
     ILogger<LectureChunkRetrievalService> logger)
 {
-    public async Task<string> GetRelevantContextAsync(
+    public virtual async Task<string> GetRelevantContextAsync(
         Guid lectureId,
         string userMessage,
         CancellationToken cancellationToken = default)

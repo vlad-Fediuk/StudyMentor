@@ -44,8 +44,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.HasPostgresExtension("pgcrypto");
-        modelBuilder.HasPostgresExtension("vector");
+        if (Database.IsNpgsql())
+        {
+            modelBuilder.HasPostgresExtension("pgcrypto");
+            modelBuilder.HasPostgresExtension("vector");
+        }
 
         ConfigureBaseEntity<Major>(modelBuilder);
         ConfigureBaseEntity<Subject>(modelBuilder);
@@ -101,9 +104,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.ToTable("lecture_chunks");
             entity.Property(e => e.Content).IsRequired();
-            entity.Property(e => e.Embedding).HasColumnType("vector");
-            entity.Property(e => e.EmbeddingModel).HasMaxLength(256);
-            entity.HasIndex(e => new { e.LectureId, e.EmbeddingModel, e.EmbeddingDimensions });
+            if (Database.IsNpgsql())
+            {
+                entity.Property(e => e.Embedding).HasColumnType("vector");
+                entity.Property(e => e.EmbeddingModel).HasMaxLength(256);
+                entity.HasIndex(e => new { e.LectureId, e.EmbeddingModel, e.EmbeddingDimensions });
+            }
+            else
+            {
+                entity.Ignore(e => e.Embedding);
+            }
         });
 
         modelBuilder.Entity<ChatSession>(entity =>
@@ -208,7 +218,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.BaseUrl).IsRequired();
             entity.Property(e => e.IsEnabled).HasDefaultValue(true);
             entity.Property(e => e.TimeoutSeconds).HasDefaultValue(300);
-            entity.Property(e => e.SettingsJson).HasColumnType("jsonb");
+            if (Database.IsNpgsql())
+            {
+                entity.Property(e => e.SettingsJson).HasColumnType("jsonb");
+            }
             entity.HasIndex(e => e.Type).IsUnique();
             entity.HasMany(e => e.Models)
                 .WithOne(e => e.Provider)
@@ -224,8 +237,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.IsEnabled).HasDefaultValue(true);
             entity.Property(e => e.TopP).HasDefaultValue(1.0);
             entity.Property(e => e.MaxOutputTokens).HasDefaultValue(2048);
-            entity.Property(e => e.CapabilitiesJson).HasColumnType("jsonb");
-            entity.Property(e => e.SettingsJson).HasColumnType("jsonb");
+            if (Database.IsNpgsql())
+            {
+                entity.Property(e => e.CapabilitiesJson).HasColumnType("jsonb");
+                entity.Property(e => e.SettingsJson).HasColumnType("jsonb");
+            }
             entity.HasIndex(e => new { e.ProviderId, e.ModelName }).IsUnique();
         });
 

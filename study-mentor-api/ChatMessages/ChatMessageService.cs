@@ -17,7 +17,7 @@ public class ChatMessageService(AppDbContext dbContext) : BaseCrudService<ChatMe
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<ChatMessage>> GetMessagesAsync(
+    public virtual async Task<IReadOnlyCollection<ChatMessage>> GetMessagesAsync(
         Guid chatId,
         CancellationToken cancellationToken)
     {
@@ -27,7 +27,7 @@ public class ChatMessageService(AppDbContext dbContext) : BaseCrudService<ChatMe
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<int> GetNextSequenceNumberAsync(
+    public virtual async Task<int> GetNextSequenceNumberAsync(
         Guid chatId,
         CancellationToken cancellationToken)
     {
