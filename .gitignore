@@ -406,3 +406,9 @@ FodyWeavers.xsd
 #Credentials
 /*/firebase/
 **/net10.0/
+
+# Code coverage reports
+CoverageReport/**
+!CoverageReport/StudyMentor_Coverage_Report.pdf
+!CoverageReport/Summary.md
+
