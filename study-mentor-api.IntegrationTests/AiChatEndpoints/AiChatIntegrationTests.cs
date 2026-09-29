@@ -81,6 +81,16 @@ public class AiChatIntegrationTests
         _testLectureId = lecture.Id;
     }
 
+    [TearDown]
+    public async Task TearDown()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.ChatMessages.RemoveRange(db.ChatMessages);
+        db.ChatSessions.RemoveRange(db.ChatSessions);
+        await db.SaveChangesAsync();
+    }
+
     [OneTimeTearDown]
     public void OneTimeTearDown()
     {
