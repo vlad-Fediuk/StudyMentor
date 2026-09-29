@@ -2,19 +2,19 @@
 
 |||
 |:---|:---|
-| Generated on: | 29.09.2026 - 16:14:41 |
-| Coverage date: | 29.09.2026 - 16:14:09 - 29.09.2026 - 16:14:11 |
-| Parser: | MultiReport (2x Cobertura) |
+| Generated on: | 29.09.2026 - 17:12:49 |
+| Coverage date: | 29.09.2026 - 16:14:09 - 29.09.2026 - 17:12:48 |
+| Parser: | MultiReport (4x Cobertura) |
 | Assemblies: | 1 |
 | Classes: | 146 |
 | Files: | 142 |
-| **Line coverage:** | 13.9% (1236 of 8845) |
-| Covered lines: | 1236 |
-| Uncovered lines: | 7609 |
+| **Line coverage:** | 14.7% (1305 of 8845) |
+| Covered lines: | 1305 |
+| Uncovered lines: | 7540 |
 | Coverable lines: | 8845 |
 | Total lines: | 12173 |
-| **Branch coverage:** | 10.3% (66 of 640) |
-| Covered branches: | 66 |
+| **Branch coverage:** | 11.2% (72 of 640) |
+| Covered branches: | 72 |
 | Total branches: | 640 |
 | **Method coverage:** | [Feature is only available for sponsors](https://reportgenerator.io/pro) |
 
@@ -27,15 +27,15 @@
 
 | **Name** | **Covered** | **Uncovered** | **Coverable** | **Total** | **Line coverage** | **Covered** | **Total** | **Branch coverage** |
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|
-| **study-mentor-api** | **1236** | **7609** | **8845** | **12571** | **13.9%** | **66** | **640** | **10.3%** |
+| **study-mentor-api** | **1305** | **7540** | **8845** | **12571** | **14.7%** | **72** | **640** | **11.2%** |
 | Microsoft.AspNetCore.OpenApi.Generated | 4 | 377 | 381 | 606 | 1% | 0 | 206 | 0% |
-| StudyMentorApi.AiChat.AiChatEndpoints | 16 | 25 | 41 | 72 | 39% | 2 | 2 | 100% |
+| StudyMentorApi.AiChat.AiChatEndpoints | 27 | 14 | 41 | 72 | 65.8% | 2 | 2 | 100% |
 | StudyMentorApi.AiChat.AiChatErrorResponse | 0 | 3 | 3 | 5 | 0% | 0 | 0 |  |
 | StudyMentorApi.AiChat.AiChatFailedException | 0 | 1 | 1 | 3 | 0% | 0 | 0 |  |
 | StudyMentorApi.AiChat.AiChatMessageDto | 7 | 0 | 7 | 9 | 100% | 0 | 0 |  |
 | StudyMentorApi.AiChat.AiChatSendMessageRequest | 3 | 0 | 3 | 5 | 100% | 0 | 0 |  |
-| StudyMentorApi.AiChat.AiChatSendMessageResponse | 3 | 1 | 4 | 6 | 75% | 0 | 0 |  |
-| StudyMentorApi.AiChat.AiChatService | 91 | 42 | 133 | 185 | 68.4% | 5 | 14 | 35.7% |
+| StudyMentorApi.AiChat.AiChatSendMessageResponse | 4 | 0 | 4 | 6 | 100% | 0 | 0 |  |
+| StudyMentorApi.AiChat.AiChatService | 98 | 35 | 133 | 185 | 73.6% | 7 | 14 | 50% |
 | StudyMentorApi.Authentication.AuthenticationEndpoints | 6 | 13 | 19 | 34 | 31.5% | 0 | 0 |  |
 | StudyMentorApi.Authentication.AuthenticationException | 0 | 1 | 1 | 4 | 0% | 0 | 0 |  |
 | StudyMentorApi.Authentication.Jwt.JwtAuthenticationRequest | 0 | 1 | 1 | 6 | 0% | 0 | 0 |  |
@@ -45,13 +45,13 @@
 | StudyMentorApi.ChatMessages.ChatMessageEndpoints | 12 | 83 | 95 | 162 | 12.6% | 0 | 2 | 0% |
 | StudyMentorApi.ChatMessages.ChatMessageRequest | 0 | 6 | 6 | 10 | 0% | 0 | 0 |  |
 | StudyMentorApi.ChatMessages.ChatMessageResponse | 0 | 8 | 8 | 12 | 0% | 0 | 0 |  |
-| StudyMentorApi.ChatMessages.ChatMessageService | 7 | 36 | 43 | 76 | 16.2% | 0 | 2 | 0% |
-| StudyMentorApi.ChatSessions.ChatSessionEndpoints | 21 | 25 | 46 | 87 | 45.6% | 0 | 0 |  |
+| StudyMentorApi.ChatMessages.ChatMessageService | 19 | 24 | 43 | 76 | 44.1% | 2 | 2 | 100% |
+| StudyMentorApi.ChatSessions.ChatSessionEndpoints | 27 | 19 | 46 | 87 | 58.6% | 0 | 0 |  |
 | StudyMentorApi.ChatSessions.ChatSessionRequest | 3 | 0 | 3 | 6 | 100% | 0 | 0 |  |
 | StudyMentorApi.ChatSessions.ChatSessionResponse | 4 | 0 | 4 | 7 | 100% | 0 | 0 |  |
-| StudyMentorApi.ChatSessions.ChatSessionService | 9 | 22 | 31 | 55 | 29% | 0 | 0 |  |
-| StudyMentorApi.Common.NotFoundException | 0 | 1 | 1 | 5 | 0% | 0 | 0 |  |
-| StudyMentorApi.Common.ValidationException | 0 | 1 | 1 | 5 | 0% | 0 | 0 |  |
+| StudyMentorApi.ChatSessions.ChatSessionService | 19 | 12 | 31 | 55 | 61.2% | 0 | 0 |  |
+| StudyMentorApi.Common.NotFoundException | 1 | 0 | 1 | 5 | 100% | 0 | 0 |  |
+| StudyMentorApi.Common.ValidationException | 1 | 0 | 1 | 5 | 100% | 0 | 0 |  |
 | StudyMentorApi.Data.AppDbContext | 356 | 26 | 382 | 437 | 93.1% | 3 | 4 | 75% |
 | StudyMentorApi.Data.Models.AiModel | 11 | 2 | 13 | 30 | 84.6% | 0 | 0 |  |
 | StudyMentorApi.Data.Models.AiProvider | 8 | 1 | 9 | 22 | 88.8% | 0 | 0 |  |
@@ -72,7 +72,7 @@
 | StudyMentorApi.Data.Models.TestQuestion | 0 | 5 | 5 | 14 | 0% | 0 | 0 |  |
 | StudyMentorApi.Data.Models.User | 6 | 0 | 6 | 16 | 100% | 0 | 0 |  |
 | StudyMentorApi.Diagnostics.AiSmokeTestRunner | 0 | 25 | 25 | 40 | 0% | 0 | 6 | 0% |
-| StudyMentorApi.Extensions.ExceptionHandlerExtensions | 10 | 16 | 26 | 35 | 38.4% | 0 | 0 |  |
+| StudyMentorApi.Extensions.ExceptionHandlerExtensions | 24 | 2 | 26 | 35 | 92.3% | 0 | 0 |  |
 | StudyMentorApi.Extensions.JwtAuthenticationExtensions | 37 | 0 | 37 | 55 | 100% | 1 | 2 | 50% |
 | StudyMentorApi.Extensions.ServiceExtensions | 39 | 0 | 39 | 56 | 100% | 0 | 0 |  |
 | StudyMentorApi.Flashcards.CardRequest | 0 | 3 | 3 | 5 | 0% | 0 | 0 |  |
@@ -154,7 +154,7 @@
 | StudyMentorApi.Services.Ai.StructuredOutput.GeneratedFlashcardsDto | 1 | 0 | 1 | 33 | 100% | 0 | 0 |  |
 | StudyMentorApi.Services.Ai.StructuredOutput.GeneratedQuestionDto | 5 | 0 | 5 | 33 | 100% | 0 | 0 |  |
 | StudyMentorApi.Services.Ai.StructuredOutput.GeneratedTestDto | 2 | 0 | 2 | 33 | 100% | 0 | 0 |  |
-| StudyMentorApi.Services.BaseCrudService<T> | 7 | 25 | 32 | 94 | 21.8% | 0 | 6 | 0% |
+| StudyMentorApi.Services.BaseCrudService<T> | 12 | 20 | 32 | 94 | 37.5% | 2 | 6 | 33.3% |
 | StudyMentorApi.Subjects.SubjectEndpoints | 10 | 67 | 77 | 138 | 12.9% | 0 | 0 |  |
 | StudyMentorApi.Subjects.SubjectRequest | 0 | 1 | 1 | 3 | 0% | 0 | 0 |  |
 | StudyMentorApi.Subjects.SubjectResponse | 0 | 1 | 1 | 5 | 0% | 0 | 0 |  |
@@ -172,6 +172,6 @@
 | StudyMentorApi.Users.UserEndpoints | 10 | 43 | 53 | 91 | 18.8% | 0 | 10 | 0% |
 | StudyMentorApi.Users.UserRequest | 0 | 6 | 6 | 9 | 0% | 0 | 0 |  |
 | StudyMentorApi.Users.UserResponse | 0 | 6 | 6 | 9 | 0% | 0 | 0 |  |
-| StudyMentorApi.Users.UserService | 1 | 28 | 29 | 53 | 3.4% | 0 | 2 | 0% |
+| StudyMentorApi.Users.UserService | 2 | 27 | 29 | 53 | 6.8% | 0 | 2 | 0% |
 | System.Runtime.CompilerServices | 0 | 3 | 3 | 23 | 0% | 0 | 0 |  |
 
