@@ -17,6 +17,11 @@ public class StubAiGenerationService : IAiGenerationService
 {
     public Task<AiGenerationResponse> GenerateAsync(AiGenerationRequest request, CancellationToken cancellationToken = default)
     {
+        if (request.UserMessage.Contains("FAIL_PROVIDER"))
+        {
+            throw new InvalidOperationException("External AI provider connection timeout");
+        }
+
         return Task.FromResult(new AiGenerationResponse(
             $"Консультація тьютора: відповідь на запит '{request.UserMessage}'.",
             "MockAiProvider",
@@ -146,7 +151,7 @@ public class AiChatWorkflowE2ETests
     }
 
     [Test]
-    public async Task StudentConsultationFullWorkflow_Scenario()
+    public async Task StudentTutorDialogueScenario_ShouldHandleFullConversationCycle()
     {
         var sessionResponse = await _client.PostAsJsonAsync("/chat-sessions", new ChatSessionRequest(_studentUserId, _lectureId1));
         Assert.That(sessionResponse.StatusCode, Is.EqualTo(HttpStatusCode.Created));
@@ -273,5 +278,26 @@ public class AiChatWorkflowE2ETests
 
         var missingMessagesRes = await _client.GetAsync($"/api/ai-chat/messages?chatId={randomMissingId}");
         Assert.That(missingMessagesRes.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+    }
+
+    [Test]
+    public async Task AiProviderFailureGracefulDegradationScenario_ShouldReturnErrorWithoutCrashing()
+    {
+        var sessionResponse = await _client.PostAsJsonAsync("/chat-sessions", new ChatSessionRequest(_studentUserId, _lectureId1));
+        var session = (await sessionResponse.Content.ReadFromJsonAsync<ChatSessionResponse>())!;
+
+        var failMessageRequest = new AiChatSendMessageRequest(session.Id.ToString(), "FAIL_PROVIDER: симуляція збою ШІ");
+        var response = await _client.PostAsJsonAsync("/api/ai-chat/messages", failMessageRequest);
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+
+        var historyResponse = await _client.GetAsync($"/api/ai-chat/messages?chatId={session.Id}");
+        Assert.That(historyResponse.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+        var history = await historyResponse.Content.ReadFromJsonAsync<List<AiChatMessageDto>>();
+        Assert.That(history, Is.Not.Null);
+        Assert.That(history, Has.Count.EqualTo(2));
+        Assert.That(history![1].Role, Is.EqualTo("assistant"));
+        Assert.That(history[1].Status, Is.EqualTo("failed"));
     }
 }
