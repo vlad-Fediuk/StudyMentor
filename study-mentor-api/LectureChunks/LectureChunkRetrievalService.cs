@@ -7,13 +7,13 @@ using StudyMentorApi.Services.Ai.Embeddings;
 
 namespace StudyMentorApi.LectureChunks;
 
-public sealed class LectureChunkRetrievalService(
+public class LectureChunkRetrievalService(
     AppDbContext dbContext,
     IAiEmbeddingService embeddingService,
     IOptions<AiEmbeddingOptions> options,
     ILogger<LectureChunkRetrievalService> logger)
 {
-    public async Task<string> GetRelevantContextAsync(
+    public virtual async Task<string> GetRelevantContextAsync(
         Guid lectureId,
         string userMessage,
         CancellationToken cancellationToken = default)
@@ -62,7 +62,7 @@ public sealed class LectureChunkRetrievalService(
         }
     }
 
-    private static string FormatContext(
+    internal static string FormatContext(
         IReadOnlyCollection<LectureChunkContextItem> chunks,
         int maxContextChars)
     {
@@ -71,8 +71,9 @@ public sealed class LectureChunkRetrievalService(
             return string.Empty;
         }
 
+        const string header = "Relevant lecture context:\n\n";
         var parts = new List<string>();
-        var usedChars = 0;
+        var usedChars = header.Length;
 
         foreach (var chunk in chunks)
         {
@@ -94,8 +95,8 @@ public sealed class LectureChunkRetrievalService(
 
         return parts.Count == 0
             ? string.Empty
-            : $"Relevant lecture context:\n\n{string.Join("\n\n", parts)}";
+            : $"{header}{string.Join("\n\n", parts)}";
     }
 
-    private sealed record LectureChunkContextItem(int Order, string Content, double Distance);
+    internal sealed record LectureChunkContextItem(int Order, string Content, double Distance);
 }

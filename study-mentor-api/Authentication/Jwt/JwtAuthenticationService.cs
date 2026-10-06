@@ -39,16 +39,7 @@ public class JwtAuthenticationService(
 
     private static string ExtractAndValidateEmail(ClaimsPrincipal principal)
     {
-        var email = principal.FindFirstValue("preferred_username")?.Trim()
-            ?? principal.FindFirstValue("email")?.Trim()
-            ?? principal.FindFirstValue("upn")?.Trim();
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            throw new AuthenticationException("Email claim is missing in the Microsoft token.");
-        }
-
-        return email;
+        return JwtAuthenticationValidator.ExtractEmail(principal);
     }
 
     private async Task<User> GetOrCreateUserByEmailAsync(string email, ClaimsPrincipal principal)
