@@ -27,6 +27,20 @@ public class LectureChunkRetrievalService(
         try
         {
             var embedding = await embeddingService.CreateEmbeddingAsync(userMessage, cancellationToken);
+
+            if (!dbContext.Database.IsNpgsql())
+            {
+                var memoryChunks = await dbContext.LectureChunks
+                    .AsNoTracking()
+                    .Where(chunk => chunk.LectureId == lectureId)
+                    .OrderBy(chunk => chunk.Order)
+                    .Take(topK)
+                    .Select(chunk => new LectureChunkContextItem(chunk.Order, chunk.Content, 0.1))
+                    .ToListAsync(cancellationToken);
+
+                return FormatContext(memoryChunks, maxContextChars);
+            }
+
             var queryVector = new Vector(embedding.Vector);
 
             var chunks = await dbContext.LectureChunks
