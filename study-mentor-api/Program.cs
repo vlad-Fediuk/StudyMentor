@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 using StudyMentorApi.AiChat;
 using StudyMentorApi.Authentication;
@@ -22,17 +22,34 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
+        DotNetEnv.Env.TraversePath().Load();
+
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         builder.Services.AddSwaggerGen();
 
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            if (builder.Environment.IsEnvironment("Testing"))
+            {
+                connectionString = "Host=localhost;Database=test;Username=postgres;Password=postgres;";
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' is not configured. " +
+                "Please configure ConnectionStrings__DefaultConnection via .env or environment variables.");
+            }
+        }
+
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(
-                builder.Configuration.GetConnectionString("DefaultConnection"),
+                connectionString,
                 npgsqlOptions => npgsqlOptions.UseVector()));
-        builder.Services.AddApplicationServices(builder.Configuration);
+        builder.Services.AddApplicationServices(builder.Configuration, builder.Environment);
 
         builder.Services.AddCors(options =>
         {

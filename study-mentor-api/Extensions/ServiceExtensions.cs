@@ -1,4 +1,4 @@
-using StudyMentorApi.Authentication.Jwt;
+﻿using StudyMentorApi.Authentication.Jwt;
 using StudyMentorApi.Services.Ai;
 using StudyMentorApi.Services.Ai.Embeddings;
 using StudyMentorApi.Services.Ai.Prompts;
@@ -11,7 +11,8 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        Microsoft.Extensions.Hosting.IHostEnvironment? environment = null)
     {
         // We use Scoped for services and repositories
         services.Configure<AiEmbeddingOptions>(configuration.GetSection(AiEmbeddingOptions.SectionName));
@@ -49,7 +50,7 @@ public static class ServiceExtensions
         {
             client.Timeout = Timeout.InfiniteTimeSpan;
         });
-        services.AddJwtAuthentication(configuration);
+        services.AddJwtAuthentication(configuration, environment);
 
         return services;
     }

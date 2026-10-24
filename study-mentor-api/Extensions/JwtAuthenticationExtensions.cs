@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
@@ -11,10 +11,21 @@ namespace StudyMentorApi.Extensions;
 
 public static class JwtAuthenticationExtensions
 {
-    public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static AuthenticationBuilder AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration, Microsoft.Extensions.Hosting.IHostEnvironment? environment = null)
     {
-        var jwtKey = configuration["Jwt:Campus:Key"]
-            ?? throw new InvalidOperationException("Jwt:Campus:Key is not configured.");
+        var jwtKey = configuration["Jwt:Campus:Key"];
+        if (string.IsNullOrWhiteSpace(jwtKey))
+        {
+            if (configuration["ASPNETCORE_ENVIRONMENT"] == "Testing")
+            {
+                jwtKey = "TestingDefaultSecretKeyMinimum32CharactersLong!";
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                "Jwt:Campus:Key is not configured. Please configure Jwt__Campus__Key via .env or environment variables.");
+            }
+        }
 
         var authenticationBuilder = services.AddAuthentication(options =>
         {
