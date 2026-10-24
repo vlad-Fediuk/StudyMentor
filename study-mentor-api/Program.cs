@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 using StudyMentorApi.AiChat;
 using StudyMentorApi.Authentication;
@@ -45,10 +45,19 @@ public class Program
             }
         }
 
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(
-                connectionString,
-                npgsqlOptions => npgsqlOptions.UseVector()));
+        if (builder.Environment.IsEnvironment("Testing"))
+        {
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseInMemoryDatabase(builder.Configuration["Testing:DatabaseName"] ?? "TestingDb"));
+        }
+        else
+        {
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(
+                    connectionString,
+                    npgsqlOptions => npgsqlOptions.UseVector()));
+        }
+
         builder.Services.AddApplicationServices(builder.Configuration, builder.Environment);
 
         builder.Services.AddCors(options =>
