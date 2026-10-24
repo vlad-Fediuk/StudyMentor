@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -29,12 +29,20 @@ public class JwtTokenService(
 
         var audience = configuration["Jwt:Campus:Audience"]
             ?? throw new InvalidOperationException("Configuration error: 'Jwt:Campus:Audience' is not set.");
+        var lifetimeMinutes = configuration.GetValue<int?>(
+            "Jwt:Campus:LifetimeMinutes") ?? 60;
+
+        if (lifetimeMinutes <= 0)
+        {
+            throw new InvalidOperationException(
+                "Jwt:Campus:LifetimeMinutes must be greater than zero.");
+        }
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Audience = audience,
-            Expires = DateTime.UtcNow.AddDays(30),
+            Expires = DateTime.UtcNow.AddMinutes(lifetimeMinutes),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             Issuer = configuration["Jwt:Campus:Issuer"]
                 ?? throw new InvalidOperationException("Configuration error: 'Jwt:Campus:Issuer' is not set.")

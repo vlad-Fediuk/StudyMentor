@@ -101,7 +101,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.ToTable("lecture_chunks");
             entity.Property(e => e.Content).IsRequired();
-            entity.Property(e => e.Embedding).HasColumnType("vector");
+            if (Database.ProviderName?.Contains("InMemory") == true) { entity.Ignore(e => e.Embedding); } else { entity.Property(e => e.Embedding).HasColumnType("vector"); }
             entity.Property(e => e.EmbeddingModel).HasMaxLength(256);
             entity.HasIndex(e => new { e.LectureId, e.EmbeddingModel, e.EmbeddingDimensions });
         });

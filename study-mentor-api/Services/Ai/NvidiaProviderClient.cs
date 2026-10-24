@@ -1,4 +1,4 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -82,7 +82,9 @@ public sealed class NvidiaProviderClient(HttpClient httpClient) : IAiProviderCli
             ? "NVIDIA_API_KEY"
             : environmentVariable;
 
-        return Environment.GetEnvironmentVariable(variableName) ?? string.Empty;
+        return Environment.GetEnvironmentVariable(variableName)
+            ?? Environment.GetEnvironmentVariable("NVIDIA_API_KEY")
+            ?? string.Empty;
     }
 
     private sealed record NvidiaChatCompletionRequest(
