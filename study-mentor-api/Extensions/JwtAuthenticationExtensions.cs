@@ -16,7 +16,7 @@ public static class JwtAuthenticationExtensions
         var jwtKey = configuration["Jwt:Campus:Key"];
         if (string.IsNullOrWhiteSpace(jwtKey))
         {
-            if (configuration["ASPNETCORE_ENVIRONMENT"] == "Testing")
+            if (environment?.IsEnvironment("Testing") == true)
             {
                 jwtKey = "TestingDefaultSecretKeyMinimum32CharactersLong!";
             }
@@ -40,6 +40,7 @@ public static class JwtAuthenticationExtensions
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.FromSeconds(30),
                 NameClaimType = ClaimTypes.NameIdentifier,
                 RoleClaimType = ClaimTypes.Role,
                 ValidIssuer = configuration["Jwt:Campus:Issuer"],
