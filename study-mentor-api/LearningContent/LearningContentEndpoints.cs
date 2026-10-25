@@ -14,7 +14,8 @@ public static class LearningContentEndpoints
         var group = routes
             .MapGroup("/api/learning-content")
             .WithTags("LearningContent")
-            .RequireAuthorization("user");
+            .RequireAuthorization("user")
+            .RequireRateLimiting("ai");
 
         group.MapPost("/generate", Generate);
         group.MapPost("/generate/chat", GenerateForChat);

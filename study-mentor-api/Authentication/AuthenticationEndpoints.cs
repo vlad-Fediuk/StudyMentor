@@ -12,7 +12,10 @@ public static class AuthenticationEndpoints
             [FromServices] IJwtAuthenticationService authService) =>
         {
             return await AuthenticateAsync(() => authService.AuthenticateAsync(request));
-        }).WithTags("Authentication").AllowAnonymous();
+        })
+        .WithTags("Authentication")
+        .AllowAnonymous()
+        .RequireRateLimiting("auth");
     }
 
     private static async Task<IResult> AuthenticateAsync(Func<Task<string>> authenticate)

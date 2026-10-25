@@ -10,7 +10,8 @@ public static class UserEndpoints
     {
         var group = routes
             .MapGroup("/users")
-            .WithTags("Users");
+            .WithTags("Users")
+            .RequireRateLimiting("api");
 
         group.MapGet("/", GetAll).RequireAuthorization("admin");
         group.MapGet("/{id}", GetById).RequireAuthorization("user");

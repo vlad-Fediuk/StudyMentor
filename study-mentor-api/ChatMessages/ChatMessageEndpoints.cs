@@ -13,7 +13,8 @@ public static class ChatMessageEndpoints
         var group = routes
             .MapGroup("/chat-messages")
             .WithTags("ChatMessages")
-            .RequireAuthorization("user");
+            .RequireAuthorization("user")
+            .RequireRateLimiting("api");
 
         group.MapGet("/", GetAll).RequireAuthorization("admin");
         group.MapGet("/{id}", GetById);

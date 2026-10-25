@@ -12,7 +12,8 @@ public static class ChatSessionEndpoints
         var group = routes
             .MapGroup("/chat-sessions")
             .WithTags("ChatSessions")
-            .RequireAuthorization("user");
+            .RequireAuthorization("user")
+            .RequireRateLimiting("api");
 
         group.MapGet("/", GetAll).RequireAuthorization("admin");
         group.MapGet("/{id}", GetById);

@@ -12,7 +12,8 @@ public static class AiChatEndpoints
         var group = routes
             .MapGroup("/api/ai-chat")
             .WithTags("AiChat")
-            .RequireAuthorization("user");
+            .RequireAuthorization("user")
+            .RequireRateLimiting("ai");
 
         group.MapGet("/messages", GetMessages);
         group.MapPost("/messages", SendMessage);

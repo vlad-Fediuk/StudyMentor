@@ -10,7 +10,8 @@ public static class TestEndpoints
         var group = routes
             .MapGroup("/tests")
             .WithTags("Tests")
-            .RequireAuthorization("user");
+            .RequireAuthorization("user")
+            .RequireRateLimiting("api");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);

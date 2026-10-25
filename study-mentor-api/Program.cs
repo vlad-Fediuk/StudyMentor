@@ -75,6 +75,8 @@ public class Program
             });
         });
 
+        builder.Services.AddRateLimiting(builder.Configuration);
+
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -92,6 +94,7 @@ public class Program
         app.UseCors();
         app.UseHttpsRedirection();
         app.UseAuthentication();
+        app.UseRateLimiting();
         app.UseAuthorization();
         app.MapControllers();
         app.MapAuthenticationEndpoints();
