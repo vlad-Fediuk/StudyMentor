@@ -54,6 +54,11 @@ public static class UserEndpoints
         UserService service,
         CancellationToken ct)
     {
+        if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email))
+        {
+            return Results.BadRequest(new { error = "Name and Email are required." });
+        }
+
         var entity = new User
         {
             Name = request.Name,

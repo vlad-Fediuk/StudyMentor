@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -134,10 +134,16 @@ public class ApiSecurityIntegrationTests
         _factory.Dispose();
     }
 
-    private string GenerateJwt(Guid userId, string[] roles, string name = "TestUser", string email = "test@test.com")
+    private string GenerateJwt(
+        Guid userId,
+        string[] roles,
+        string name = "TestUser",
+        string email = "test@test.com",
+        TimeSpan? lifetime = null,
+        string? signingKey = null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(_jwtKey);
+        var key = Encoding.UTF8.GetBytes(signingKey ?? _jwtKey);
 
         var claims = new List<Claim>
         {
@@ -148,12 +154,17 @@ public class ApiSecurityIntegrationTests
         };
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
+        var expires = lifetime.HasValue
+            ? DateTime.UtcNow.Add(lifetime.Value)
+            : DateTime.UtcNow.AddMinutes(60);
+
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Audience = _jwtAudience,
             Issuer = _jwtIssuer,
-            Expires = DateTime.UtcNow.AddMinutes(60),
+            NotBefore = (lifetime.HasValue && lifetime.Value < TimeSpan.Zero ? expires.AddMinutes(-5) : DateTime.UtcNow.AddMinutes(-1)),
+            Expires = expires,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
@@ -385,5 +396,40 @@ public class ApiSecurityIntegrationTests
         var assignedUserId = sessionResult.GetProperty("userId").GetString();
 
         Assert.That(assignedUserId, Is.EqualTo(_userAId.ToString()));
+    }
+    [Test]
+    public async Task ExpiredToken_ShouldReturn401Unauthorized()
+    {
+        var expiredToken = GenerateJwt(_userAId, ["User"], lifetime: TimeSpan.FromMinutes(-10));
+        using var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", expiredToken);
+
+        var response = await client.GetAsync("/users");
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
+
+    [Test]
+    public async Task InvalidSignatureToken_ShouldReturn401Unauthorized()
+    {
+        var forgedToken = GenerateJwt(_userAId, ["Admin"], signingKey: "TotallyInvalidForgedKeyForTestingPurposesOnly32Chars!");
+        using var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", forgedToken);
+
+        var response = await client.GetAsync("/users");
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+    }
+
+    [Test]
+    public async Task CreateUser_WithMissingEmail_ShouldReturn400BadRequest()
+    {
+        var response = await _client.PostAsJsonAsync("/users", new
+        {
+            name = "Incomplete User",
+            email = "",
+            password = "Password123",
+            groupId = _groupId
+        });
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
     }
 }
