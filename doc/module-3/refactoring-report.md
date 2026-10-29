@@ -1,5 +1,7 @@
 # Рефакторинг — пакет 2, модуль 3
 
+Подробный разбор по файлам, подходам и тестам: [refactoring-details-ru.md](refactoring-details-ru.md).
+
 ## Межі роботи
 
 Робоча гілка `codex/module-3-quality` походить від `origin/p/module-3` (`9480591`).

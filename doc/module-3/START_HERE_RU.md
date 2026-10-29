@@ -135,6 +135,8 @@ git diff sonar-baseline..sonar-after -- study-mentor-api/LearningContent
 
 ## 7. Где все материалы
 
+- [Подробно о рефакторинге: файлы, паттерны, изменения и тесты](refactoring-details-ru.md)
+
 - [Основной отчёт Sonar](sonarqube-report.md)
 - [Отчёт о версиях API](api-versioning.md)
 - [Отчёт о рефакторинге](refactoring-report.md)
