@@ -16,6 +16,8 @@ namespace StudyMentor.QualityTests;
 
 public class FlashcardContractTests
 {
+    private static readonly string[] LegacyFields = ["cards", "chatMessageId", "id", "name"];
+    private static readonly string[] ErrorFields = ["error"];
     private static async Task<WebApplication> CreateApp()
     {
         var builder = WebApplication.CreateBuilder();
@@ -43,6 +45,49 @@ public class FlashcardContractTests
         }
     }
 
+    [Fact]
+    public async Task V1CrudRoundTripKeepsLegacyAliasAndTrimsInput()
+    {
+        await using var app = await CreateApp();
+        Guid messageId;
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var message = new ChatMessage { Content = "Topic", ChatSessionId = Guid.NewGuid() };
+            db.ChatMessages.Add(message);
+            await db.SaveChangesAsync();
+            messageId = message.Id;
+        }
+        var client = app.GetTestClient();
+        var created = await client.PostAsJsonAsync("/api/v1/flashcards",
+            new FlashcardRequest(" Set ", messageId, [new(" Term ", " Definition ")]));
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        using var initial = JsonDocument.Parse(await created.Content.ReadAsStringAsync());
+        var id = initial.RootElement.GetProperty("id").GetString();
+        Assert.Equal($"/flashcards/{id}", created.Headers.Location!.ToString());
+        Assert.Equal("Set", initial.RootElement.GetProperty("name").GetString());
+        Assert.Equal("Term", initial.RootElement.GetProperty("cards")[0].GetProperty("term").GetString());
+        var updated = await client.PutAsJsonAsync($"/api/v1/flashcards/{id}",
+            new FlashcardRequest(" Updated ", messageId, [new("New", "Meaning")]));
+        updated.EnsureSuccessStatusCode();
+        using var fetched = JsonDocument.Parse(await client.GetStringAsync($"/flashcards/{id}"));
+        Assert.Equal("Updated", fetched.RootElement.GetProperty("name").GetString());
+        Assert.Equal("New", fetched.RootElement.GetProperty("cards")[0].GetProperty("term").GetString());
+        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"/api/v1/flashcards/{id}")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v2/flashcards/{id}")).StatusCode);
+    }
+
+    [Fact]
+    public async Task V2EmptyPageUsesDocumentedDefaults()
+    {
+        await using var app = await CreateApp();
+        using var json = JsonDocument.Parse(await app.GetTestClient().GetStringAsync("/api/v2/flashcards"));
+        Assert.Equal(1, json.RootElement.GetProperty("page").GetInt32());
+        Assert.Equal(20, json.RootElement.GetProperty("pageSize").GetInt32());
+        Assert.Equal(0, json.RootElement.GetProperty("total").GetInt32());
+        Assert.Empty(json.RootElement.GetProperty("items").EnumerateArray());
+    }
+
     [Theory]
     [InlineData("/flashcards")]
     [InlineData("/api/v1/flashcards")]
@@ -61,7 +106,7 @@ public class FlashcardContractTests
         response.EnsureSuccessStatusCode();
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         var item = Assert.Single(json.RootElement.EnumerateArray());
-        Assert.Equal(new[] { "cards", "chatMessageId", "id", "name" }, item.EnumerateObject().Select(p => p.Name).Order());
+        Assert.Equal(LegacyFields, item.EnumerateObject().Select(p => p.Name).Order());
         Assert.Single(item.GetProperty("cards").EnumerateArray());
     }
 
@@ -128,7 +173,7 @@ public class FlashcardContractTests
             new FlashcardRequest(" ", Guid.NewGuid(), []));
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-        Assert.Equal(new[] { "error" }, json.RootElement.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(ErrorFields, json.RootElement.EnumerateObject().Select(p => p.Name));
         Assert.Equal("Flashcard name is required.", json.RootElement.GetProperty("error").GetString());
     }
 
@@ -141,7 +186,7 @@ public class FlashcardContractTests
         var response = await app.GetTestClient().SendAsync(new HttpRequestMessage(new HttpMethod(method), $"/flashcards/{Guid.NewGuid()}"));
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-        Assert.Equal(new[] { "error" }, json.RootElement.EnumerateObject().Select(p => p.Name));
+        Assert.Equal(ErrorFields, json.RootElement.EnumerateObject().Select(p => p.Name));
     }
 }
 

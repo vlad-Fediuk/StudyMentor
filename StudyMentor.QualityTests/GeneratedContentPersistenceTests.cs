@@ -8,6 +8,8 @@ namespace StudyMentor.QualityTests;
 
 public class GeneratedContentPersistenceTests
 {
+    private static readonly int[] ExpectedAnswerOrder = [0, 1];
+    private static readonly string[] ExpectedFallbackAnswers = ["Answer", "Варіант 2"];
     [Fact]
     public async Task FlashcardPersistenceKeepsTrimmingTitleAndMessageLink()
     {
@@ -48,7 +50,7 @@ public class GeneratedContentPersistenceTests
         Assert.Equal("Question", question.Prompt);
         Assert.Equal(2, question.AnswerVariants.Count);
         Assert.Single(question.AnswerVariants, answer => answer.IsCorrect);
-        Assert.Equal(new[] { 0, 1 }, question.AnswerVariants.Select(answer => answer.Order));
+        Assert.Equal(ExpectedAnswerOrder, question.AnswerVariants.Select(answer => answer.Order));
     }
 
     [Fact]
@@ -61,12 +63,20 @@ public class GeneratedContentPersistenceTests
             Questions = [new() { Text = "Question", CorrectAnswer = "Answer" }]
         }), Guid.NewGuid(), " Topic ", default);
         Assert.Equal("Тест: Topic", tests.Created!.Name);
-        Assert.Equal(new[] { "Answer", "Варіант 2" }, tests.Created.Questions.Single().AnswerVariants.Select(a => a.Text));
+        Assert.Equal(ExpectedFallbackAnswers, tests.Created.Questions.Single().AnswerVariants.Select(a => a.Text));
     }
 
     private sealed class CapturingFlashcards() : FlashcardService(null!, null!)
     {
         public override Task<Flashcard> CreateAsync(Flashcard entity, CancellationToken cancellationToken = default) => Task.FromResult(entity);
+    }
+
+    [Fact]
+    public async Task UnknownGeneratedContentTypeIsRejected()
+    {
+        var persistence = new GeneratedContentPersistence(new CapturingFlashcards(), new CapturingTests());
+        await Assert.ThrowsAsync<StudyMentorApi.Common.ValidationException>(() =>
+            persistence.PersistAsync(new("unknown", new object()), Guid.NewGuid(), "Topic", default));
     }
 
     private sealed class CapturingTests() : TestService(null!, null!, null!)
