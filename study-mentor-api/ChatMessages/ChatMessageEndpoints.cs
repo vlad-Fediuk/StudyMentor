@@ -1,5 +1,8 @@
+using System.Security.Claims;
+using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Common;
 using StudyMentorApi.Data.Models;
+using StudyMentorApi.Extensions;
 
 namespace StudyMentorApi.ChatMessages;
 
@@ -10,9 +13,10 @@ public static class ChatMessageEndpoints
         var group = routes
             .MapGroup("/chat-messages")
             .WithTags("ChatMessages")
-            .RequireAuthorization("user");
+            .RequireAuthorization("user")
+            .RequireRateLimiting("api");
 
-        group.MapGet("/", GetAll);
+        group.MapGet("/", GetAll).RequireAuthorization("admin");
         group.MapGet("/{id}", GetById);
         group.MapGet("/session/{sessionId}", GetBySession);
         group.MapPost("/", Create);
@@ -24,58 +28,111 @@ public static class ChatMessageEndpoints
         ChatMessageService service,
         CancellationToken ct)
     {
-        try
-        {
-            var items = await service.GetAllAsync(ct);
-            return Results.Ok(items.Select(ToResponse));
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem(ex.Message, statusCode: 500);
-        }
+        var items = await service.GetAllAsync(ct);
+        return Results.Ok(items.Select(ToResponse));
     }
 
     private static async Task<IResult> GetById(
         Guid id,
-        ChatMessageService service,
+        ClaimsPrincipal user,
+        ChatMessageService messageService,
+        ChatSessionService sessionService,
         CancellationToken ct)
     {
+        var currentUserId = user.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        ChatMessage item;
         try
         {
-            var item = await service.GetByIdAsync(id, ct);
-            return Results.Ok(ToResponse(item));
+            item = await messageService.GetByIdAsync(id, ct);
         }
         catch (NotFoundException ex)
         {
             return Results.NotFound(new { error = ex.Message });
         }
-        catch (Exception ex)
+
+        ChatSession session;
+        try
         {
-            return Results.Problem(ex.Message, statusCode: 500);
+            session = await sessionService.GetByIdAsync(item.ChatSessionId, ct);
         }
+        catch (NotFoundException)
+        {
+            return Results.NotFound(new { error = "Associated chat session was not found." });
+        }
+
+        if (session.UserId != currentUserId && !user.IsAdmin())
+        {
+            return Results.Forbid();
+        }
+
+        return Results.Ok(ToResponse(item));
     }
 
     private static async Task<IResult> GetBySession(
         Guid sessionId,
-        ChatMessageService service,
+        ClaimsPrincipal user,
+        ChatMessageService messageService,
+        ChatSessionService sessionService,
         CancellationToken ct)
     {
+        var currentUserId = user.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        ChatSession session;
         try
         {
-            var items = await service.GetBySessionAsync(sessionId, ct);
-            return Results.Ok(items.Select(ToResponse));
+            session = await sessionService.GetByIdAsync(sessionId, ct);
         }
-        catch (Exception ex)
+        catch (NotFoundException ex)
         {
-            return Results.Problem(ex.Message, statusCode: 500);
+            return Results.NotFound(new { error = ex.Message });
         }
+
+        if (session.UserId != currentUserId && !user.IsAdmin())
+        {
+            return Results.Forbid();
+        }
+
+        var items = await messageService.GetBySessionAsync(sessionId, ct);
+        return Results.Ok(items.Select(ToResponse));
     }
 
     private static async Task<IResult> Create(
         ChatMessageRequest request,
-        ChatMessageService service,
+        ClaimsPrincipal user,
+        ChatMessageService messageService,
+        ChatSessionService sessionService,
         CancellationToken ct)
     {
+        var currentUserId = user.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        ChatSession session;
+        try
+        {
+            session = await sessionService.GetByIdAsync(request.ChatSessionId, ct);
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+
+        if (session.UserId != currentUserId && !user.IsAdmin())
+        {
+            return Results.Forbid();
+        }
+
         try
         {
             var entity = new ChatMessage
@@ -87,37 +144,88 @@ public static class ChatMessageEndpoints
                 SequenceNumber = request.SequenceNumber,
                 Status = "completed"
             };
-            var created = await service.CreateAsync(entity, ct);
+            var created = await messageService.CreateAsync(entity, ct);
             return Results.Created($"/chat-messages/{created.Id}", ToResponse(created));
         }
         catch (ValidationException ex)
         {
             return Results.BadRequest(new { error = ex.Message });
         }
-        catch (Exception ex)
-        {
-            return Results.Problem(ex.Message, statusCode: 500);
-        }
     }
 
     private static async Task<IResult> Update(
         Guid id,
         ChatMessageRequest request,
-        ChatMessageService service,
+        ClaimsPrincipal user,
+        ChatMessageService messageService,
+        ChatSessionService sessionService,
         CancellationToken ct)
     {
+        var currentUserId = user.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        ChatMessage existingMessage;
+        try
+        {
+            existingMessage = await messageService.GetByIdAsync(id, ct);
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+
+        ChatSession originalSession;
+        try
+        {
+            originalSession = await sessionService.GetByIdAsync(existingMessage.ChatSessionId, ct);
+        }
+        catch (NotFoundException)
+        {
+            return Results.NotFound(new { error = "Associated chat session was not found." });
+        }
+
+        var isAdmin = user.IsAdmin();
+        if (originalSession.UserId != currentUserId && !isAdmin)
+        {
+            return Results.Forbid();
+        }
+
+        var targetSessionId = existingMessage.ChatSessionId;
+        if (request.ChatSessionId != existingMessage.ChatSessionId)
+        {
+            if (!isAdmin)
+            {
+                targetSessionId = existingMessage.ChatSessionId;
+            }
+            else
+            {
+                try
+                {
+                    await sessionService.GetByIdAsync(request.ChatSessionId, ct);
+                    targetSessionId = request.ChatSessionId;
+                }
+                catch (NotFoundException ex)
+                {
+                    return Results.NotFound(new { error = ex.Message });
+                }
+            }
+        }
+
         try
         {
             var entity = new ChatMessage
             {
-                ChatSessionId = request.ChatSessionId,
+                ChatSessionId = targetSessionId,
                 Content = request.Content,
                 Timestamp = NormalizeTimestamp(request.Timestamp),
                 Role = request.Role,
                 SequenceNumber = request.SequenceNumber,
                 Status = "completed"
             };
-            var updated = await service.UpdateAsync(id, entity, ct);
+            var updated = await messageService.UpdateAsync(id, entity, ct);
             return Results.Ok(ToResponse(updated));
         }
         catch (NotFoundException ex)
@@ -128,30 +236,48 @@ public static class ChatMessageEndpoints
         {
             return Results.BadRequest(new { error = ex.Message });
         }
-        catch (Exception ex)
-        {
-            return Results.Problem(ex.Message, statusCode: 500);
-        }
     }
 
     private static async Task<IResult> Delete(
         Guid id,
-        ChatMessageService service,
+        ClaimsPrincipal user,
+        ChatMessageService messageService,
+        ChatSessionService sessionService,
         CancellationToken ct)
     {
+        var currentUserId = user.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        ChatMessage existingMessage;
         try
         {
-            await service.DeleteAsync(id, ct);
-            return Results.NoContent();
+            existingMessage = await messageService.GetByIdAsync(id, ct);
         }
         catch (NotFoundException ex)
         {
             return Results.NotFound(new { error = ex.Message });
         }
-        catch (Exception ex)
+
+        ChatSession session;
+        try
         {
-            return Results.Problem(ex.Message, statusCode: 500);
+            session = await sessionService.GetByIdAsync(existingMessage.ChatSessionId, ct);
         }
+        catch (NotFoundException)
+        {
+            return Results.NotFound(new { error = "Associated chat session was not found." });
+        }
+
+        if (session.UserId != currentUserId && !user.IsAdmin())
+        {
+            return Results.Forbid();
+        }
+
+        await messageService.DeleteAsync(id, ct);
+        return Results.NoContent();
     }
 
     private static ChatMessageResponse ToResponse(ChatMessage m) =>

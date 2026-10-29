@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using StudyMentorApi.Data.Models;
+using StudyMentorApi.Extensions;
 
 namespace StudyMentorApi.Users;
 
@@ -8,10 +10,11 @@ public static class UserEndpoints
     {
         var group = routes
             .MapGroup("/users")
-            .WithTags("Users");
+            .WithTags("Users")
+            .RequireRateLimiting("api");
 
-        group.MapGet("/", GetAll);
-        group.MapGet("/{id}", GetById);
+        group.MapGet("/", GetAll).RequireAuthorization("admin");
+        group.MapGet("/{id}", GetById).RequireAuthorization("user");
         group.MapPost("/", Create);
         group.MapPut("/{id}", Update).RequireAuthorization("user");
         group.MapDelete("/{id}", Delete).RequireAuthorization("user");
@@ -22,16 +25,22 @@ public static class UserEndpoints
         CancellationToken ct)
     {
         var items = await service.GetAllAsync(ct);
-        return Results.Ok(items.Select(ToResponse));
+        return Results.Ok(items.Select(u => u.ToResponse()));
     }
 
     private static async Task<IResult> GetById(
         Guid id,
+        ClaimsPrincipal user,
         UserService service,
         CancellationToken ct)
     {
+        if (user.AuthorizeOwnerOrAdmin(id) is { } authResult)
+        {
+            return authResult;
+        }
+
         var item = await service.GetByIdAsync(id, ct);
-        return Results.Ok(ToResponse(item));
+        return Results.Ok(item.ToResponse());
     }
 
     private static async Task<IResult> Create(
@@ -39,53 +48,46 @@ public static class UserEndpoints
         UserService service,
         CancellationToken ct)
     {
-        var entity = new User
+        if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email))
         {
-            Name = request.Name,
-            Email = NormalizeEmail(request.Email),
-            Password = request.Password,
-            GroupId = request.GroupId,
-            Roles = request.Roles?.ToArray() ?? ["User"]
-        };
+            return Results.BadRequest(new { error = "Name and Email are required." });
+        }
+
+        var entity = request.ToNewUserEntity();
         var created = await service.CreateAsync(entity, ct);
-        return Results.Created($"/users/{created.Id}", ToResponse(created));
+        return Results.Created($"/users/{created.Id}", created.ToResponse());
     }
 
     private static async Task<IResult> Update(
         Guid id,
+        ClaimsPrincipal user,
         UserRequest request,
         UserService service,
         CancellationToken ct)
     {
-        var entity = new User
+        if (user.AuthorizeOwnerOrAdmin(id) is { } authResult)
         {
-            Name = request.Name,
-            Email = NormalizeEmail(request.Email),
-            Password = request.Password,
-            GroupId = request.GroupId,
-            Roles = request.Roles?.ToArray() ?? ["User"]
-        };
+            return authResult;
+        }
+
+        var existing = await service.GetByIdAsync(id, ct);
+        var entity = existing.BuildUpdatedEntity(request, user.IsAdmin());
         var updated = await service.UpdateAsync(id, entity, ct);
-        return Results.Ok(ToResponse(updated));
+        return Results.Ok(updated.ToResponse());
     }
 
     private static async Task<IResult> Delete(
         Guid id,
+        ClaimsPrincipal user,
         UserService service,
         CancellationToken ct)
     {
+        if (user.AuthorizeOwnerOrAdmin(id) is { } authResult)
+        {
+            return authResult;
+        }
+
         await service.DeleteAsync(id, ct);
         return Results.NoContent();
     }
-
-    private static UserResponse ToResponse(User u) =>
-        new(
-            u.Id,
-            u.Name,
-            u.GroupId,
-            u.Email,
-            u.Roles);
-
-    private static string? NormalizeEmail(string? email) =>
-        string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
 }

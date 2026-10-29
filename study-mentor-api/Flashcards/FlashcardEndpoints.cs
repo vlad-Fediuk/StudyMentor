@@ -9,7 +9,9 @@ public static class FlashcardEndpoints
     {
         var group = routes
             .MapGroup("/flashcards")
-            .WithTags("Flashcards");
+            .WithTags("Flashcards")
+            .RequireAuthorization("user")
+            .RequireRateLimiting("api");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);

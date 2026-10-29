@@ -12,7 +12,10 @@ public static class AuthenticationEndpoints
             [FromServices] IJwtAuthenticationService authService) =>
         {
             return await AuthenticateAsync(() => authService.AuthenticateAsync(request));
-        }).WithTags("Authentication").AllowAnonymous();
+        })
+        .WithTags("Authentication")
+        .AllowAnonymous()
+        .RequireRateLimiting("auth");
     }
 
     private static async Task<IResult> AuthenticateAsync(Func<Task<string>> authenticate)
@@ -26,9 +29,9 @@ public static class AuthenticationEndpoints
         {
             return Results.Json(new { message = ex.Message }, statusCode: StatusCodes.Status401Unauthorized);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return Results.Json(new { message = $"Authentication failed: {ex.Message}" }, statusCode: StatusCodes.Status500InternalServerError);
+            return Results.Json(new { message = "Authentication failed due to an unexpected server error." }, statusCode: StatusCodes.Status500InternalServerError);
         }
     }
 }

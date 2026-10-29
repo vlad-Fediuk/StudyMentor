@@ -1,4 +1,7 @@
+using System.Security.Claims;
+using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Common;
+using StudyMentorApi.Extensions;
 
 namespace StudyMentorApi.AiChat;
 
@@ -6,27 +9,47 @@ public static class AiChatEndpoints
 {
     public static void MapAiChatEndpoints(this IEndpointRouteBuilder routes)
     {
-        routes
-            .MapGet("/api/ai-chat/messages", GetMessages)
-            .WithTags("AiChat");
+        var group = routes
+            .MapGroup("/api/ai-chat")
+            .WithTags("AiChat")
+            .RequireAuthorization("user")
+            .RequireRateLimiting("ai");
 
-        routes
-            .MapPost("/api/ai-chat/messages", SendMessage)
-            .WithTags("AiChat");
+        group.MapGet("/messages", GetMessages);
+        group.MapPost("/messages", SendMessage);
     }
 
     private static async Task<IResult> GetMessages(
         string? chatId,
+        ClaimsPrincipal user,
         AiChatService service,
+        ChatSessionService chatSessionService,
         CancellationToken cancellationToken)
     {
+        var currentUserId = user.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
         if (string.IsNullOrWhiteSpace(chatId))
         {
             return Results.BadRequest(new { error = "chatId is required." });
         }
 
+        if (!Guid.TryParse(chatId, out var parsedChatId))
+        {
+            return Results.BadRequest(new { error = "chatId must be a valid GUID." });
+        }
+
         try
         {
+            var session = await chatSessionService.GetByIdAsync(parsedChatId, cancellationToken);
+            if (session.UserId != currentUserId && !user.IsAdmin())
+            {
+                return Results.Forbid();
+            }
+
             var messages = await service.GetMessagesAsync(chatId, cancellationToken);
             return Results.Ok(messages);
         }
@@ -38,11 +61,35 @@ public static class AiChatEndpoints
 
     private static async Task<IResult> SendMessage(
         AiChatSendMessageRequest request,
+        ClaimsPrincipal user,
         AiChatService service,
+        ChatSessionService chatSessionService,
         CancellationToken cancellationToken)
     {
+        var currentUserId = user.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        if (string.IsNullOrWhiteSpace(request.ChatId))
+        {
+            return Results.BadRequest(new { error = "chatId is required." });
+        }
+
+        if (!Guid.TryParse(request.ChatId, out var parsedChatId))
+        {
+            return Results.BadRequest(new { error = "chatId must be a valid GUID." });
+        }
+
         try
         {
+            var session = await chatSessionService.GetByIdAsync(parsedChatId, cancellationToken);
+            if (session.UserId != currentUserId && !user.IsAdmin())
+            {
+                return Results.Forbid();
+            }
+
             var response = await service.SendMessageAsync(request, cancellationToken);
             return Results.Ok(response);
         }
@@ -58,15 +105,11 @@ public static class AiChatEndpoints
         {
             return Results.BadRequest(new { error = ex.Message });
         }
-        catch (AiChatFailedException ex)
+        catch (AiChatFailedException)
         {
             return Results.Json(
-                new AiChatErrorResponse("failed", ex.Message),
+                new AiChatErrorResponse("failed", "AI chat generation failed."),
                 statusCode: StatusCodes.Status500InternalServerError);
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem(ex.Message, statusCode: 500);
         }
     }
 }
