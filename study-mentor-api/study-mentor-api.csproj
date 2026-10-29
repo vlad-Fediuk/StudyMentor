@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>StudyMentorApi</RootNamespace>
+        <Description>StudyMentor REST API for learning content, flashcards, tests and AI-assisted study.</Description>
     </PropertyGroup>
 
     <ItemGroup>
