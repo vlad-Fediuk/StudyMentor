@@ -37,18 +37,12 @@ public static class ChatSessionEndpoints
         ChatSessionService service,
         CancellationToken ct)
     {
-        var currentUserId = user.GetUserId();
-        if (currentUserId == null)
-        {
-            return Results.Unauthorized();
-        }
-
         try
         {
             var item = await service.GetByIdAsync(id, ct);
-            if (item.UserId != currentUserId && !user.IsAdmin())
+            if (user.AuthorizeOwnerOrAdmin(item.UserId) is { } authResult)
             {
-                return Results.Forbid();
+                return authResult;
             }
 
             return Results.Ok(ToResponse(item));
@@ -65,15 +59,9 @@ public static class ChatSessionEndpoints
         ChatSessionService service,
         CancellationToken ct)
     {
-        var currentUserId = user.GetUserId();
-        if (currentUserId == null)
+        if (user.AuthorizeOwnerOrAdmin(userId) is { } authResult)
         {
-            return Results.Unauthorized();
-        }
-
-        if (userId != currentUserId && !user.IsAdmin())
-        {
-            return Results.Forbid();
+            return authResult;
         }
 
         var items = await service.GetByUserAsync(userId, ct);
@@ -123,12 +111,6 @@ public static class ChatSessionEndpoints
         ChatSessionService service,
         CancellationToken ct)
     {
-        var currentUserId = user.GetUserId();
-        if (currentUserId == null)
-        {
-            return Results.Unauthorized();
-        }
-
         ChatSession existing;
         try
         {
@@ -139,12 +121,12 @@ public static class ChatSessionEndpoints
             return Results.NotFound(new { error = ex.Message });
         }
 
-        var isAdmin = user.IsAdmin();
-        if (existing.UserId != currentUserId && !isAdmin)
+        if (user.AuthorizeOwnerOrAdmin(existing.UserId) is { } authResult)
         {
-            return Results.Forbid();
+            return authResult;
         }
 
+        var isAdmin = user.IsAdmin();
         var targetUserId = isAdmin && request.UserId != Guid.Empty
             ? request.UserId
             : existing.UserId;
@@ -164,12 +146,6 @@ public static class ChatSessionEndpoints
         ChatSessionService service,
         CancellationToken ct)
     {
-        var currentUserId = user.GetUserId();
-        if (currentUserId == null)
-        {
-            return Results.Unauthorized();
-        }
-
         ChatSession existing;
         try
         {
@@ -180,9 +156,9 @@ public static class ChatSessionEndpoints
             return Results.NotFound(new { error = ex.Message });
         }
 
-        if (existing.UserId != currentUserId && !user.IsAdmin())
+        if (user.AuthorizeOwnerOrAdmin(existing.UserId) is { } authResult)
         {
-            return Results.Forbid();
+            return authResult;
         }
 
         await service.DeleteAsync(id, ct);
