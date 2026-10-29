@@ -15,6 +15,7 @@ public class AiChatService(
     LectureChunkRetrievalService lectureChunkRetrievalService,
     IAiGenerationService aiGenerationService)
 {
+    private const string CompletedStatus = "completed";
     private const int MaxHistoryMessagesForAi = 20;
     private const string MissingKnowledgeMessage = "Потрібної інформації немає в доступних матеріалах.";
 
@@ -62,7 +63,7 @@ public class AiChatService(
             Timestamp = DateTime.UtcNow,
             Role = MessageRole.User,
             SequenceNumber = nextSequenceNumber,
-            Status = "completed"
+            Status = CompletedStatus
         }, cancellationToken);
 
         try
@@ -84,11 +85,11 @@ public class AiChatService(
                     Timestamp = DateTime.UtcNow,
                     Role = MessageRole.Assistant,
                     SequenceNumber = nextSequenceNumber + 1,
-                    Status = "completed"
+                    Status = CompletedStatus
                 }, cancellationToken);
 
                 return new AiChatSendMessageResponse(
-                    "completed",
+                    CompletedStatus,
                     ToDto(userMessage),
                     ToDto(missingKnowledgeMessage));
             }
@@ -110,11 +111,11 @@ public class AiChatService(
                 Timestamp = DateTime.UtcNow,
                 Role = MessageRole.Assistant,
                 SequenceNumber = nextSequenceNumber + 1,
-                Status = "completed"
+                Status = CompletedStatus
             }, cancellationToken);
 
             return new AiChatSendMessageResponse(
-                "completed",
+                CompletedStatus,
                 ToDto(userMessage),
                 ToDto(assistantMessage));
         }
