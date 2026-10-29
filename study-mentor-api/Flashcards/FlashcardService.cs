@@ -15,7 +15,7 @@ public class FlashcardService(AppDbContext dbContext, ChatMessageService chatMes
         var total = await dbContext.Flashcards.CountAsync(ct);
         var items = await Query().AsNoTracking().OrderBy(f => f.Id)
             .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
-        return new(items.Select(FlashcardEndpoints.ToV2Response).ToList(), page, pageSize, total);
+        return new(items.Select(item => item.ToV2Response()).ToList(), page, pageSize, total);
     }
 
     protected override IQueryable<Flashcard> Query()
