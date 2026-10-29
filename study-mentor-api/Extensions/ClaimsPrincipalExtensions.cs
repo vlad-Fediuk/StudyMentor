@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using StudyMentorApi.Users;
 
 namespace StudyMentorApi.Extensions;
 
@@ -14,6 +16,22 @@ public static class ClaimsPrincipalExtensions
 
     public static bool IsAdmin(this ClaimsPrincipal? principal)
     {
-        return principal?.IsInRole("Admin") == true;
+        return principal?.IsInRole(UserRoles.Admin) == true;
+    }
+
+    public static IResult? AuthorizeOwnerOrAdmin(this ClaimsPrincipal? principal, Guid resourceOwnerId)
+    {
+        var currentUserId = principal.GetUserId();
+        if (currentUserId == null)
+        {
+            return Results.Unauthorized();
+        }
+
+        if (currentUserId.Value != resourceOwnerId && !principal.IsAdmin())
+        {
+            return Results.Forbid();
+        }
+
+        return null;
     }
 }
