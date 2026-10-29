@@ -1,5 +1,8 @@
 # Модуль 3 — пакет 2: як показати роботу
 
+**Повна покрокова інструкція та таблиця виконаних завдань:** [START_HERE_RU.md](START_HERE_RU.md).
+Для звичайного локального запуску Docker/БД/backend використовуйте `./scripts/Start-Module3.ps1`.
+
 1. [SonarQube: аналіз, проблеми й порівняння](sonarqube-report.md).
 2. [API Versioning: маршрути, контракти й перевірки](api-versioning.md).
 3. [Рефакторинг: зміни, причини й тести](refactoring-report.md).
