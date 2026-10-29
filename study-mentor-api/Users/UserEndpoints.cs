@@ -25,7 +25,7 @@ public static class UserEndpoints
         CancellationToken ct)
     {
         var items = await service.GetAllAsync(ct);
-        return Results.Ok(items.Select(ToResponse));
+        return Results.Ok(items.Select(u => u.ToResponse()));
     }
 
     private static async Task<IResult> GetById(
@@ -34,19 +34,13 @@ public static class UserEndpoints
         UserService service,
         CancellationToken ct)
     {
-        var currentUserId = user.GetUserId();
-        if (currentUserId == null)
+        if (user.AuthorizeOwnerOrAdmin(id) is { } authResult)
         {
-            return Results.Unauthorized();
-        }
-
-        if (currentUserId != id && !user.IsAdmin())
-        {
-            return Results.Forbid();
+            return authResult;
         }
 
         var item = await service.GetByIdAsync(id, ct);
-        return Results.Ok(ToResponse(item));
+        return Results.Ok(item.ToResponse());
     }
 
     private static async Task<IResult> Create(
@@ -59,16 +53,9 @@ public static class UserEndpoints
             return Results.BadRequest(new { error = "Name and Email are required." });
         }
 
-        var entity = new User
-        {
-            Name = request.Name,
-            Email = NormalizeEmail(request.Email),
-            Password = request.Password,
-            GroupId = request.GroupId,
-            Roles = ["User"]
-        };
+        var entity = request.ToNewUserEntity();
         var created = await service.CreateAsync(entity, ct);
-        return Results.Created($"/users/{created.Id}", ToResponse(created));
+        return Results.Created($"/users/{created.Id}", created.ToResponse());
     }
 
     private static async Task<IResult> Update(
@@ -78,38 +65,15 @@ public static class UserEndpoints
         UserService service,
         CancellationToken ct)
     {
-        var currentUserId = user.GetUserId();
-        if (currentUserId == null)
+        if (user.AuthorizeOwnerOrAdmin(id) is { } authResult)
         {
-            return Results.Unauthorized();
-        }
-
-        var isAdmin = user.IsAdmin();
-        if (currentUserId != id && !isAdmin)
-        {
-            return Results.Forbid();
+            return authResult;
         }
 
         var existing = await service.GetByIdAsync(id, ct);
-
-        var rolesToAssign = isAdmin
-            ? (request.Roles?.ToArray() ?? existing.Roles)
-            : existing.Roles;
-
-        var passwordToAssign = string.IsNullOrWhiteSpace(request.Password)
-            ? existing.Password
-            : request.Password;
-
-        var entity = new User
-        {
-            Name = request.Name,
-            Email = NormalizeEmail(request.Email),
-            Password = passwordToAssign,
-            GroupId = request.GroupId,
-            Roles = rolesToAssign
-        };
+        var entity = existing.BuildUpdatedEntity(request, user.IsAdmin());
         var updated = await service.UpdateAsync(id, entity, ct);
-        return Results.Ok(ToResponse(updated));
+        return Results.Ok(updated.ToResponse());
     }
 
     private static async Task<IResult> Delete(
@@ -118,29 +82,12 @@ public static class UserEndpoints
         UserService service,
         CancellationToken ct)
     {
-        var currentUserId = user.GetUserId();
-        if (currentUserId == null)
+        if (user.AuthorizeOwnerOrAdmin(id) is { } authResult)
         {
-            return Results.Unauthorized();
-        }
-
-        if (currentUserId != id && !user.IsAdmin())
-        {
-            return Results.Forbid();
+            return authResult;
         }
 
         await service.DeleteAsync(id, ct);
         return Results.NoContent();
     }
-
-    private static UserResponse ToResponse(User u) =>
-        new(
-            u.Id,
-            u.Name,
-            u.GroupId,
-            u.Email,
-            u.Roles);
-
-    private static string? NormalizeEmail(string? email) =>
-        string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
 }
