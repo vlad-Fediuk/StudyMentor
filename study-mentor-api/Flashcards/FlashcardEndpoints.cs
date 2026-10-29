@@ -11,11 +11,52 @@ public static class FlashcardEndpoints
             .MapGroup("/flashcards")
             .WithTags("Flashcards");
 
+        MapV1(group);
+
+        var api = routes.NewVersionedApi("Flashcards");
+        var versioned = api.MapGroup("/api/v{version:apiVersion}/flashcards").WithTags("Flashcards");
+        MapV1(versioned.MapGroup("").HasApiVersion(1.0));
+        var v2 = versioned.MapGroup("").HasApiVersion(2.0);
+        v2.MapGet("/", GetPage);
+        v2.MapGet("/{id:guid}", GetByIdV2);
+    }
+
+    private static void MapV1(RouteGroupBuilder group)
+    {
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);
         group.MapPost("/", Create);
         group.MapPut("/{id}", Update);
         group.MapDelete("/{id}", Delete);
+    }
+
+    private static async Task<IResult> GetPage(
+        FlashcardService service, CancellationToken ct, int page = 1, int pageSize = 20)
+    {
+        if (page < 1 || pageSize is < 1 or > 100 || (long)(page - 1) * pageSize > int.MaxValue)
+        {
+            return Results.BadRequest(new { error = "page must be positive and pageSize must be between 1 and 100." });
+        }
+
+        return Results.Ok(await service.GetPageAsync(page, pageSize, ct));
+    }
+
+    private static async Task<IResult> GetByIdV2(Guid id, FlashcardService service, CancellationToken ct)
+    {
+        try
+        {
+            return Results.Ok(ToV2Response(await service.GetByIdAsync(id, ct)));
+        }
+        catch (NotFoundException ex)
+        {
+            return Results.NotFound(new { error = ex.Message });
+        }
+    }
+
+    internal static FlashcardV2Response ToV2Response(Flashcard flashcard)
+    {
+        var response = ToResponse(flashcard);
+        return new(response.Id, response.Name, response.ChatMessageId, response.Cards, response.Cards.Count);
     }
 
     private static async Task<IResult> GetAll(

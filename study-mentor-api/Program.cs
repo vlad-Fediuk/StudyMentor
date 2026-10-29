@@ -33,6 +33,7 @@ public class Program
                 builder.Configuration.GetConnectionString("DefaultConnection"),
                 npgsqlOptions => npgsqlOptions.UseVector()));
         builder.Services.AddApplicationServices(builder.Configuration);
+        builder.Services.AddApplicationApiVersioning();
 
         builder.Services.AddCors(options =>
         {
