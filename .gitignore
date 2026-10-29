@@ -406,3 +406,6 @@ FodyWeavers.xsd
 #Credentials
 /*/firebase/
 **/net10.0/
+
+# SonarScanner local analysis data
+.sonarqube/
