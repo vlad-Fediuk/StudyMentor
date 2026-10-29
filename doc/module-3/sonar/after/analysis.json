@@ -1,0 +1,31 @@
+{
+  "paging": {
+    "pageIndex": 1,
+    "pageSize": 1,
+    "total": 6
+  },
+  "analyses": [
+    {
+      "key": "b78a475c-8ef6-4ab0-8246-cb72f61929e4",
+      "date": "2026-10-30T01:01:10+02:00",
+      "events": [
+        {
+          "key": "7c988549-fb4b-4b9e-b30d-f4c1fecfda93",
+          "category": "QUALITY_GATE",
+          "name": "Passed",
+          "description": ""
+        },
+        {
+          "key": "2b8f8e6c-79dc-449d-b6cd-43ac50a2c5c7",
+          "category": "VERSION",
+          "name": "after"
+        }
+      ],
+      "projectVersion": "after",
+      "manualNewCodePeriodBaseline": false,
+      "revision": "ea59120bc39bcdd35978d53609646854f241bc4f",
+      "detectedCI": "undetected",
+      "relativePathFromScmRoot": "../../../StudyMentor-module3"
+    }
+  ]
+}

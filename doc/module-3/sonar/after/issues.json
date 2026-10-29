@@ -1,0 +1,660 @@
+[
+  {
+    "key": "166d6215-6d7f-4f70-bc84-6b45c3abcf11",
+    "rule": "csharpsquid:S3267",
+    "severity": "MINOR",
+    "component": "study-mentor:study-mentor-api/Tests/TestService.cs",
+    "project": "study-mentor",
+    "line": 121,
+    "hash": "690dad0ffd1eba759bd13493098c91ee",
+    "textRange": {
+      "startLine": 121,
+      "endLine": 121,
+      "startOffset": 33,
+      "endOffset": 49
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Loop should be simplified by calling Select(question => question.AnswerVariants)",
+    "effort": "5min",
+    "debt": "5min",
+    "author": "zderij508@gmail.com",
+    "tags": [],
+    "creationDate": "2026-06-09T19:11:19+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "CLEAR",
+    "cleanCodeAttributeCategory": "INTENTIONAL",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "LOW"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "2198e6f5-1c9d-4c7d-ae65-894656a4271f",
+    "rule": "csharpsquid:S6444",
+    "severity": "MINOR",
+    "component": "study-mentor:study-mentor-api/LectureChunks/LectureChunkService.cs",
+    "project": "study-mentor",
+    "line": 110,
+    "hash": "c0542e9e3e425feeff5e5b9289a3dacf",
+    "textRange": {
+      "startLine": 110,
+      "endLine": 111,
+      "startOffset": 25,
+      "endOffset": 42
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Pass a timeout to limit the execution time.",
+    "effort": "5min",
+    "debt": "5min",
+    "author": "taraspilipco@gmail.com",
+    "tags": [
+      "cwe",
+      "regex",
+      "former-hotspot"
+    ],
+    "creationDate": "2026-06-07T00:37:33+03:00",
+    "updateDate": "2026-10-30T00:34:46+02:00",
+    "type": "VULNERABILITY",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "TRUSTWORTHY",
+    "cleanCodeAttributeCategory": "RESPONSIBLE",
+    "impacts": [
+      {
+        "softwareQuality": "SECURITY",
+        "severity": "LOW"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "98229336-6de4-416f-a16c-2906e7281946",
+    "rule": "external_roslyn:SYSLIB1045",
+    "severity": "INFO",
+    "component": "study-mentor:study-mentor-api/LectureChunks/LectureChunkService.cs",
+    "project": "study-mentor",
+    "line": 110,
+    "hash": "c0542e9e3e425feeff5e5b9289a3dacf",
+    "textRange": {
+      "startLine": 110,
+      "endLine": 111,
+      "startOffset": 25,
+      "endOffset": 42
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Используйте \"GeneratedRegexAttribute\", чтобы создавать реализацию регулярного выражения во время компиляции.",
+    "effort": "0min",
+    "debt": "0min",
+    "author": "taraspilipco@gmail.com",
+    "tags": [],
+    "creationDate": "2026-06-07T00:37:33+03:00",
+    "updateDate": "2026-10-30T00:34:46+02:00",
+    "type": "CODE_SMELL",
+    "externalRuleEngine": "roslyn",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "CONVENTIONAL",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "INFO"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "48f94b16-4ecd-4609-ad4c-80e0d3a453b5",
+    "rule": "external_roslyn:CA1859",
+    "severity": "INFO",
+    "component": "study-mentor:study-mentor-api/AiChat/AiChatService.cs",
+    "project": "study-mentor",
+    "line": 162,
+    "hash": "210ae2c9ac81458a6db4372847fb3acf",
+    "textRange": {
+      "startLine": 162,
+      "endLine": 162,
+      "startOffset": 54,
+      "endOffset": 70
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Измените тип возвращаемого значения метода \"ToAiChatMessages\" с \"System.Collections.Generic.IReadOnlyCollection<StudyMentorApi.Services.Ai.AiChatMessage>\" на \"System.Collections.Generic.List<StudyMentorApi.Services.Ai.AiChatMessage>\" для повышения производительности",
+    "effort": "0min",
+    "debt": "0min",
+    "author": "yuliia.ionashku@polytech.pp.ua",
+    "tags": [],
+    "creationDate": "2026-06-06T12:56:45+03:00",
+    "updateDate": "2026-10-30T00:34:46+02:00",
+    "type": "CODE_SMELL",
+    "externalRuleEngine": "roslyn",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "CONVENTIONAL",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "INFO"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "cfb6b73a-ebb6-4cc4-be88-97174048f59d",
+    "rule": "external_roslyn:CA1859",
+    "severity": "INFO",
+    "component": "study-mentor:study-mentor-api/Services/Ai/Prompts/PromptTemplateService.cs",
+    "project": "study-mentor",
+    "line": 5,
+    "hash": "4d81beb1a818c1239d2d89b6805cb27c",
+    "textRange": {
+      "startLine": 5,
+      "endLine": 5,
+      "startOffset": 68,
+      "endOffset": 81
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Измените тип поля \"TemplateFiles\" с \"System.Collections.Generic.IReadOnlyDictionary<StudyMentorApi.Services.Ai.Prompts.PromptType, string>\" на \"System.Collections.Generic.Dictionary<StudyMentorApi.Services.Ai.Prompts.PromptType, string>\" для повышения производительности",
+    "effort": "0min",
+    "debt": "0min",
+    "author": "yuliia.ionashku@polytech.pp.ua",
+    "tags": [],
+    "creationDate": "2026-06-02T18:10:27+03:00",
+    "updateDate": "2026-10-30T00:34:46+02:00",
+    "type": "CODE_SMELL",
+    "externalRuleEngine": "roslyn",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "CONVENTIONAL",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "INFO"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "ec2920f2-eaf8-4004-8be9-4238c485e276",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/ChatSessions/ChatSessionService.cs",
+    "project": "study-mentor",
+    "line": 28,
+    "hash": "595992dad3a6ff04744efd29067481b5",
+    "textRange": {
+      "startLine": 28,
+      "endLine": 28,
+      "startOffset": 89,
+      "endOffset": 91
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "zderij508@gmail.com",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-06-02T17:11:44+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "99e0cc70-a2eb-499e-957a-699f16749da6",
+    "rule": "external_roslyn:ASP0025",
+    "severity": "INFO",
+    "component": "study-mentor:study-mentor-api/Extensions/JwtAuthenticationExtensions.cs",
+    "project": "study-mentor",
+    "line": 40,
+    "hash": "96bb2c02290528d3749810c031a788f1",
+    "textRange": {
+      "startLine": 40,
+      "endLine": 51,
+      "startOffset": 8,
+      "endOffset": 10
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Use AddAuthorizationBuilder to register authorization services and construct policies",
+    "effort": "0min",
+    "debt": "0min",
+    "author": "fediuk.vladyslav@polytech.pp.ua",
+    "tags": [],
+    "creationDate": "2026-06-02T16:34:53+03:00",
+    "updateDate": "2026-10-30T00:34:46+02:00",
+    "type": "CODE_SMELL",
+    "externalRuleEngine": "roslyn",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "CONVENTIONAL",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "INFO"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "3106e7ac-b11f-47ed-a322-83e8b4c3d786",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/Users/UserService.cs",
+    "project": "study-mentor",
+    "line": 23,
+    "hash": "7ff21830256feb2d2e6daab59ef2b023",
+    "textRange": {
+      "startLine": 23,
+      "endLine": 23,
+      "startOffset": 82,
+      "endOffset": 84
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "taraspilipco@gmail.com",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-06-02T15:20:58+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "cb6f1660-6ad9-480e-8986-9e1831bbc307",
+    "rule": "csharpsquid:S6418",
+    "severity": "BLOCKER",
+    "component": "study-mentor:study-mentor-api/appsettings.json",
+    "project": "study-mentor",
+    "line": 19,
+    "hash": "7c89f18e23b574cd943839d78fac5610",
+    "textRange": {
+      "startLine": 19,
+      "endLine": 19,
+      "startOffset": 17,
+      "endOffset": 87
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "\"ApiKey\" detected here, make sure this is not a hard-coded secret.",
+    "effort": "30min",
+    "debt": "30min",
+    "author": "yuliia.ionashku@polytech.pp.ua",
+    "tags": [
+      "cwe",
+      "secret",
+      "former-hotspot"
+    ],
+    "creationDate": "2026-06-02T14:58:27+03:00",
+    "updateDate": "2026-10-30T00:34:46+02:00",
+    "type": "VULNERABILITY",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "TRUSTWORTHY",
+    "cleanCodeAttributeCategory": "RESPONSIBLE",
+    "impacts": [
+      {
+        "softwareQuality": "SECURITY",
+        "severity": "BLOCKER"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "b225ca60-d319-4275-affd-d5f500507ec5",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/ChatSessions/ChatSessionService.cs",
+    "project": "study-mentor",
+    "line": 31,
+    "hash": "bf6962377648aeb19e4dec094da555f8",
+    "textRange": {
+      "startLine": 31,
+      "endLine": 31,
+      "startOffset": 100,
+      "endOffset": 102
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "yuliia.nedzelska@polytech.pp.ua",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-05-11T22:34:03+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "c80426a6-f0be-4020-8f1c-8bb06798aa87",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/ChatSessions/ChatSessionService.cs",
+    "project": "study-mentor",
+    "line": 38,
+    "hash": "17affc426a849e58c35a0b4fcd1f7df2",
+    "textRange": {
+      "startLine": 38,
+      "endLine": 38,
+      "startOffset": 108,
+      "endOffset": 110
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "yuliia.nedzelska@polytech.pp.ua",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-05-11T22:34:03+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "a77d116f-8003-458d-92b0-e72361d32de0",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/ChatSessions/ChatSessionService.cs",
+    "project": "study-mentor",
+    "line": 44,
+    "hash": "e099f7938e11e535190a4da23a7daf04",
+    "textRange": {
+      "startLine": 44,
+      "endLine": 44,
+      "startOffset": 90,
+      "endOffset": 92
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "yuliia.nedzelska@polytech.pp.ua",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-05-11T22:34:03+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "98e2f5c4-1b45-42ca-b195-148738ad6e03",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/Users/UserService.cs",
+    "project": "study-mentor",
+    "line": 26,
+    "hash": "fa8e1abde0e0cb09db64c699a65824c3",
+    "textRange": {
+      "startLine": 26,
+      "endLine": 26,
+      "startOffset": 86,
+      "endOffset": 88
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "yuliia.nedzelska@polytech.pp.ua",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-05-11T22:14:24+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "49311e90-7217-4412-ad56-719183c998a8",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/Users/UserService.cs",
+    "project": "study-mentor",
+    "line": 33,
+    "hash": "9f99efe18fc322577d401cb2237cea0f",
+    "textRange": {
+      "startLine": 33,
+      "endLine": 33,
+      "startOffset": 94,
+      "endOffset": 96
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "yuliia.nedzelska@polytech.pp.ua",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-05-11T22:14:24+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  },
+  {
+    "key": "a399cd7c-6965-4022-9eb3-62a89a4f8866",
+    "rule": "csharpsquid:S927",
+    "severity": "CRITICAL",
+    "component": "study-mentor:study-mentor-api/Users/UserService.cs",
+    "project": "study-mentor",
+    "line": 39,
+    "hash": "3751099350c552265cacc295fecd4610",
+    "textRange": {
+      "startLine": 39,
+      "endLine": 39,
+      "startOffset": 83,
+      "endOffset": 85
+    },
+    "flows": [],
+    "status": "OPEN",
+    "message": "Rename parameter 'ct' to 'cancellationToken' to match the base class declaration.",
+    "effort": "10min",
+    "debt": "10min",
+    "author": "yuliia.nedzelska@polytech.pp.ua",
+    "tags": [
+      "suspicious"
+    ],
+    "creationDate": "2026-05-11T22:14:24+03:00",
+    "updateDate": "2026-10-30T00:41:10+02:00",
+    "type": "CODE_SMELL",
+    "scope": "MAIN",
+    "quickFixAvailable": false,
+    "messageFormattings": [],
+    "codeVariants": [],
+    "cleanCodeAttribute": "IDENTIFIABLE",
+    "cleanCodeAttributeCategory": "CONSISTENT",
+    "impacts": [
+      {
+        "softwareQuality": "MAINTAINABILITY",
+        "severity": "HIGH"
+      }
+    ],
+    "issueStatus": "OPEN",
+    "prioritizedRule": false,
+    "fromSonarQubeUpdate": false,
+    "internalTags": [],
+    "linkedTicketStatus": "NOT_LINKED"
+  }
+]

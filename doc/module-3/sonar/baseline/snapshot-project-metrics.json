@@ -1,0 +1,39 @@
+{
+  "component": {
+    "key": "study-mentor-baseline",
+    "name": "StudyMentor - Baseline 840e563",
+    "qualifier": "TRK",
+    "measures": [
+      {
+        "metric": "coverage",
+        "value": "11.4",
+        "bestValue": false
+      },
+      {
+        "metric": "bugs",
+        "value": "0",
+        "bestValue": true
+      },
+      {
+        "metric": "code_smells",
+        "value": "22",
+        "bestValue": false
+      },
+      {
+        "metric": "duplicated_lines_density",
+        "value": "1.1",
+        "bestValue": false
+      },
+      {
+        "metric": "vulnerabilities",
+        "value": "2",
+        "bestValue": false
+      },
+      {
+        "metric": "security_hotspots",
+        "value": "0",
+        "bestValue": true
+      }
+    ]
+  }
+}

@@ -4,6 +4,11 @@
 
 Minimal API використовує `Asp.Versioning.Http` 10.2.3 та версію в URL.
 Реєстрація винесена в `AddApplicationApiVersioning`, маршрути — в `FlashcardEndpoints`.
+Для описів використано `Asp.Versioning.Mvc.ApiExplorer` 10.2.1 (він підтримує також Minimal API)
+і `Asp.Versioning.OpenApi` 10.2.3. Версійований API Explorer підставляє версію у шлях,
+тому Swagger не отримує два конфліктні GET одного URL.
+У Swagger UI доступні окремі документи v1/v2; працюють також `/openapi/v1.json` і `/openapi/v2.json`.
+HTTP-тести перевіряють усі чотири JSON-документи та відсутність маршрутів іншої версії.
 Обов'язковий ресурс для демонстрації: Flashcards. Решта ресурсів зберігають свої маршрути.
 
 | Маршрут | Контракт |
@@ -40,3 +45,6 @@ HTTP-тести запускають справжні маршрути в TestSe
 помилкові параметри й старий формат 404.
 Тестова БД — InMemory; лише в тестовому контексті ігнорується vector-поле LectureChunk.
 Це перевірка HTTP-контракту, а не перевірка PostgreSQL/pgvector або повного production-host.
+
+Для ручної перевірки імпортуйте `flashcards-versioning.postman_collection.json`
+і встановіть baseUrl відповідно до запуску backend (профіль http: `http://localhost:5132`).
