@@ -29,8 +29,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddOpenApi();
-        builder.Services.AddSwaggerGen();
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(
@@ -58,11 +56,12 @@ public class Program
 
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
+            app.MapOpenApi().WithDocumentPerVersion();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Study Mentor API V1");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "Study Mentor API V2");
                 c.RoutePrefix = string.Empty;
             });
         }

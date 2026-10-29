@@ -28,11 +28,30 @@ public class FlashcardContractTests
         builder.Services.AddScoped<ChatMessageService>();
         builder.Services.AddScoped<FlashcardService>();
         builder.Services.AddApplicationApiVersioning();
+        builder.Services.AddEndpointsApiExplorer();
         var app = builder.Build();
         app.UseGlobalExceptionHandler();
+        app.UseSwagger();
+        app.MapOpenApi().WithDocumentPerVersion();
         app.MapFlashcardEndpoints();
         await app.StartAsync();
         return app;
+    }
+
+    [Theory]
+    [InlineData("/swagger/v1/swagger.json", "v1", "v2")]
+    [InlineData("/swagger/v2/swagger.json", "v2", "v1")]
+    [InlineData("/openapi/v1.json", "v1", "v2")]
+    [InlineData("/openapi/v2.json", "v2", "v1")]
+    public async Task SwaggerDocumentRemainsAvailableAfterVersioning(string route, string version, string otherVersion)
+    {
+        await using var app = await CreateApp();
+        var response = await app.GetTestClient().GetAsync(route);
+        response.EnsureSuccessStatusCode();
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var paths = json.RootElement.GetProperty("paths");
+        Assert.Contains(paths.EnumerateObject(), path => path.Name.TrimEnd('/') == $"/api/{version}/flashcards");
+        Assert.DoesNotContain(paths.EnumerateObject(), path => path.Name.TrimEnd('/') == $"/api/{otherVersion}/flashcards");
     }
 
     // These tests exercise Flashcards over HTTP; vector retrieval requires PostgreSQL separately.
