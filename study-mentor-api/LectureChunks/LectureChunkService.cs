@@ -8,15 +8,19 @@ using System.Text.RegularExpressions;
 
 namespace StudyMentorApi.LectureChunks;
 
-public class LectureChunkService(AppDbContext dbContext, IAiEmbeddingService embeddingService)
+public partial class LectureChunkService(AppDbContext dbContext, IAiEmbeddingService embeddingService)
 {
     private const int TargetChunkLength = 1000;
     private const int MaxChunkLength = 1500;
+    private const int ParagraphRegexTimeoutMs = 1000;
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".txt",
         ".md"
     };
+
+    [GeneratedRegex(@"\n\s*\n", RegexOptions.None, ParagraphRegexTimeoutMs)]
+    private static partial Regex ParagraphSplitRegex();
 
     public async Task<IReadOnlyCollection<LectureChunkResponse>> CreateFromFileAsync(
         LectureChunkRequest request,
@@ -107,8 +111,8 @@ public class LectureChunkService(AppDbContext dbContext, IAiEmbeddingService emb
     private static List<string> SplitIntoChunks(string content)
     {
         var normalized = content.Replace("\r\n", "\n").Replace("\r", "\n");
-        var paragraphs = Regex
-            .Split(normalized, @"\n\s*\n")
+        var paragraphs = ParagraphSplitRegex()
+            .Split(normalized)
             .Select(p => p.Trim())
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .ToList();
