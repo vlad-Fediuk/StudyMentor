@@ -605,6 +605,9 @@ namespace StudyMentorApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("users", (string)null);
                 });
 
@@ -613,17 +616,6 @@ namespace StudyMentorApi.Migrations
                     b.HasBaseType("StudyMentorApi.Data.Models.Exercise");
 
                     b.HasDiscriminator().HasValue("Flashcard");
-                });
-
-            modelBuilder.Entity("StudyMentorApi.Data.Models.AiModel", b =>
-                {
-                    b.HasOne("StudyMentorApi.Data.Models.AiProvider", "Provider")
-                        .WithMany("Models")
-                        .HasForeignKey("ProviderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.Test", b =>
@@ -636,6 +628,17 @@ namespace StudyMentorApi.Migrations
                     b.HasIndex("SourceFlashcardId");
 
                     b.HasDiscriminator().HasValue("Test");
+                });
+
+            modelBuilder.Entity("StudyMentorApi.Data.Models.AiModel", b =>
+                {
+                    b.HasOne("StudyMentorApi.Data.Models.AiProvider", "Provider")
+                        .WithMany("Models")
+                        .HasForeignKey("ProviderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.Card", b =>
@@ -723,11 +726,6 @@ namespace StudyMentorApi.Migrations
                     b.Navigation("Major");
                 });
 
-            modelBuilder.Entity("StudyMentorApi.Data.Models.AiProvider", b =>
-                {
-                    b.Navigation("Models");
-                });
-
             modelBuilder.Entity("StudyMentorApi.Data.Models.TestAnswerVariant", b =>
                 {
                     b.HasOne("StudyMentorApi.Data.Models.TestQuestion", "TestQuestion")
@@ -758,6 +756,11 @@ namespace StudyMentorApi.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("SourceFlashcard");
+                });
+
+            modelBuilder.Entity("StudyMentorApi.Data.Models.AiProvider", b =>
+                {
+                    b.Navigation("Models");
                 });
 
             modelBuilder.Entity("StudyMentorApi.Data.Models.ChatMessage", b =>
