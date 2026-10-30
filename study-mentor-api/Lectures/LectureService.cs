@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using StudyMentorApi.Common;
 using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
+using StudyMentorApi.Majors;
 using StudyMentorApi.Services;
 using StudyMentorApi.Subjects;
 
@@ -17,9 +19,47 @@ public class LectureService : BaseCrudService<Lecture>
         _subjectService = subjectService;
     }
 
+    public virtual async Task<IReadOnlyCollection<LectureResponse>> GetAllResponsesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.Lectures
+            .AsNoTracking()
+            .Select(l => new LectureResponse(
+                l.Id,
+                l.Name,
+                new SubjectResponse(
+                    l.SubjectId,
+                    l.Subject!.Name,
+                    new MajorResponse(
+                        l.Subject.MajorId,
+                        l.Subject.Major!.Name))))
+            .ToListAsync(cancellationToken);
+    }
+
+    public virtual async Task<LectureResponse> GetResponseByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await _dbContext.Lectures
+            .AsNoTracking()
+            .Where(l => l.Id == id)
+            .Select(l => new LectureResponse(
+                l.Id,
+                l.Name,
+                new SubjectResponse(
+                    l.SubjectId,
+                    l.Subject!.Name,
+                    new MajorResponse(
+                        l.Subject.MajorId,
+                        l.Subject.Major!.Name))))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return response ?? throw new NotFoundException($"Entity '{nameof(Lecture)}' with id '{id}' was not found.");
+    }
+
     protected override IQueryable<Lecture> Query()
     {
-        return _dbContext.Lectures.AsQueryable();
+        return _dbContext.Lectures.AsNoTracking();
     }
 
     protected override async Task<Lecture?> FindByIdAsync(Guid id, CancellationToken cancellationToken)

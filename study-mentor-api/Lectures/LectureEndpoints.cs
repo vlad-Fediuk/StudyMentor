@@ -22,15 +22,12 @@ public static class LectureEndpoints
 
     private static async Task<IResult> GetAll(
         LectureService service,
-        SubjectService subjectService,
-        MajorService majorService,
         CancellationToken ct)
     {
         try
         {
-            var items = await service.GetAllAsync(ct);
-            var subjects = await BuildSubjectResponsesAsync(subjectService, majorService, ct);
-            return Results.Ok(items.Select(l => new LectureResponse(l.Id, l.Name, subjects[l.SubjectId])));
+            var items = await service.GetAllResponsesAsync(ct);
+            return Results.Ok(items);
         }
         catch (Exception ex)
         {
@@ -41,15 +38,12 @@ public static class LectureEndpoints
     private static async Task<IResult> GetById(
         Guid id,
         LectureService service,
-        SubjectService subjectService,
-        MajorService majorService,
         CancellationToken ct)
     {
         try
         {
-            var item = await service.GetByIdAsync(id, ct);
-            var subject = await MapSubjectResponseAsync(item.SubjectId, subjectService, majorService, ct);
-            return Results.Ok(new LectureResponse(item.Id, item.Name, subject));
+            var item = await service.GetResponseByIdAsync(id, ct);
+            return Results.Ok(item);
         }
         catch (NotFoundException ex)
         {
@@ -134,20 +128,6 @@ public static class LectureEndpoints
         {
             return Results.Problem(ex.Message, statusCode: 500);
         }
-    }
-
-    private static async Task<Dictionary<Guid, SubjectResponse>> BuildSubjectResponsesAsync(
-        SubjectService subjectService,
-        MajorService majorService,
-        CancellationToken ct)
-    {
-        var majors = (await majorService.GetAllAsync(ct))
-            .ToDictionary(m => m.Id, m => new MajorResponse(m.Id, m.Name));
-
-        return (await subjectService.GetAllAsync(ct))
-            .ToDictionary(
-                s => s.Id,
-                s => new SubjectResponse(s.Id, s.Name, majors[s.MajorId]));
     }
 
     private static async Task<SubjectResponse> MapSubjectResponseAsync(
