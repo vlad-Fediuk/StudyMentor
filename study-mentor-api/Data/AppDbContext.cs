@@ -202,6 +202,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.ToTable("users");
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Email);
+            entity.HasIndex(e => e.Email).IsUnique();
             entity.Property(e => e.Password).IsRequired();
             entity.Property(e => e.Roles).IsRequired();
             entity.HasMany(e => e.ChatSessions)
