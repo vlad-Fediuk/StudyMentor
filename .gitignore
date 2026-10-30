@@ -400,7 +400,11 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+# Environment variables and local secrets
 .env
+.env.*
+.env.local
+!.env.example
 /Docker/campus_db
 
 #Credentials
