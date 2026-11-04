@@ -29,47 +29,54 @@ public static class AuthenticationEndpoints
             [FromServices] IJwtTokenService jwtTokenService,
             CancellationToken ct) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            try
             {
-                return Results.BadRequest(new { message = "Email and password are required." });
-            }
-
-            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
-            var existingUser = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
-            if (existingUser != null)
-            {
-                return Results.Conflict(new { message = "User with this email already exists." });
-            }
-
-            var defaultGroup = await db.Groups.FirstOrDefaultAsync(ct);
-            var groupId = defaultGroup?.Id ?? Guid.NewGuid();
-            if (defaultGroup == null)
-            {
-                var group = new Group
+                if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
                 {
-                    Id = groupId,
-                    Name = "General"
+                    return Results.BadRequest(new { message = "Email and password are required." });
+                }
+
+                var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+                var existingUser = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
+                if (existingUser != null)
+                {
+                    return Results.Conflict(new { message = "User with this email already exists." });
+                }
+
+                var defaultGroup = await db.Groups.FirstOrDefaultAsync(ct);
+                var groupId = defaultGroup?.Id ?? Guid.NewGuid();
+                if (defaultGroup == null)
+                {
+                    var group = new Group
+                    {
+                        Id = groupId,
+                        Name = "General"
+                    };
+                    db.Groups.Add(group);
+                    await db.SaveChangesAsync(ct);
+                }
+
+                var name = string.IsNullOrWhiteSpace(request.Name) ? normalizedEmail.Split('@')[0] : request.Name.Trim();
+                var hashedPassword = HashPassword(request.Password);
+
+                var user = new User
+                {
+                    Name = name,
+                    Email = normalizedEmail,
+                    Password = hashedPassword,
+                    GroupId = groupId,
+                    Roles = ["User"]
                 };
-                db.Groups.Add(group);
-                await db.SaveChangesAsync(ct);
+
+                await userService.CreateAsync(user, ct);
+                var token = await jwtTokenService.CreateTokenAsync(user);
+
+                return Results.Ok(new { token, name = user.Name, email = user.Email });
             }
-
-            var name = string.IsNullOrWhiteSpace(request.Name) ? normalizedEmail.Split('@')[0] : request.Name.Trim();
-            var hashedPassword = HashPassword(request.Password);
-
-            var user = new User
+            catch (Exception ex)
             {
-                Name = name,
-                Email = normalizedEmail,
-                Password = hashedPassword,
-                GroupId = groupId,
-                Roles = ["User"]
-            };
-
-            await userService.CreateAsync(user, ct);
-            var token = await jwtTokenService.CreateTokenAsync(user);
-
-            return Results.Ok(new { token, name = user.Name, email = user.Email });
+                return Results.Json(new { message = ex.Message }, statusCode: StatusCodes.Status500InternalServerError);
+            }
         });
 
         group.MapPost("/login", async (
@@ -78,26 +85,33 @@ public static class AuthenticationEndpoints
             [FromServices] IJwtTokenService jwtTokenService,
             CancellationToken ct) =>
         {
-            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            try
             {
-                return Results.BadRequest(new { message = "Email and password are required." });
-            }
+                if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                {
+                    return Results.BadRequest(new { message = "Email and password are required." });
+                }
 
-            var normalizedEmail = request.Email.Trim().ToLowerInvariant();
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
-            if (user == null)
+                var normalizedEmail = request.Email.Trim().ToLowerInvariant();
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
+                if (user == null)
+                {
+                    return Results.Json(new { message = "Invalid email or password." }, statusCode: StatusCodes.Status401Unauthorized);
+                }
+
+                var hashedInput = HashPassword(request.Password);
+                if (user.Password != hashedInput)
+                {
+                    return Results.Json(new { message = "Invalid email or password." }, statusCode: StatusCodes.Status401Unauthorized);
+                }
+
+                var token = await jwtTokenService.CreateTokenAsync(user);
+                return Results.Ok(new { token, name = user.Name, email = user.Email });
+            }
+            catch (Exception ex)
             {
-                return Results.Json(new { message = "Invalid email or password." }, statusCode: StatusCodes.Status401Unauthorized);
+                return Results.Json(new { message = ex.Message }, statusCode: StatusCodes.Status500InternalServerError);
             }
-
-            var hashedInput = HashPassword(request.Password);
-            if (user.Password != hashedInput)
-            {
-                return Results.Json(new { message = "Invalid email or password." }, statusCode: StatusCodes.Status401Unauthorized);
-            }
-
-            var token = await jwtTokenService.CreateTokenAsync(user);
-            return Results.Ok(new { token, name = user.Name, email = user.Email });
         });
 
         routes.MapPost("/auth", async (
