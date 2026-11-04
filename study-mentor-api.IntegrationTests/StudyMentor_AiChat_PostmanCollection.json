@@ -1,0 +1,542 @@
+{
+  "info": {
+    "_postman_id": "b3e945c2-f12a-4a88-8255-7d402bf376f9",
+    "name": "StudyMentor - AI Chat Endpoints (Participant 3)",
+    "description": "Повна автоматизована Postman-колекція для Модуля 2 (REST API Testing, Варіант 3: ШІ-Чат, сесії та повідомлення). Містить 12 запитів з перевіркою кодів HTTP, коректних/некоректних даних та вбудованими Postman Scripts (Tests).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Create Chat Session (Positive - 201 Created)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"Response contains session ID, userId, and lectureId\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"id\");",
+              "    pm.expect(jsonData.userId).to.eql(pm.collectionVariables.get(\"userId\"));",
+              "    pm.expect(jsonData.lectureId).to.eql(pm.collectionVariables.get(\"lectureId\"));",
+              "    pm.collectionVariables.set(\"chatId\", jsonData.id);",
+              "});",
+              "",
+              "pm.test(\"Content-Type header is application/json\", function () {",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"lectureId\": \"{{lectureId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/chat-sessions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat-sessions"
+          ]
+        },
+        "description": "Створення нової сесії навчання для користувача та лекції. Очікуваний результат: 201 Created, повертає id створеної сесії та зберігає його у змінну chatId."
+      },
+      "response": []
+    },
+    {
+      "name": "02. Create Chat Session - Invalid JSON Body (Negative - 400 Bad Request)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Server rejects invalid payload gracefully\", function () {",
+              "    pm.expect(pm.response.code).to.eql(400);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"not-a-valid-guid\",\n  \"lectureId\": 12345\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/chat-sessions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat-sessions"
+          ]
+        },
+        "description": "Спроба передати некоректні типи полів (невалідний GUID). Очікуваний результат: 400 Bad Request."
+      },
+      "response": []
+    },
+    {
+      "name": "03. Get All Chat Sessions (Positive - 200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response is an array\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/chat-sessions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat-sessions"
+          ]
+        },
+        "description": "Отримання списку всіх сесій. Очікуваний результат: 200 OK з масивом сесій."
+      },
+      "response": []
+    },
+    {
+      "name": "04. Get Chat Session By Id (Positive - 200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Returned session has valid structure\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"id\");",
+              "    pm.expect(jsonData).to.have.property(\"userId\");",
+              "    pm.expect(jsonData).to.have.property(\"lectureId\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/chat-sessions/{{chatId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat-sessions",
+            "{{chatId}}"
+          ]
+        },
+        "description": "Отримання даних однієї сесії за її ідентифікатором chatId. Очікуваний результат: 200 OK."
+      },
+      "response": []
+    },
+    {
+      "name": "05. Get Chat Session By Id - Nonexistent (Negative - 404 Not Found)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/chat-sessions/00000000-0000-0000-0000-000000000000",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat-sessions",
+            "00000000-0000-0000-0000-000000000000"
+          ]
+        },
+        "description": "Запит неіснуючої сесії. Очікуваний результат: 404 Not Found."
+      },
+      "response": []
+    },
+    {
+      "name": "06. Get Chat Sessions By User (Positive - 200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Sessions list belongs to the requested user\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "    if (jsonData.length > 0) {",
+              "        jsonData.forEach(function (session) {",
+              "            pm.expect(session.userId).to.eql(pm.collectionVariables.get(\"userId\"));",
+              "        });",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/chat-sessions/user/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "chat-sessions",
+            "user",
+            "{{userId}}"
+          ]
+        },
+        "description": "Отримання сесій, закріплених за студентом. Очікуваний результат: 200 OK."
+      },
+      "response": []
+    },
+    {
+      "name": "07. Get AI Chat Messages - Valid Session (Positive - 200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response is an array of messages\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an(\"array\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/ai-chat/messages?chatId={{chatId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ai-chat",
+            "messages"
+          ],
+          "query": [
+            {
+              "key": "chatId",
+              "value": "{{chatId}}",
+              "description": "ID сесії"
+            }
+          ]
+        },
+        "description": "Отримання списку повідомлень сесії. Очікуваний результат: 200 OK."
+      },
+      "response": []
+    },
+    {
+      "name": "08. Get AI Chat Messages - Missing chatId Query Param (Negative - 400 Bad Request)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Error body specifies chatId is required\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.error).to.include(\"chatId is required\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/ai-chat/messages",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ai-chat",
+            "messages"
+          ]
+        },
+        "description": "Запит без обов'язкового query-параметра chatId. Очікуваний результат: 400 Bad Request з поясненням помилки."
+      },
+      "response": []
+    },
+    {
+      "name": "09. Get AI Chat Messages - Nonexistent chatId (Negative - 404 Not Found)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"Error message indicates not found\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.error).to.include(\"not found\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/ai-chat/messages?chatId=00000000-0000-0000-0000-000000000000",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ai-chat",
+            "messages"
+          ],
+          "query": [
+            {
+              "key": "chatId",
+              "value": "00000000-0000-0000-0000-000000000000"
+            }
+          ]
+        },
+        "description": "Запит повідомлень для неіснуючого chatId. Очікуваний результат: 404 Not Found."
+      },
+      "response": []
+    },
+    {
+      "name": "10. Send AI Message - Missing Content (Negative - 400 Bad Request)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"Error confirms content is required\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.error).to.include(\"content is required\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chatId\": \"{{chatId}}\",\n  \"content\": \"   \"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/ai-chat/messages",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ai-chat",
+            "messages"
+          ]
+        },
+        "description": "Спроба відправити порожнє повідомлення. Очікуваний результат: 400 Bad Request."
+      },
+      "response": []
+    },
+    {
+      "name": "11. Send AI Message - Nonexistent ChatId (Negative - 404 Not Found)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chatId\": \"00000000-0000-0000-0000-000000000000\",\n  \"content\": \"Тестове повідомлення до неіснуючого чату\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/ai-chat/messages",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ai-chat",
+            "messages"
+          ]
+        },
+        "description": "Відправка повідомлення до неіснуючої сесії. Очікуваний результат: 404 Not Found."
+      },
+      "response": []
+    },
+    {
+      "name": "12. Send AI Message - Valid Prompt (Positive - 200 OK)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"Response contains message and status\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property(\"status\");",
+              "    pm.expect(jsonData).to.have.property(\"message\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"chatId\": \"{{chatId}}\",\n  \"content\": \"Поясни, будь ласка, поняття інкапсуляції в ООП?\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/ai-chat/messages",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "ai-chat",
+            "messages"
+          ]
+        },
+        "description": "Відправка валідного навчального запитання до ШІ. Очікуваний результат: 200 OK згенерована відповідь."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "b03b7164-1f6a-4f9f-b5de-078f394a42e1",
+      "type": "string"
+    },
+    {
+      "key": "lectureId",
+      "value": "7298c84c-3a33-4827-b643-8a12d5523c09",
+      "type": "string"
+    },
+    {
+      "key": "chatId",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    }
+  ]
+}
