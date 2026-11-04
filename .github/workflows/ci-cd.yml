@@ -2,9 +2,9 @@ name: Build, Test and Publish
 
 on:
   push:
-    branches: [main, practice]
+    branches: [main, practice, deploy]
   pull_request:
-    branches: [main, practice]
+    branches: [main, practice, deploy]
 
 env:
   DOTNET_VERSION: "10.0.x"
@@ -29,6 +29,9 @@ jobs:
         run: dotnet build StudyMentor.sln --configuration Release --no-restore
 
       - name: Run tests
+        env:
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=test;Username=postgres;Password=postgres;"
+          Jwt__Campus__Key: "TestingDefaultSecretKeyMinimum32CharactersLong!"
         run: dotnet test StudyMentor.sln --configuration Release --no-build
 
   publish:

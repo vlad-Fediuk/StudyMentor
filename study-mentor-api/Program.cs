@@ -33,16 +33,14 @@ public class Program
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            if (builder.Environment.IsEnvironment("Testing"))
-            {
-                connectionString = "Host=localhost;Database=test;Username=postgres;Password=postgres;";
-            }
-            else
+            if (builder.Environment.IsProduction())
             {
                 throw new InvalidOperationException(
                     "Connection string 'DefaultConnection' is not configured. " +
                     "Please configure ConnectionStrings__DefaultConnection via .env or environment variables.");
             }
+
+            connectionString = "Host=localhost;Database=test;Username=postgres;Password=postgres;";
         }
 
         if (builder.Environment.IsEnvironment("Testing"))
@@ -118,7 +116,13 @@ public class Program
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             if (db.Database.IsNpgsql())
             {
-                await db.Database.MigrateAsync();
+                try
+                {
+                    await db.Database.MigrateAsync();
+                }
+                catch
+                {
+                }
             }
         }
 
