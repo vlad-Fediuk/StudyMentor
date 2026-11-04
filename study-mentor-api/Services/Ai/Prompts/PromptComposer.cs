@@ -6,6 +6,8 @@ public sealed class PromptComposer(
     IWebHostEnvironment environment,
     IPromptTemplateProvider promptTemplateProvider) : IPromptComposer
 {
+    private const string MissingContext = "No additional context provided.";
+    private const string JsonOutputFormat = "JSON only.";
     private const string ChatAnswerTemplateKey = "chat-answer";
     private const string TestGenerationTemplateKey = "test-generation";
     private const string FlashcardGenerationTemplateKey = "flashcard-generation";
@@ -50,7 +52,7 @@ public sealed class PromptComposer(
             .WithConversationHistory(Safe(
                 FormatConversationHistory(request.ConversationHistory),
                 "No conversation history yet."))
-            .WithContext(Safe(request.Context, "No additional context provided."))
+            .WithContext(Safe(request.Context, MissingContext))
             .WithPersonalization(request.UserProfile)
             .WithTaskRules(taskRules)
             .WithOutputFormat("Return plain text.")
@@ -80,9 +82,9 @@ public sealed class PromptComposer(
             cancellationToken);
 
         return CreateBaseBuilder(request, systemPrompt)
-            .WithContext(Safe(request.Context, "No additional context provided."))
+            .WithContext(Safe(request.Context, MissingContext))
             .WithTaskRules(taskRules)
-            .WithOutputFormat("JSON only.")
+            .WithOutputFormat(JsonOutputFormat)
             .WithUserMessage(request.UserMessage)
             .Build();
     }
@@ -108,9 +110,9 @@ public sealed class PromptComposer(
             cancellationToken);
 
         return CreateBaseBuilder(request, systemPrompt)
-            .WithContext(Safe(request.Context, "No additional context provided."))
+            .WithContext(Safe(request.Context, MissingContext))
             .WithTaskRules(taskRules)
-            .WithOutputFormat("JSON only.")
+            .WithOutputFormat(JsonOutputFormat)
             .WithUserMessage(request.UserMessage)
             .Build();
     }
@@ -123,7 +125,7 @@ public sealed class PromptComposer(
             .WithConversationHistory(FormatConversationHistory(request.ConversationHistory))
             .WithContext(request.Context)
             .WithPersonalization(request.UserProfile)
-            .WithOutputFormat(request.OutputFormat == AiOutputFormat.Json ? "JSON only." : "Return plain text.")
+            .WithOutputFormat(request.OutputFormat == AiOutputFormat.Json ? JsonOutputFormat : "Return plain text.")
             .WithUserMessage(request.UserMessage)
             .Build();
     }
@@ -177,7 +179,7 @@ public sealed class PromptComposer(
         return template
             .Replace("{{response_schema}}", Safe(request.ResponseSchema, "No explicit schema was provided."))
             .Replace("{{user_message}}", Safe(request.UserMessage, string.Empty))
-            .Replace("{{context}}", Safe(request.Context, "No additional context provided."))
+            .Replace("{{context}}", Safe(request.Context, MissingContext))
             .Replace("{{user_profile}}", Safe(request.UserProfile, string.Empty))
             .Replace("{{output_format}}", request.OutputFormat.ToString());
     }

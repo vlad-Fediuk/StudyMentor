@@ -20,19 +20,22 @@ namespace StudyMentorApi;
 
 public class Program
 {
+    protected Program()
+    {
+        // Entry point only; keep the type available for integration-test host factories.
+    }
+
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddControllers();
-        builder.Services.AddOpenApi();
-        builder.Services.AddSwaggerGen();
 
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(
                 builder.Configuration.GetConnectionString("DefaultConnection"),
                 npgsqlOptions => npgsqlOptions.UseVector()));
         builder.Services.AddApplicationServices(builder.Configuration);
+        builder.Services.AddApplicationApiVersioning();
 
         builder.Services.AddCors(options =>
         {
@@ -53,11 +56,12 @@ public class Program
 
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi();
+            app.MapOpenApi().WithDocumentPerVersion();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Study Mentor API V1");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "Study Mentor API V2");
                 c.RoutePrefix = string.Empty;
             });
         }
@@ -67,7 +71,6 @@ public class Program
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
-        app.MapControllers();
         app.MapAuthenticationEndpoints();
         app.MapMajorEndpoints();
         app.MapSubjectEndpoints();
@@ -81,6 +84,6 @@ public class Program
         app.MapFlashcardEndpoints();
         app.MapLearningContentEndpoints();
         app.MapTestEndpoints();
-        app.Run();
+        await app.RunAsync();
     }
 }

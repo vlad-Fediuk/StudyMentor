@@ -416,3 +416,6 @@ CoverageReport/**
 !CoverageReport/StudyMentor_Coverage_Report.pdf
 !CoverageReport/Summary.md
 
+
+# SonarScanner local analysis data
+.sonarqube/

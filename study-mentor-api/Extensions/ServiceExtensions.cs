@@ -32,6 +32,7 @@ public static class ServiceExtensions
         services.AddScoped<Tests.TestService>();
         services.AddSingleton<PromptTemplateService>();
         services.AddScoped<LearningContentGenerationService>();
+        services.AddScoped<GeneratedContentPersistence>();
         services.AddScoped<IPromptTemplateProvider, PromptTemplateProvider>();
         services.AddScoped<IPromptComposer, PromptComposer>();
         services.AddScoped<IAiStructuredOutputParser, AiStructuredOutputParser>();
