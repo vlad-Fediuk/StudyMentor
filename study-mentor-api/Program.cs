@@ -22,19 +22,43 @@ public class Program
 {
     protected Program()
     {
-        // Entry point only; keep the type available for integration-test host factories.
     }
 
     public static async Task Main(string[] args)
     {
+        DotNetEnv.Env.TraversePath().Load();
+
         var builder = WebApplication.CreateBuilder(args);
 
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            if (builder.Environment.IsEnvironment("Testing"))
+            {
+                connectionString = "Host=localhost;Database=test;Username=postgres;Password=postgres;";
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "Connection string 'DefaultConnection' is not configured. " +
+                    "Please configure ConnectionStrings__DefaultConnection via .env or environment variables.");
+            }
+        }
 
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(
-                builder.Configuration.GetConnectionString("DefaultConnection"),
-                npgsqlOptions => npgsqlOptions.UseVector()));
-        builder.Services.AddApplicationServices(builder.Configuration);
+        if (builder.Environment.IsEnvironment("Testing"))
+        {
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseInMemoryDatabase(builder.Configuration["Testing:DatabaseName"] ?? "TestingDb"));
+        }
+        else
+        {
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(
+                    connectionString,
+                    npgsqlOptions => npgsqlOptions.UseVector()));
+        }
+
+        builder.Services.AddApplicationServices(builder.Configuration, builder.Environment);
         builder.Services.AddApplicationApiVersioning();
 
         builder.Services.AddCors(options =>
@@ -51,6 +75,8 @@ public class Program
                     .AllowAnyMethod();
             });
         });
+
+        builder.Services.AddRateLimiting(builder.Configuration);
 
         var app = builder.Build();
 
@@ -70,6 +96,7 @@ public class Program
         app.UseCors();
         app.UseHttpsRedirection();
         app.UseAuthentication();
+        app.UseRateLimiting();
         app.UseAuthorization();
         app.MapAuthenticationEndpoints();
         app.MapMajorEndpoints();
