@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import {
   Component,
   EventEmitter,
@@ -38,7 +39,7 @@ export class SidebarComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly apiUrl = 'http://localhost:5132';
+  private readonly apiUrl = environment.apiUrl;
 
   subjects: SubjectResponse[] = [];
   lectures: LectureResponse[] = [];

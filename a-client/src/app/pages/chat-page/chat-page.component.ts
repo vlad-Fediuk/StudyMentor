@@ -14,6 +14,7 @@ import { marked } from 'marked';
 import { firstValueFrom } from 'rxjs';
 
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { environment } from '../../../environments/environment';
 
 type ChatRole = 'user' | 'assistant' | 'system';
 type GenerationType = 'flashcard' | 'test';
@@ -120,7 +121,7 @@ export class ChatPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
-  private readonly apiUrl = 'http://localhost:5132';
+  private readonly apiUrl = environment.apiUrl;
   private readonly chatIdStorageKey = 'studyMentor.chatId';
   private readonly scrollButtonOffset = 2000;
   private readonly hiddenExerciseMessageContent = '__study_mentor_exercise_source__';
@@ -904,7 +905,7 @@ export class ChatPageComponent implements OnInit {
       }
 
       if (error.status === 0) {
-        return 'API недоступний. Перевір, що backend запущений на localhost:5132.';
+        return `API недоступний. Перевір з'єднання з ${this.apiUrl}.`;
       }
     }
 

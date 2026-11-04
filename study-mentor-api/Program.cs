@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 using StudyMentorApi.AiChat;
 using StudyMentorApi.Authentication;
@@ -30,7 +30,12 @@ public class Program
 
         var builder = WebApplication.CreateBuilder(args);
 
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+        var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? builder.Configuration["DefaultConnection"]
+            ?? builder.Configuration["ConnectionStrings__DefaultConnection"];
+
+        var connectionString = NormalizeConnectionString(rawConnectionString);
+
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             if (builder.Environment.IsProduction())
@@ -64,11 +69,23 @@ public class Program
             options.AddDefaultPolicy(policy =>
             {
                 policy
-                    .WithOrigins(
-                        "http://localhost:4200",
-                        "http://localhost:4300",
-                        "http://localhost:5173",
-                        "http://localhost:4173")
+                    .SetIsOriginAllowed(origin =>
+                    {
+                        if (string.IsNullOrEmpty(origin))
+                        {
+                            return false;
+                        }
+
+                        if (Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                        {
+                            var host = uri.Host;
+                            return host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+                                || host.EndsWith(".pages.dev", StringComparison.OrdinalIgnoreCase)
+                                || host.EndsWith(".onrender.com", StringComparison.OrdinalIgnoreCase);
+                        }
+
+                        return false;
+                    })
                     .AllowAnyHeader()
                     .AllowAnyMethod();
             });
@@ -127,5 +144,50 @@ public class Program
         }
 
         await app.RunAsync();
+    }
+
+    private static string NormalizeConnectionString(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = raw.Trim().Trim('"', '\'');
+        if (trimmed.StartsWith("ConnectionStrings__DefaultConnection=", StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed["ConnectionStrings__DefaultConnection=".Length..].Trim().Trim('"', '\'');
+        }
+
+        if (trimmed.StartsWith("DefaultConnection=", StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed["DefaultConnection=".Length..].Trim().Trim('"', '\'');
+        }
+
+        if (trimmed.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var uri = new Uri(trimmed);
+                var userInfo = uri.UserInfo.Split(':', 2);
+                var username = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : string.Empty;
+                var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+                var port = uri.Port > 0 ? uri.Port : 5432;
+                var database = uri.AbsolutePath.TrimStart('/');
+                if (string.IsNullOrEmpty(database))
+                {
+                    database = "postgres";
+                }
+
+                return $"Host={uri.Host};Port={port};Database={database};Username={username};Password={password};";
+            }
+            catch
+            {
+                return trimmed;
+            }
+        }
+
+        return trimmed;
     }
 }
