@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
 using StudyMentorApi.AiChat;
 using StudyMentorApi.Authentication;
@@ -111,6 +111,17 @@ public class Program
         app.MapFlashcardEndpoints();
         app.MapLearningContentEndpoints();
         app.MapTestEndpoints();
+
+        if (!app.Environment.IsEnvironment("Testing"))
+        {
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            if (db.Database.IsNpgsql())
+            {
+                await db.Database.MigrateAsync();
+            }
+        }
+
         await app.RunAsync();
     }
 }

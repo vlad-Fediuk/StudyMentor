@@ -1,0 +1,11 @@
+**/.git
+**/.vs
+**/.vscode
+**/bin
+**/obj
+**/TestResults
+**/.env
+**/.env.local
+**/node_modules
+**/dist
+CoverageReport/**
