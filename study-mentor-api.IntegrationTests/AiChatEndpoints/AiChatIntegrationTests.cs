@@ -1,10 +1,12 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StudyMentorApi.AiChat;
+using StudyMentorApi.Authentication.Jwt;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
@@ -59,6 +61,7 @@ public class AiChatIntegrationTests
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<IJwtTokenService>();
 
         var major = new Major { Name = "CS" };
         var subject = new Subject { Name = "Testing", Major = major };
@@ -68,7 +71,7 @@ public class AiChatIntegrationTests
             Name = "Integration Student",
             Email = "student@test.com",
             Password = "hash",
-            Roles = ["Student"]
+            Roles = ["User"]
         };
 
         db.Majors.Add(major);
@@ -79,6 +82,9 @@ public class AiChatIntegrationTests
 
         _testUserId = user.Id;
         _testLectureId = lecture.Id;
+
+        var token = await tokenService.CreateTokenAsync(user);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     [TearDown]

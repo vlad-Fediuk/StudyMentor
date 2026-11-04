@@ -1,4 +1,4 @@
-using StudyMentorApi.Common;
+﻿using StudyMentorApi.Common;
 using StudyMentorApi.AiChat;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
@@ -20,6 +20,7 @@ public class LearningContentGenerationService(
     GeneratedContentPersistence contentPersistence,
     AppDbContext dbContext)
 {
+    
     private const int DefaultTestQuestionCount = 5;
     private const int DefaultFlashcardCount = 8;
     private const string TestType = "test";
@@ -273,25 +274,25 @@ public class LearningContentGenerationService(
     {
         if (type == FlashcardType && createdContent is FlashcardResponse flashcard)
         {
-            return $"Готово: створено набір карток \"{flashcard.Name}\" ({flashcard.Cards.Count}). Відкрийте \"Практичні завдання\" в боковому меню.";
+            return $"Ð“Ð¾Ñ‚Ð¾Ð²Ð¾: ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð¾ Ð½Ð°Ð±Ñ–Ñ€ ÐºÐ°Ñ€Ñ‚Ð¾Ðº \"{flashcard.Name}\" ({flashcard.Cards.Count}). Ð’Ñ–Ð´ÐºÑ€Ð¸Ð¹Ñ‚Ðµ \"ÐŸÑ€Ð°ÐºÑ‚Ð¸Ñ‡Ð½Ñ– Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ\" Ð² Ð±Ð¾ÐºÐ¾Ð²Ð¾Ð¼Ñƒ Ð¼ÐµÐ½ÑŽ.";
         }
 
         if (createdContent is TestResponse test)
         {
-            return $"Готово: створено тест \"{test.Name}\" ({test.Questions.Count} питань). Відкрийте \"Практичні завдання\" в боковому меню.";
+            return $"Ð“Ð¾Ñ‚Ð¾Ð²Ð¾: ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð¾ Ñ‚ÐµÑÑ‚ \"{test.Name}\" ({test.Questions.Count} Ð¿Ð¸Ñ‚Ð°Ð½ÑŒ). Ð’Ñ–Ð´ÐºÑ€Ð¸Ð¹Ñ‚Ðµ \"ÐŸÑ€Ð°ÐºÑ‚Ð¸Ñ‡Ð½Ñ– Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ\" Ð² Ð±Ð¾ÐºÐ¾Ð²Ð¾Ð¼Ñƒ Ð¼ÐµÐ½ÑŽ.";
         }
 
-        return "Готово: завдання створено. Відкрийте \"Практичні завдання\" в боковому меню.";
+        return "Ð“Ð¾Ñ‚Ð¾Ð²Ð¾: Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð¾. Ð’Ñ–Ð´ÐºÑ€Ð¸Ð¹Ñ‚Ðµ \"ÐŸÑ€Ð°ÐºÑ‚Ð¸Ñ‡Ð½Ñ– Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ\" Ð² Ð±Ð¾ÐºÐ¾Ð²Ð¾Ð¼Ñƒ Ð¼ÐµÐ½ÑŽ.";
     }
 
     private static string BuildFailureMessage(string type, Exception exception)
     {
-        var name = type == FlashcardType ? "карток" : "тесту";
+        var name = type == FlashcardType ? "ÐºÐ°Ñ€Ñ‚Ð¾Ðº" : "Ñ‚ÐµÑÑ‚Ñƒ";
         var message = string.IsNullOrWhiteSpace(exception.Message)
-            ? "невідома помилка"
+            ? "Ð½ÐµÐ²Ñ–Ð´Ð¾Ð¼Ð° Ð¿Ð¾Ð¼Ð¸Ð»ÐºÐ°"
             : exception.Message;
 
-        return $"Не вдалося виконати генерацію {name}: {message}";
+        return $"ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ð²Ð¸ÐºÐ¾Ð½Ð°Ñ‚Ð¸ Ð³ÐµÐ½ÐµÑ€Ð°Ñ†Ñ–ÑŽ {name}: {message}";
     }
 
     private static AiChatMessageDto ToDto(ChatMessage message)
@@ -336,3 +337,5 @@ public class LearningContentGenerationService(
             : normalized;
     }
 }
+
+

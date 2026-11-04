@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using StudyMentorApi.Authentication;
@@ -27,11 +27,7 @@ public class GenerationExceptionTests
         var aiGenMock = new Mock<IAiGenerationService>();
         _service = new LearningContentGenerationService(
             aiGenMock.Object,
-            null!,
-            null!,
-            null!,
-            null!,
-            null!,
+            null!, null!, null!, null!,
             _dbContext);
     }
 
@@ -91,3 +87,4 @@ public class GenerationExceptionTests
         Assert.That(ex!.Message, Is.EqualTo("Email claim is missing in the Microsoft token."));
     }
 }
+

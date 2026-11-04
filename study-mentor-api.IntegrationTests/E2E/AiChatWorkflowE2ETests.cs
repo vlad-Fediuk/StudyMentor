@@ -1,10 +1,12 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using StudyMentorApi.AiChat;
+using StudyMentorApi.Authentication.Jwt;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Data;
 using StudyMentorApi.Data.Models;
@@ -109,6 +111,7 @@ public class AiChatWorkflowE2ETests
 
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<IJwtTokenService>();
 
         var major = new Major { Name = "Computer Science" };
         var subject = new Subject { Name = "Software Engineering", Major = major };
@@ -119,7 +122,7 @@ public class AiChatWorkflowE2ETests
             Name = "Student E2E Tester",
             Email = "e2e_student@studymentor.com",
             Password = "hashed_password",
-            Roles = ["Student"]
+            Roles = ["User"]
         };
 
         db.Majors.Add(major);
@@ -131,6 +134,9 @@ public class AiChatWorkflowE2ETests
         _studentUserId = student.Id;
         _lectureId1 = lecture1.Id;
         _lectureId2 = lecture2.Id;
+
+        var token = await tokenService.CreateTokenAsync(student);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     [TearDown]

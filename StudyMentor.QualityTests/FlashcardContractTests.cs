@@ -29,8 +29,13 @@ public class FlashcardContractTests
         builder.Services.AddScoped<FlashcardService>();
         builder.Services.AddApplicationApiVersioning();
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy("user", policy => policy.RequireAssertion(_ => true));
+        builder.Services.AddRateLimiting(builder.Configuration);
         var app = builder.Build();
         app.UseGlobalExceptionHandler();
+        app.UseAuthorization();
+        app.UseRateLimiting();
         app.UseSwagger();
         app.MapOpenApi().WithDocumentPerVersion();
         app.MapFlashcardEndpoints();
@@ -54,7 +59,6 @@ public class FlashcardContractTests
         Assert.DoesNotContain(paths.EnumerateObject(), path => path.Name.TrimEnd('/') == $"/api/{otherVersion}/flashcards");
     }
 
-    // These tests exercise Flashcards over HTTP; vector retrieval requires PostgreSQL separately.
     private sealed class ContractDbContext(DbContextOptions<AppDbContext> options) : AppDbContext(options)
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -208,4 +212,3 @@ public class FlashcardContractTests
         Assert.Equal(ErrorFields, json.RootElement.EnumerateObject().Select(p => p.Name));
     }
 }
-

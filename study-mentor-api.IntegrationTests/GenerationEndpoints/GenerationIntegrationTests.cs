@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Moq;
 using StudyMentorApi.Authentication.Jwt;
 using StudyMentorApi.Data;
+using StudyMentorApi.Data.Models;
 
 namespace study_mentor_api.IntegrationTests.GenerationEndpoints;
 
@@ -65,10 +67,26 @@ public class GenerationIntegrationTests
     private HttpClient _client = null!;
 
     [OneTimeSetUp]
-    public void OneTimeSetUp()
+    public async Task OneTimeSetUp()
     {
         _factory = new CustomWebApplicationFactory();
         _client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<IJwtTokenService>();
+        var user = new User
+        {
+            Name = "Generation Test User",
+            Email = "gen@test.com",
+            Password = "hash",
+            Roles = ["User"]
+        };
+        db.Users.Add(user);
+        db.SaveChanges();
+
+        var token = await tokenService.CreateTokenAsync(user);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     [OneTimeTearDown]

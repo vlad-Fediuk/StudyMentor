@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using StudyMentorApi.ChatSessions;
 using StudyMentorApi.Common;
 using StudyMentorApi.Extensions;
@@ -64,6 +64,11 @@ public static class LearningContentEndpoints
         if (currentUserId == null)
         {
             return Results.Unauthorized();
+        }
+
+        if (!request.ExplicitGeneration)
+        {
+            return Results.BadRequest(new { error = "explicitGeneration must be true for chat learning-content generation." });
         }
 
         if (!string.IsNullOrWhiteSpace(request.ChatId))

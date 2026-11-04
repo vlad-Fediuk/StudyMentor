@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -39,11 +39,7 @@ public class GenerationMockingTests
 
         var service = new LearningContentGenerationService(
             aiGenerationMock.Object,
-            null!,
-            null!,
-            null!,
-            null!,
-            null!,
+            null!, null!, null!, null!,
             dbContext);
 
         var request = new GenerateLearningContentRequest("test", "Create test questions", 5, null, null);

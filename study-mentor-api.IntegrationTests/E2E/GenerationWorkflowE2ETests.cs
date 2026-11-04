@@ -180,6 +180,11 @@ public class GenerationWorkflowE2ETests
     [Test]
     public async Task AutomatedQuizGenerationFromLectureScenario_ShouldGenerateAndPersistTestToDatabase()
     {
+        var authRequest = new JwtAuthenticationRequest("valid_e2e_microsoft_token");
+        var authResponse = await _client.PostAsJsonAsync("/auth", authRequest);
+        var tokenResult = await authResponse.Content.ReadFromJsonAsync<AuthTokenResponse>();
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult!.Token);
+
         var requestPayload = new GenerateLearningContentChatRequest(
             ExplicitGeneration: true,
             Type: "test",
@@ -206,6 +211,8 @@ public class GenerationWorkflowE2ETests
         var testsList = await testsResponse.Content.ReadFromJsonAsync<List<TestResponse>>();
         Assert.That(testsList, Is.Not.Null);
         Assert.That(testsList!.Any(t => t.Name == "Тест по лекції з архітектури"), Is.True);
+
+        _client.DefaultRequestHeaders.Authorization = null;
     }
 
     [Test]

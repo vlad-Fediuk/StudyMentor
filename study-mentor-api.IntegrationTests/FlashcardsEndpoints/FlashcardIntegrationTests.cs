@@ -1,6 +1,11 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
 using study_mentor_api.IntegrationTests.Infrastructure;
+using StudyMentorApi.Authentication.Jwt;
+using StudyMentorApi.Data;
+using StudyMentorApi.Data.Models;
 using StudyMentorApi.Flashcards;
 
 namespace study_mentor_api.IntegrationTests.FlashcardsEndpoints;
@@ -12,10 +17,26 @@ public class FlashcardIntegrationTests
     private HttpClient _client = null!;
 
     [SetUp]
-    public void SetUp()
+    public async Task SetUp()
     {
         _factory = new CustomWebApplicationFactory();
         _client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<IJwtTokenService>();
+        var user = new User
+        {
+            Name = "Flashcard Test User",
+            Email = "flashcard@test.com",
+            Password = "hash",
+            Roles = ["User"]
+        };
+        db.Users.Add(user);
+        db.SaveChanges();
+
+        var token = await tokenService.CreateTokenAsync(user);
+        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     [TearDown]

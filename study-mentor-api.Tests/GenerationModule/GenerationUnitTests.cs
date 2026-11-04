@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using StudyMentorApi.Authentication.Jwt;
@@ -35,11 +35,7 @@ public class GenerationUnitTests
 
         var service = new LearningContentGenerationService(
             aiGenerationMock.Object,
-            null!,
-            null!,
-            null!,
-            null!,
-            null!,
+            null!, null!, null!, null!,
             dbContext);
 
         var request = new GenerateLearningContentRequest(alias, "Generate study cards", 3, null, null);
@@ -105,3 +101,4 @@ public class GenerationUnitTests
         Assert.That(emailDirect, Is.EqualTo("user@example.com"));
     }
 }
+
