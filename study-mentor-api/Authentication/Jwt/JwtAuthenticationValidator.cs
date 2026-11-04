@@ -8,8 +8,12 @@ namespace StudyMentorApi.Authentication.Jwt;
 
 public class JwtAuthenticationValidator
 {
-    private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
-    private readonly TokenValidationParameters _validationParameters;
+    private readonly ConfigurationManager<OpenIdConnectConfiguration>? _configurationManager;
+    private readonly TokenValidationParameters? _validationParameters;
+
+    public JwtAuthenticationValidator()
+    {
+    }
 
     public JwtAuthenticationValidator(IConfiguration configuration)
     {
@@ -34,11 +38,30 @@ public class JwtAuthenticationValidator
         };
     }
 
-    public async Task<ClaimsPrincipal> ValidateIdTokenAsync(string idToken)
+    public virtual async Task<ClaimsPrincipal> ValidateIdTokenAsync(string idToken)
     {
+        if (_configurationManager == null || _validationParameters == null)
+        {
+            throw new InvalidOperationException("Validator is not configured.");
+        }
+
         var openIdConfig = await _configurationManager.GetConfigurationAsync();
         _validationParameters.IssuerSigningKeys = openIdConfig.SigningKeys;
 
         return new JwtSecurityTokenHandler().ValidateToken(idToken, _validationParameters, out _);
+    }
+
+    public static string ExtractEmail(ClaimsPrincipal principal)
+    {
+        var email = principal.FindFirstValue("preferred_username")?.Trim()
+            ?? principal.FindFirstValue("email")?.Trim()
+            ?? principal.FindFirstValue("upn")?.Trim();
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new AuthenticationException("Email claim is missing in the Microsoft token.");
+        }
+
+        return email.ToLowerInvariant();
     }
 }

@@ -1,4 +1,4 @@
-using StudyMentorApi.Common;
+﻿using StudyMentorApi.Common;
 using StudyMentorApi.AiChat;
 using StudyMentorApi.ChatMessages;
 using StudyMentorApi.ChatSessions;
@@ -17,10 +17,12 @@ public class LearningContentGenerationService(
     LectureService lectureService,
     ChatSessionService chatSessionService,
     ChatMessageService chatMessageService,
-    FlashcardService flashcardService,
-    TestService testService,
+    GeneratedContentPersistence contentPersistence,
     AppDbContext dbContext)
 {
+    
+    private const int DefaultTestQuestionCount = 5;
+    private const int DefaultFlashcardCount = 8;
     private const string TestType = "test";
     private const string FlashcardType = "flashcard";
 
@@ -105,9 +107,10 @@ public class LearningContentGenerationService(
         }
 
         var chat = await chatSessionService.GetByIdAsync(chatId, cancellationToken);
+        var defaultCount = type == TestType ? DefaultTestQuestionCount : DefaultFlashcardCount;
         var count = request.Count is > 0
             ? request.Count.Value
-            : type == TestType ? 5 : 8;
+            : defaultCount;
 
         Validate(new GenerateLearningContentRequest(
             type,
@@ -139,10 +142,10 @@ public class LearningContentGenerationService(
                 request.LectureId ?? chat.LectureId,
                 request.Context);
             var generated = await GenerateAsync(generationRequest, cancellationToken);
-            var createdContent = await PersistGeneratedContentAsync(
+            var createdContent = await contentPersistence.PersistAsync(
                 generated,
                 userMessage.Id,
-                request.Message!,
+                request.Message,
                 cancellationToken);
 
             var systemMessage = await CreateSystemMessageAsync(
@@ -249,124 +252,6 @@ public class LearningContentGenerationService(
             """;
     }
 
-    private async Task<object> PersistGeneratedContentAsync(
-        GenerateLearningContentResponse generated,
-        Guid userMessageId,
-        string sourceMessage,
-        CancellationToken cancellationToken)
-    {
-        return generated.Type switch
-        {
-            FlashcardType => await PersistFlashcardsAsync(
-                (GeneratedFlashcardsDto)generated.GeneratedContent,
-                userMessageId,
-                sourceMessage,
-                cancellationToken),
-            TestType => await PersistTestAsync(
-                (GeneratedTestDto)generated.GeneratedContent,
-                userMessageId,
-                sourceMessage,
-                cancellationToken),
-            _ => throw new ValidationException("Unsupported generated content type.")
-        };
-    }
-
-    private async Task<FlashcardResponse> PersistFlashcardsAsync(
-        GeneratedFlashcardsDto generated,
-        Guid userMessageId,
-        string sourceMessage,
-        CancellationToken cancellationToken)
-    {
-        var flashcard = await flashcardService.CreateAsync(new Flashcard
-        {
-            Name = BuildExerciseName("Картки", sourceMessage),
-            ChatMessageId = userMessageId,
-            Cards = generated.Cards!
-                .Select(card => new Card
-                {
-                    Term = card.Front!.Trim(),
-                    Definition = card.Back!.Trim()
-                })
-                .ToList()
-        }, cancellationToken);
-
-        return new FlashcardResponse(
-            flashcard.Id,
-            flashcard.Name,
-            flashcard.ChatMessageId,
-            flashcard.Cards
-                .Select(card => new CardResponse(card.Id, card.Term, card.Definition))
-                .ToList());
-    }
-
-    private async Task<TestResponse> PersistTestAsync(
-        GeneratedTestDto generated,
-        Guid userMessageId,
-        string sourceMessage,
-        CancellationToken cancellationToken)
-    {
-        var test = await testService.CreateAsync(new StudyMentorApi.Data.Models.Test
-        {
-            Name = string.IsNullOrWhiteSpace(generated.Title)
-                ? BuildExerciseName("Тест", sourceMessage)
-                : generated.Title.Trim(),
-            ChatMessageId = userMessageId,
-            Questions = generated.Questions!
-                .Select((question, questionIndex) => new TestQuestion
-                {
-                    Prompt = question.Text!.Trim(),
-                    Order = questionIndex,
-                    AnswerVariants = BuildAnswerVariants(question)
-                })
-                .ToList()
-        }, cancellationToken);
-
-        return new TestResponse(
-            test.Id,
-            test.Name,
-            test.ChatMessageId,
-            test.SourceFlashcardId,
-            test.Questions
-                .OrderBy(question => question.Order)
-                .Select(question => new TestQuestionResponse(
-                    question.Id,
-                    question.Prompt,
-                    question.AnswerVariants
-                        .OrderBy(answer => answer.Order)
-                        .Select(answer => new TestAnswerVariantResponse(answer.Id, answer.Text))
-                        .ToList()))
-                .ToList());
-    }
-
-    private static List<TestAnswerVariant> BuildAnswerVariants(GeneratedQuestionDto question)
-    {
-        var correctAnswer = question.CorrectAnswer!.Trim();
-        var options = (question.Options ?? [])
-            .Select(option => option.Trim())
-            .Where(option => !string.IsNullOrWhiteSpace(option))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        if (!options.Any(option => string.Equals(option, correctAnswer, StringComparison.OrdinalIgnoreCase)))
-        {
-            options.Insert(0, correctAnswer);
-        }
-
-        while (options.Count < 2)
-        {
-            options.Add($"Варіант {options.Count + 1}");
-        }
-
-        return options
-            .Select((option, index) => new TestAnswerVariant
-            {
-                Text = option,
-                IsCorrect = string.Equals(option, correctAnswer, StringComparison.OrdinalIgnoreCase),
-                Order = index
-            })
-            .ToList();
-    }
-
     private async Task<ChatMessage> CreateSystemMessageAsync(
         Guid chatId,
         int sequenceNumber,
@@ -385,30 +270,29 @@ public class LearningContentGenerationService(
         }, cancellationToken);
     }
 
-    private static string BuildExerciseName(string prefix, string sourceMessage)
-    {
-        var normalized = sourceMessage.Trim();
-        var title = normalized.Length > 48 ? normalized[..48].Trim() + "..." : normalized;
-        return $"{prefix}: {title}";
-    }
-
     private static string BuildSuccessMessage(string type, object createdContent)
     {
-        return type == FlashcardType && createdContent is FlashcardResponse flashcard
-            ? $"Готово: створено набір карток \"{flashcard.Name}\" ({flashcard.Cards.Count}). Відкрийте \"Практичні завдання\" в боковому меню."
-            : createdContent is TestResponse test
-                ? $"Готово: створено тест \"{test.Name}\" ({test.Questions.Count} питань). Відкрийте \"Практичні завдання\" в боковому меню."
-                : "Готово: завдання створено. Відкрийте \"Практичні завдання\" в боковому меню.";
+        if (type == FlashcardType && createdContent is FlashcardResponse flashcard)
+        {
+            return $"Ð“Ð¾Ñ‚Ð¾Ð²Ð¾: ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð¾ Ð½Ð°Ð±Ñ–Ñ€ ÐºÐ°Ñ€Ñ‚Ð¾Ðº \"{flashcard.Name}\" ({flashcard.Cards.Count}). Ð’Ñ–Ð´ÐºÑ€Ð¸Ð¹Ñ‚Ðµ \"ÐŸÑ€Ð°ÐºÑ‚Ð¸Ñ‡Ð½Ñ– Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ\" Ð² Ð±Ð¾ÐºÐ¾Ð²Ð¾Ð¼Ñƒ Ð¼ÐµÐ½ÑŽ.";
+        }
+
+        if (createdContent is TestResponse test)
+        {
+            return $"Ð“Ð¾Ñ‚Ð¾Ð²Ð¾: ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð¾ Ñ‚ÐµÑÑ‚ \"{test.Name}\" ({test.Questions.Count} Ð¿Ð¸Ñ‚Ð°Ð½ÑŒ). Ð’Ñ–Ð´ÐºÑ€Ð¸Ð¹Ñ‚Ðµ \"ÐŸÑ€Ð°ÐºÑ‚Ð¸Ñ‡Ð½Ñ– Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ\" Ð² Ð±Ð¾ÐºÐ¾Ð²Ð¾Ð¼Ñƒ Ð¼ÐµÐ½ÑŽ.";
+        }
+
+        return "Ð“Ð¾Ñ‚Ð¾Ð²Ð¾: Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ ÑÑ‚Ð²Ð¾Ñ€ÐµÐ½Ð¾. Ð’Ñ–Ð´ÐºÑ€Ð¸Ð¹Ñ‚Ðµ \"ÐŸÑ€Ð°ÐºÑ‚Ð¸Ñ‡Ð½Ñ– Ð·Ð°Ð²Ð´Ð°Ð½Ð½Ñ\" Ð² Ð±Ð¾ÐºÐ¾Ð²Ð¾Ð¼Ñƒ Ð¼ÐµÐ½ÑŽ.";
     }
 
     private static string BuildFailureMessage(string type, Exception exception)
     {
-        var name = type == FlashcardType ? "карток" : "тесту";
+        var name = type == FlashcardType ? "ÐºÐ°Ñ€Ñ‚Ð¾Ðº" : "Ñ‚ÐµÑÑ‚Ñƒ";
         var message = string.IsNullOrWhiteSpace(exception.Message)
-            ? "невідома помилка"
+            ? "Ð½ÐµÐ²Ñ–Ð´Ð¾Ð¼Ð° Ð¿Ð¾Ð¼Ð¸Ð»ÐºÐ°"
             : exception.Message;
 
-        return $"Не вдалося виконати генерацію {name}: {message}";
+        return $"ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ð²Ð¸ÐºÐ¾Ð½Ð°Ñ‚Ð¸ Ð³ÐµÐ½ÐµÑ€Ð°Ñ†Ñ–ÑŽ {name}: {message}";
     }
 
     private static AiChatMessageDto ToDto(ChatMessage message)
@@ -453,3 +337,5 @@ public class LearningContentGenerationService(
             : normalized;
     }
 }
+
+

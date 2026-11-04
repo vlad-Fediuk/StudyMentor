@@ -1,0 +1,39 @@
+{
+  "component": {
+    "key": "study-mentor-baseline",
+    "name": "StudyMentor - Baseline 840e563",
+    "qualifier": "TRK",
+    "measures": [
+      {
+        "metric": "software_quality_reliability_issues",
+        "value": "1",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_security_rating",
+        "value": "5.0",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_maintainability_issues",
+        "value": "21",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_reliability_rating",
+        "value": "3.0",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_security_issues",
+        "value": "2",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_maintainability_rating",
+        "value": "1.0",
+        "bestValue": true
+      }
+    ]
+  }
+}

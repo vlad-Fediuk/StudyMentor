@@ -5,13 +5,20 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>StudyMentorApi</RootNamespace>
+        <Description>StudyMentor REST API for learning content, flashcards, tests and AI-assisted study.</Description>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Asp.Versioning.Http" Version="10.2.3" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
+        <PackageReference Include="Asp.Versioning.OpenApi" Version="10.2.3" />
+        <PackageReference Include="DotNetEnv" Version="3.2.0" />
         <PackageReference Include="FluentValidation" Version="12.1.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.10" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.8" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
@@ -31,6 +38,21 @@
     <ItemGroup>
         <Content Include="Services\Ai\Prompts\*.md" CopyToOutputDirectory="PreserveNewest" />
         <Content Include="Services\Ai\Prompts\Templates\*.md" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>study-mentor-api.Tests</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>study-mentor-api.IntegrationTests</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>StudyMentor.QualityTests</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+        </AssemblyAttribute>
     </ItemGroup>
 
 </Project>

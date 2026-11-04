@@ -400,9 +400,22 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+# Environment variables and local secrets
 .env
+.env.*
+.env.local
+!.env.example
 /Docker/campus_db
 
 #Credentials
 /*/firebase/
 **/net10.0/
+
+# Code coverage reports
+CoverageReport/**
+!CoverageReport/StudyMentor_Coverage_Report.pdf
+!CoverageReport/Summary.md
+
+
+# SonarScanner local analysis data
+.sonarqube/

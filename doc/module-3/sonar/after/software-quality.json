@@ -1,0 +1,39 @@
+{
+  "component": {
+    "key": "study-mentor",
+    "name": "StudyMentor",
+    "qualifier": "TRK",
+    "measures": [
+      {
+        "metric": "software_quality_reliability_issues",
+        "value": "0",
+        "bestValue": true
+      },
+      {
+        "metric": "software_quality_security_rating",
+        "value": "5.0",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_maintainability_issues",
+        "value": "13",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_reliability_rating",
+        "value": "1.0",
+        "bestValue": true
+      },
+      {
+        "metric": "software_quality_security_issues",
+        "value": "2",
+        "bestValue": false
+      },
+      {
+        "metric": "software_quality_maintainability_rating",
+        "value": "1.0",
+        "bestValue": true
+      }
+    ]
+  }
+}

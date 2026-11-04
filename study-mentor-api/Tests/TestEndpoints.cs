@@ -9,7 +9,9 @@ public static class TestEndpoints
     {
         var group = routes
             .MapGroup("/tests")
-            .WithTags("Tests");
+            .WithTags("Tests")
+            .RequireAuthorization("user")
+            .RequireRateLimiting("api");
 
         group.MapGet("/", GetAll);
         group.MapGet("/{id}", GetById);
@@ -24,14 +26,9 @@ public static class TestEndpoints
         TestService service,
         CancellationToken ct)
     {
-        var items = await service.GetAllAsync(ct);
-
-        if (sourceFlashcardId.HasValue)
-        {
-            items = items
-                .Where(test => test.SourceFlashcardId == sourceFlashcardId.Value)
-                .ToList();
-        }
+        var items = sourceFlashcardId.HasValue
+            ? await service.GetBySourceFlashcardIdAsync(sourceFlashcardId.Value, ct)
+            : await service.GetAllAsync(ct);
 
         return Results.Ok(items.Select(ToResponse));
     }

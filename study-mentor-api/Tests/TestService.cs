@@ -14,9 +14,19 @@ public class TestService(
     FlashcardService flashcardService)
     : BaseCrudService<Test>
 {
+    public virtual async Task<IReadOnlyCollection<Test>> GetBySourceFlashcardIdAsync(
+        Guid sourceFlashcardId,
+        CancellationToken cancellationToken = default)
+    {
+        return await Query()
+            .Where(t => t.SourceFlashcardId == sourceFlashcardId)
+            .ToListAsync(cancellationToken);
+    }
+
     protected override IQueryable<Test> Query()
     {
         return dbContext.Tests
+            .AsNoTracking()
             .Include(t => t.Questions.OrderBy(q => q.Order))
             .ThenInclude(q => q.AnswerVariants.OrderBy(a => a.Order))
             .AsQueryable();
@@ -118,19 +128,19 @@ public class TestService(
             throw new ValidationException("Every question must have a prompt.");
         }
 
-        foreach (var question in entity.Questions)
+        foreach (var answerVariants in entity.Questions.Select(question => question.AnswerVariants))
         {
-            if (question.AnswerVariants.Count < 2)
+            if (answerVariants.Count < 2)
             {
                 throw new ValidationException("Every question must have at least two answer variants.");
             }
 
-            if (question.AnswerVariants.Any(a => string.IsNullOrWhiteSpace(a.Text)))
+            if (answerVariants.Any(a => string.IsNullOrWhiteSpace(a.Text)))
             {
                 throw new ValidationException("Every answer variant must have text.");
             }
 
-            if (question.AnswerVariants.Count(a => a.IsCorrect) != 1)
+            if (answerVariants.Count(a => a.IsCorrect) != 1)
             {
                 throw new ValidationException("Every question must have exactly one correct answer.");
             }
