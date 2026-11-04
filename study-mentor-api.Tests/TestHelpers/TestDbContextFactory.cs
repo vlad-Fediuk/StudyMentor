@@ -21,6 +21,8 @@ public static class TestDbContextFactory
             .UseInMemoryDatabase(dbName ?? Guid.NewGuid().ToString())
             .Options;
 
-        return new TestAppDbContext(options);
+        var context = new TestAppDbContext(options);
+        context.Database.EnsureCreated();
+        return context;
     }
 }
