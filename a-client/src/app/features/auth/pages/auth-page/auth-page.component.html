@@ -1,20 +1,78 @@
 <main class="auth-page">
-  <section class="auth-panel" aria-label="Microsoft OAuth">
-    <app-microsoft-login-button
-      [loading]="auth.state().status === 'loading'"
-      (login)="loginSSO()"
-    />
+  <section class="auth-panel">
+    <div class="auth-header">
+      <h2>StudyMentor</h2>
+      <p>{{ isRegisterMode ? 'Створення нового облікового запису' : 'Вхід до системи' }}</p>
+    </div>
 
-    @if (auth.state().status === 'authenticated') {
-      <div class="auth-success">
-        <span>{{ auth.state().accountName }}</span>
-        <button type="button" (click)="auth.signOut()">Выйти</button>
+    <div class="auth-tabs">
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="!isRegisterMode"
+        (click)="setMode(false)">
+        Вхід
+      </button>
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="isRegisterMode"
+        (click)="setMode(true)">
+        Реєстрація
+      </button>
+    </div>
+
+    <form class="auth-form" (ngSubmit)="submit()">
+      @if (isRegisterMode) {
+        <div class="form-group">
+          <label for="name">Ім'я або логін</label>
+          <input 
+            id="name" 
+            type="text" 
+            [(ngModel)]="name" 
+            name="name" 
+            placeholder="Олександр"
+            required
+          />
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          id="email" 
+          type="email" 
+          [(ngModel)]="email" 
+          name="email" 
+          placeholder="student@polytech.ua" 
+          required
+        />
       </div>
-    }
 
-    @if (auth.state().status === 'error') {
-      <p class="auth-error">{{ auth.state().error }}</p>
-    }
+      <div class="form-group">
+        <label for="password">Пароль</label>
+        <input 
+          id="password" 
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          placeholder="••••••••" 
+          required
+        />
+      </div>
+
+      @if (auth.state().status === 'error') {
+        <div class="auth-error">
+          {{ auth.state().error }}
+        </div>
+      }
+
+      <button 
+        type="submit" 
+        class="submit-btn" 
+        [disabled]="auth.state().status === 'loading' || !email || !password">
+        {{ auth.state().status === 'loading' ? 'Обробка...' : (isRegisterMode ? 'Зареєструватися' : 'Увійти') }}
+      </button>
+    </form>
   </section>
 </main>
-

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import type { AccountInfo } from '@azure/msal-browser';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 import { microsoftAuthConfig } from '../auth.config';
 
 export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'error';
@@ -12,6 +13,23 @@ export interface AuthState {
   accountName: string;
   jwtToken: string;
   error: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  name?: string;
+  email?: string;
+}
+
+export interface RegisterDto {
+  email: string;
+  name: string;
+  password: string;
+}
+
+export interface LoginDto {
+  email: string;
+  password: string;
 }
 
 const emptyState: AuthState = {
@@ -47,6 +65,34 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(microsoftAuthConfig.backendAuthUrl, { token: microsoftIdToken })
       .pipe(tap((response) => this.completeBackendLogin(response.token, accountName)));
+  }
+
+  register(dto: RegisterDto): Observable<AuthResponse> {
+    this.state.set({ ...emptyState, status: 'loading' });
+    const url = `${environment.apiUrl}/auth/register`;
+    return this.http.post<AuthResponse>(url, dto).pipe(
+      tap({
+        next: (res) => this.completeBackendLogin(res.token, res.name || dto.name || dto.email),
+        error: (err) => {
+          const msg = err?.error?.message || 'Помилка реєстрації. Перевірте введені дані.';
+          this.setError(msg);
+        }
+      })
+    );
+  }
+
+  login(dto: LoginDto): Observable<AuthResponse> {
+    this.state.set({ ...emptyState, status: 'loading' });
+    const url = `${environment.apiUrl}/auth/login`;
+    return this.http.post<AuthResponse>(url, dto).pipe(
+      tap({
+        next: (res) => this.completeBackendLogin(res.token, res.name || res.email || dto.email),
+        error: (err) => {
+          const msg = err?.error?.message || 'Невірний email або пароль.';
+          this.setError(msg);
+        }
+      })
+    );
   }
 
   signOut(): void {
@@ -120,8 +166,3 @@ export class AuthService {
     }
   }
 }
-
-interface AuthResponse {
-  token: string;
-}
-
